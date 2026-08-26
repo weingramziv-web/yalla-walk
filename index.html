@@ -15,6 +15,11 @@
     .hidden { display: none; }
     #map { height: 180px; width: 100%; border-radius: 8px; margin-top: 10px; }
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 8px 0; text-align: right; font-size: 13px; border-right: 4px solid #27ae60; }
+    
+    /* עיצוב חלון הצ'אט */
+    .chat-box { height: 150px; border: 1px solid #eee; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; margin-bottom: 10px; }
+    .msg-user { background: #dcf8c6; padding: 6px 10px; border-radius: 8px; margin: 4px 0; display: inline-block; clear: both; float: right; }
+    .msg-partner { background: #fff; border: 1px solid #ddd; padding: 6px 10px; border-radius: 8px; margin: 4px 0; display: inline-block; clear: both; float: left; }
   </style>
 </head>
 <body>
@@ -54,7 +59,18 @@
       <div class="partner-item"><b>דניאל</b> - מוצקין | קצב: בינוני</div>
       <div class="partner-item"><b>מיכל</b> - קריות | קצב: מהיר</div>
     </div>
-    <button onclick="alert('הזמנה להליכה נשלחה!')">צור קשר להליכה 💬</button>
+    <button onclick="openChat()">צור קשר להליכה 💬</button>
+  </div>
+
+  <!-- מסך צ'אט -->
+  <div id="chatScreen" class="card hidden">
+    <h1>💬 צ'אט עם דניאל</h1>
+    <div class="chat-box" id="chatBox">
+      <div class="msg-partner">היי זיו! יוצא להליכה במוצקין?</div>
+    </div>
+    <input type="text" id="chatInput" placeholder="רשום הודעה...">
+    <button onclick="sendMsg()">שלח 📤</button>
+    <button onclick="backToMap()" style="background:#7f8c8d; margin-top:5px;">חזרה למפה 🗺️</button>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -82,12 +98,36 @@
       document.getElementById('profileScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.remove('hidden');
 
-      // טעינת מפה
       setTimeout(() => {
         const map = L.map('map').setView([32.8333, 35.0833], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         L.marker([32.8333, 35.0833]).addTo(map).bindPopup('זיו - מוצקין').openPopup();
       }, 100);
+    }
+
+    function openChat() {
+      document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('chatScreen').classList.remove('hidden');
+    }
+
+    function backToMap() {
+      document.getElementById('chatScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+    }
+
+    function sendMsg() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBox = document.getElementById('chatBox');
+      chatBox.innerHTML += `<div class="msg-user">${text}</div>`;
+      input.value = '';
+
+      setTimeout(() => {
+        chatBox.innerHTML += `<div class="msg-partner">מעולה! נפגש עוד 10 דקות? 🔥</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 1000);
     }
   </script>
 
