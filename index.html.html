@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>יאללה בוא נלך!</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+    h1 { color: #2c3e50; font-size: 20px; margin-bottom: 10px; }
+    p { font-size: 13px; color: #666; margin-bottom: 15px; }
+    input, select { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+    button { width: 100%; padding: 12px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    button:hover { background: #219150; }
+    .hidden { display: none; }
+    #map { height: 180px; width: 100%; border-radius: 8px; margin-top: 10px; }
+    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 8px 0; text-align: right; font-size: 13px; border-right: 4px solid #27ae60; }
+  </style>
+</head>
+<body>
+
+  <!-- מסך התחברות -->
+  <div id="authScreen" class="card">
+    <h1>🚶‍♂️ יאללה בוא נלך!</h1>
+    <p>מוצאים פרטנרים להליכה</p>
+    <input type="email" id="email" value="weingram.ziv@gmail.com">
+    <input type="password" id="password" value="12345678">
+    <div style="margin:8px 0;text-align:right;font-size:12px">
+      <input type="checkbox" id="ageCheck" checked> אני 18+
+    </div>
+    <button onclick="handleAuth()">התחבר / הרשם</button>
+    <div id="msg" style="color:red;font-size:12px;margin-top:8px"></div>
+  </div>
+
+  <!-- מסך פרופיל -->
+  <div id="profileScreen" class="card hidden">
+    <h1>👤 פרופיל הליכה</h1>
+    <input type="text" id="fullName" placeholder="שם מלא" value="זיו">
+    <input type="text" id="city" placeholder="עיר" value="מוצקין">
+    <select id="pace">
+      <option value="" disabled>קצב הליכה</option>
+      <option value="איטי">איטי</option>
+      <option value="בינוני" selected>בינוני</option>
+      <option value="מהיר">מהיר</option>
+    </select>
+    <button onclick="saveProfile()">שמור פרופיל 🚀</button>
+  </div>
+
+  <!-- מסך מפה ופרטנרים -->
+  <div id="mainScreen" class="card hidden">
+    <h1>🗺️ פרטנרים בסביבה</h1>
+    <div id="map"></div>
+    <div style="margin-top: 10px;">
+      <div class="partner-item"><b>דניאל</b> - מוצקין | קצב: בינוני</div>
+      <div class="partner-item"><b>מיכל</b> - קריות | קצב: מהיר</div>
+    </div>
+    <button onclick="alert('הזמנה להליכה נשלחה!')">צור קשר להליכה 💬</button>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    function handleAuth() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      const isOver18 = document.getElementById('ageCheck').checked;
+      const msg = document.getElementById('msg');
+
+      if (!email || !pass) { msg.innerText = 'נא להזין אימייל וסיסמה'; return; }
+      if (!isOver18) { msg.innerText = 'מיועד לגילאי 18+ בלבד'; return; }
+
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('profileScreen').classList.remove('hidden');
+    }
+
+    function saveProfile() {
+      const name = document.getElementById('fullName').value;
+      const city = document.getElementById('city').value;
+      const pace = document.getElementById('pace').value;
+
+      if (!name || !city || !pace) { alert('נא למלא את כל השדות'); return; }
+
+      document.getElementById('profileScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+
+      // טעינת מפה
+      setTimeout(() => {
+        const map = L.map('map').setView([32.8333, 35.0833], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        L.marker([32.8333, 35.0833]).addTo(map).bindPopup('זיו - מוצקין').openPopup();
+      }, 100);
+    }
+  </script>
+
+</body>
+</html>
