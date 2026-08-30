@@ -380,4 +380,227 @@
         btnPrev.style.display = (stepIdx === 0) ? 'none' : 'block';
       }
 
-      if (step.action)
+      if (step.action) step.action();
+      speakText(`${step.title}. ${step.desc}`);
+    }
+
+    function nextDemoStep() {
+      currentDemoStep++;
+      if (currentDemoStep < demoTourSteps.length) {
+        showDemoStep(currentDemoStep);
+      } else {
+        closeDemoTour();
+      }
+    }
+
+    function prevDemoStep() {
+      if (currentDemoStep > 0) {
+        currentDemoStep--;
+        showDemoStep(currentDemoStep);
+      }
+    }
+
+    function closeDemoTour() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      document.getElementById('demoTourModal').classList.add('hidden');
+      closeModal();
+      backToMap();
+    }
+
+    function startApp() {
+      userGender = document.getElementById('userGenderInput').value;
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+      document.getElementById('bottomNav').classList.remove('hidden');
+      
+      updateVerificationUI();
+      renderPartners();
+
+      setTimeout(() => {
+        initMap();
+      }, 100);
+    }
+
+    function initMap() {
+      try {
+        if (map || typeof L === 'undefined') return;
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
+
+        map = L.map('map').setView([userPos.lat, userPos.lng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 7, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
+          .addTo(map).bindPopup("<b>המיקום שלך</b>");
+
+        routesLayer = L.polyline([
+          [32.835, 35.076], [32.838, 35.078], [32.840, 35.082]
+        ], { color: '#8e44ad', weight: 5, opacity: 0.7, dashArray: '8, 8' });
+
+        map.invalidateSize();
+      } catch (e) {
+        console.log("Map init safe-mode:", e);
+      }
+    }
+
+    function toggleRoutes() {
+      showRoutes = !showRoutes;
+      if (showRoutes && map) { routesLayer.addTo(map); alert("🛣️ מוצגים מסלולי הליכה מוארים ובטוחים!"); }
+      else if (map) { map.removeLayer(routesLayer); }
+    }
+
+    function updateVerificationUI() {
+      const text = document.getElementById('verifyText');
+      if (verifiedWalks >= 3) {
+        document.getElementById('verificationBadge').className = "verification-badge verified-badge";
+        document.getElementById('verificationBadge').innerHTML = "✅ <b>חשבון מאומת!</b> באפשרותך לצאת להליכות עם כל המשתמשים.";
+      } else {
+        text.innerText = `${verifiedWalks}/3 הליכות עם בני אותו המין (${userGender})`;
+      }
+    }
+
+    function renderPartners() {
+      const listContainer = document.getElementById('partnersList');
+      listContainer.innerHTML = '';
+
+      partners.forEach(partner => {
+        const isOppositeGender = partner.gender !== userGender;
+        const isLocked = isOppositeGender && verifiedWalks < 3;
+
+        if (map && partner.marker) map.removeLayer(partner.marker);
+
+        if (map) {
+          partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
+            .bindPopup(`<b>${partner.name}</b> (${partner.gender}) - ${partner.rating}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות</b>' : ''}`);
+        }
+
+        const item = document.createElement('div');
+        item.className = `partner-item ${isLocked ? 'locked' : ''}`;
+        item.innerHTML = `
+          <div>
+            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
+            <span style="color:#666;">קצב: ${partner.pace} | העדפה: <b>${partner.pref}</b></span>
+          </div>
+          <button style="width:auto; padding: 4px 8px; font-size:11px;" onclick="event.stopPropagation(); openProfile(${partner.id})">פרופיל</button>
+        `;
+        item.onclick = () => focusOnPartner(partner, isLocked);
+        listContainer.appendChild(item);
+      });
+      selectedPartner = partners[0];
+    }
+
+    function focusOnPartner(partner, isLocked) {
+      if (isLocked) { alert("🔒 גישה מוגבלת: נדרשות 3 הליכות מאומתות עם בני אותו המין."); return; }
+      selectedPartner = partner;
+      if (map) {
+        map.flyTo([partner.lat, partner.lng], 15, { duration: 1 });
+        if (partner.marker) partner.marker.openPopup();
+      }
+    }
+
+    function openWhatsApp() {
+      if (!selectedPartner) selectedPartner = partners[0];
+      const text = encodeURIComponent(`היי ${selectedPartner.name}, ראיתי ב-Yalla Walk שאת/ה בסביבה, מעוניין/ת לצאת להליכה?`);
+      window.open(`https://wa.me/${selectedPartner.phone}?text=${text}`, '_blank');
+    }
+
+    function openChat() {
+      if (!selectedPartner) selectedPartner = partners[0];
+      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${selectedPartner.name}`;
+      document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('chatScreen').classList.remove('hidden');
+    }
+
+    function startActiveWalk() {
+      document.getElementById('chatScreen').classList.add('hidden');
+      document.getElementById('activeWalkScreen').classList.remove('hidden');
+      document.getElementById('activePartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
+    }
+
+    function finishWalk() {
+      document.getElementById('activeWalkScreen').classList.add('hidden');
+      document.getElementById('ratedPartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
+      document.getElementById('ratingModal').classList.remove('hidden');
+      setStars(5);
+    }
+
+    function setStars(num) {
+      selectedRating = num;
+      const stars = document.querySelectorAll('#starRating span');
+      stars.forEach((s, idx) => {
+        if (idx < num) s.classList.add('active');
+        else s.classList.remove('active');
+      });
+    }
+
+    function submitRating() {
+      const reviewInput = document.getElementById('reviewText').value.trim();
+      if (reviewInput && selectedPartner) {
+        selectedPartner.reviews.push(`'${reviewInput}'`);
+      }
+
+      document.getElementById('ratingModal').classList.add('hidden');
+      document.getElementById('reviewText').value = '';
+      verifiedWalks++;
+      totalKm += 1.2;
+      document.getElementById('userKm').innerText = `${totalKm.toFixed(1)} ק"מ`;
+      updateVerificationUI();
+      renderPartners();
+      switchTab('mainScreen');
+      alert("🏆 תודה! הדירוג והמשוב החיובי נשמרו בהצלחה.");
+    }
+
+    function sendMsg() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBox = document.getElementById('chatBox');
+      chatBox.innerHTML += `<div class="msg-user">${text}</div>`;
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      setTimeout(() => {
+        let reply = "מעולה! נפגש בנקודת המפגש. לחץ על 'סגירת הליכה' ונצא לדרך 🔥";
+        chatBox.innerHTML += `<div class="msg-partner">${reply}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 800);
+    }
+
+    function switchTab(screenId) {
+      document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('profileScreen').classList.add('hidden');
+      document.getElementById('chatScreen').classList.add('hidden');
+      document.getElementById('activeWalkScreen').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+
+      document.getElementById('navMap').classList.remove('active');
+      document.getElementById('navProfile').classList.remove('active');
+      if (screenId === 'mainScreen') {
+        document.getElementById('navMap').classList.add('active');
+        if (map) setTimeout(() => map.invalidateSize(), 200);
+      }
+      if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
+    }
+
+    function backToMap() { switchTab('mainScreen'); }
+    function openProfile(id) {
+      const partner = partners.find(p => p.id === id);
+      if (!partner) return;
+      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
+      document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating}`;
+      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🎧 העדפה: ${partner.pref}`;
+      document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>• ${r}</div>`).join('');
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+    function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
+    function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
+    function setTimeFilter(time) { selectedTime = time; filterPartners(); }
+    function filterPartners() {}
+    function locateUser() {}
+    function triggerSOS() { alert("🚀 קריאה נשלחה לכל המשתמשים בסביבה!"); }
+
+    document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
+  </script>
+</body>
+</html>
