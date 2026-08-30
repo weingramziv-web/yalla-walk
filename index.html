@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>יאללה בוא נלך! - Yalla Walk</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=4.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=5.0" />
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; }
@@ -254,7 +254,7 @@
 
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=4.0"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=5.0"></script>
   <script>
     let userGender = "גבר";
     let verifiedWalks = 0;
@@ -334,24 +334,21 @@
     function speakText(text) {
       if (!('speechSynthesis' in window)) return;
 
+      // איפוס ושחרור נעילת סאונד בדפדפני מחשב
       window.speechSynthesis.cancel();
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      }
+      window.speechSynthesis.resume();
 
       const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
       const utterance = new SpeechSynthesisUtterance(cleanText);
       utterance.lang = 'he-IL';
       
-      // טון נשי חברותי, דינמי וקליל
       utterance.rate = 0.95; 
-      utterance.pitch = 1.30; 
+      utterance.pitch = 1.25; 
 
       if (cachedVoices.length === 0) {
         cachedVoices = window.speechSynthesis.getVoices();
       }
 
-      // חיפוש מנוע דיבור נשי בעברית במחשב/נייד
       let chosenVoice = cachedVoices.find(v => 
         (v.lang.includes('he') || v.lang.includes('HE')) && 
         (v.name.includes('Carmit') || v.name.includes('Female') || v.name.includes('Hila') || v.name.includes('Google') || v.name.includes('Hebrew'))
@@ -365,7 +362,9 @@
     }
 
     function startGuidedDemoTour() {
-      if ('speechSynthesis' in window && window.speechSynthesis.paused) {
+      // הפעלת סאונד מפורשת בעקבות לחיצת משתמש במחשב
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
         window.speechSynthesis.resume();
       }
       currentDemoStep = 0;
