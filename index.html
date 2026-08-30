@@ -65,7 +65,6 @@
 
   <div class="app-container">
 
-    <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 20px;">
         <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ יאללה בוא נלך!</h1>
@@ -87,9 +86,8 @@
       </div>
     </div>
 
-    <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <button class="btn-demo" onclick="startGuidedDemoTour()">🎙️ הפעל הדמיה מודרכת עם קריינות (Demo Tour)</button>
+      <button class="btn-demo" onclick="startGuidedDemoTour()">🎙️ הפעל הדמיה מודרכת (Demo Tour)</button>
 
       <h1>🗺️ פרטנרים בסביבה</h1>
 
@@ -97,7 +95,6 @@
         ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
       </div>
 
-      <!-- סינונים -->
       <div class="filter-box">
         <label for="paceFilter">🏃‍♂️ קצב הליכה:</label>
         <select id="paceFilter" onchange="filterPartners()">
@@ -133,7 +130,6 @@
       <button class="btn-sos" onclick="triggerSOS()">📢 קריאה להליכה עכשיו!</button>
     </div>
 
-    <!-- מסך צ'אט -->
     <div class="screen hidden" id="chatScreen">
       <h1 id="chatTitle">💬 שיחה עם דניאל</h1>
       <div class="chat-box" id="chatBox">
@@ -146,7 +142,6 @@
       <button onclick="backToMap()" class="btn-secondary">חזרה למפה</button>
     </div>
 
-    <!-- מסך הליכה פעילה -->
     <div class="screen hidden" id="activeWalkScreen" style="text-align:center;">
       <h1 style="color:#27ae60;">🚶‍♂️ הליכה פעילה בלייב</h1>
       <p>אתה כרגע בצדה של הליכה עם <b id="activePartnerName">דניאל</b>!</p>
@@ -164,7 +159,6 @@
       <button class="btn-sos" style="margin-top:auto; font-size:16px; padding:15px;" onclick="finishWalk()">🏁 סיום הליכה ודירוג</button>
     </div>
 
-    <!-- מסך אזור אישי -->
     <div class="screen hidden" id="profileScreen">
       <h1>📊 האזור האישי שלי</h1>
       <div class="stat-card">
@@ -183,7 +177,6 @@
       </div>
     </div>
 
-    <!-- פופ-אפ הדמיה מודרכת (Guided Tour) -->
     <div class="modal hidden" id="demoTourModal">
       <div class="modal-content demo-modal-content">
         <span class="demo-step-badge" id="demoStepNum">שלב 1 מתוך 5</span>
@@ -196,7 +189,6 @@
       </div>
     </div>
 
-    <!-- פופ-אפ דירוג אנונימי בסיום הליכה -->
     <div class="modal hidden" id="ratingModal">
       <div class="modal-content" style="text-align:center;">
         <h2 style="color:#27ae60; margin-top:0;">🎉 הליכה הושלמה בהצלחה!</h2>
@@ -215,7 +207,6 @@
       </div>
     </div>
 
-    <!-- פופ-אפ פרופיל מורחב -->
     <div class="modal hidden" id="profileModal">
       <div class="modal-content">
         <h2 id="modalName" style="margin-top:0; color:#27ae60;"></h2>
@@ -228,7 +219,6 @@
       </div>
     </div>
 
-    <!-- ניווט תחתון -->
     <div class="bottom-nav hidden" id="bottomNav">
       <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
         <span style="font-size:18px;">🗺️</span> ראשי
@@ -270,33 +260,48 @@
 
     const demoTourSteps = [
       {
-        title: "🚶‍♂️ ברוכים הבאים ל-Yalla Walk!",
-        desc: "אפליקציה שנועדה לחבר בין אנשים שרוצים לצעוד ביחד בסביבה הקרובה, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה."
+        title: "ברוכים הבאים לאפליקציית יאללה בוא נלך",
+        desc: "האפליקציה מחברת בין אנשים שרוצים לצעוד יחד בסביבה הקרובה, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה יותר.",
+        speechText: "ברוכים הבאים לאפליקציית יאללה בוא נלך. האפליקציה מחברת בין אנשים שרוצים לצעוד יחד בסביבה הקרובה, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה יותר."
       },
       {
-        title: "🛡️ שמירה על בטחון ואימות",
-        desc: "לשמירה על בטחון הקהילה, משתמש חדש חייב לסיים 3 הליכות מאומתות עם בני אותו המין בלבד לפני שתוכל לפנות לבני המין השני."
+        title: "שמירה על ביטחון ואימות משתמשים",
+        desc: "לשמירה על בטחון הקהילה, משתמש חדש חייב לסיים שלוש הליכות מאומתות עם בני אותו המין בלבד, לפני שתוכל לפנות לבני המין השני.",
+        speechText: "שמירה על ביטחון ואימות משתמשים. לשמירה על בטחון הקהילה, משתמש חדש חייב לסיים שלוש הליכות מאומתות עם בני אותו המין בלבד, לפני שתוכל לפנות לבני המין השני."
       },
       {
-        title: "🔒 דירוג אנונימי וסינון משובים",
-        desc: "הדירוגים בסיום ההליכה הם אנונימיים לחלוטין. המערכת מסננת תגובות שליליות או פוגעניות ומציגה בפרופילים רק חיזוקים חיוביים וענייניים להליכה."
+        title: "דירוג אנונימי וסינון משובים",
+        desc: "הדירוגים בסיום ההליכה הם אנונימיים לחלוטין. המערכת מסננת תגובות שליליות או פוגעניות ומציגה בפרופילים רק חיזוקים חיוביים וענייניים להליכה.",
+        speechText: "דירוג אנונימי וסינון משובים. הדירוגים בסיום ההליכה הם אנונימיים לחלוטין. המערכת מסננת תגובות שליליות או פוגעניות ומציגה בפרופילים רק חיזוקים חיוביים וענייניים להליכה."
       },
       {
-        title: "🎯 מגוון אפשרויות חיפוש וסינון",
-        desc: "ניתן לסנן פרטנרים לפי קצב הליכה (איטי, בינוני, מהיר), סרגל מרחק מרבי בקילומטרים, זמינות (עכשיו/הערב/מחר) ומסלולי הליכה מוארים ובטוחים."
+        title: "מגוון אפשרויות חיפוש וסינון",
+        desc: "ניתן לסנן פרטנרים לפי קצב הליכה, סרגל מרחק מרבי בקילומטרים, זמינות ומסלולי הליכה מוארים ובטוחים.",
+        speechText: "מגוון אפשרויות חיפוש וסינון. ניתן לסנן פרטנרים לפי קצב הליכה, סרגל מרחק מרבי בקילומטרים, זמינות ומסלולי הליכה מוארים ובטוחים."
       },
       {
-        title: "💬 יצירת קשר וסגירת הליכה",
-        desc: "לוחצים על פרטנר, מתכתבים בצ'אט הפנימי או עוברים ל-WhatsApp, ויוצאים להליכה בלייב עם מדידת זמנים ומרחק!"
+        title: "יצירת קשר וסגירת הליכה",
+        desc: "לוחצים על פרטנר, מתכתבים בצ'אט הפנימי או עוברים לוואטסאפ, ויוצאים להליכה בלייב עם מדידת זמנים ומרחק.",
+        speechText: "יצירת קשר וסגירת הליכה. לוחצים על פרטנר, מתכתבים בצ'אט הפנימי או עוברים לוואטסאפ, ויוצאים להליכה בלייב עם מדידת זמנים ומרחק."
       }
     ];
 
     function speakText(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // ניקוי תווים ואימוג'ים שעלולים להקריא מילים באנגלית
+        const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+        
+        const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'he-IL';
         utterance.rate = 0.9;
+        
+        // חיפוש מנוע עברית
+        const voices = window.speechSynthesis.getVoices();
+        const hebrewVoice = voices.find(v => v.lang.includes('he') || v.lang.includes('HE'));
+        if (hebrewVoice) utterance.voice = hebrewVoice;
+
         window.speechSynthesis.speak(utterance);
       }
     }
@@ -312,7 +317,7 @@
       document.getElementById('demoStepNum').innerText = `שלב ${stepIdx + 1} מתוך ${demoTourSteps.length}`;
       document.getElementById('demoStepTitle').innerText = step.title;
       document.getElementById('demoStepDesc').innerText = step.desc;
-      speakText(`${step.title}. ${step.desc}`);
+      speakText(step.speechText);
     }
 
     function nextDemoStep() {
@@ -379,14 +384,14 @@
         if (partner.marker) map.removeLayer(partner.marker);
 
         partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-          .bindPopup(`<b>${partner.name}</b> (${partner.gender}) - ${partner.rating}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות</b>' : ''}`);
+          .bindPopup(`<b>${partner.name}</b> (${partner.gender}) -${partner.rating}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות</b>' : ''}`);
 
         const item = document.createElement('div');
         item.className = `partner-item ${isLocked ? 'locked' : ''}`;
         item.innerHTML = `
           <div>
-            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
-            <span style="color:#666;">קצב: ${partner.pace} | העדפה: <b>${partner.pref}</b></span>
+            <b>${partner.name}</b> (${partner.gender},${partner.dist} ק"מ) ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
+            <span style="color:#666;">קצב: ${partner.pace} \vert{} העדפה: <b>${partner.pref}</b></span>
           </div>
           <button style="width:auto; padding: 4px 8px; font-size:11px;" onclick="event.stopPropagation(); openProfile(${partner.id})">פרופיל</button>
         `;
@@ -411,112 +416,4 @@
 
     function openChat() {
       if (!selectedPartner) selectedPartner = partners[0];
-      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${selectedPartner.name}`;
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('chatScreen').classList.remove('hidden');
-    }
-
-    function runDemoFlow() {
-      selectedPartner = partners[0];
-      openChat();
-      const chatBox = document.getElementById('chatBox');
-      chatBox.innerHTML += `<div class="msg-user">היי דניאל, ראיתי שאתה קרוב. יוצאים להליכה?</div>`;
-      
-      setTimeout(() => {
-        chatBox.innerHTML += `<div class="msg-partner">מעולה! נפגש עוד 5 דקות בפארק 🔥</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-        setTimeout(() => {
-          startActiveWalk();
-        }, 1500);
-      }, 1000);
-    }
-
-    function startActiveWalk() {
-      document.getElementById('chatScreen').classList.add('hidden');
-      document.getElementById('activeWalkScreen').classList.remove('hidden');
-      document.getElementById('activePartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
-    }
-
-    function finishWalk() {
-      document.getElementById('activeWalkScreen').classList.add('hidden');
-      document.getElementById('ratedPartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
-      document.getElementById('ratingModal').classList.remove('hidden');
-      setStars(5);
-    }
-
-    function setStars(num) {
-      selectedRating = num;
-      const stars = document.querySelectorAll('#starRating span');
-      stars.forEach((s, idx) => {
-        if (idx < num) s.classList.add('active');
-        else s.classList.remove('active');
-      });
-    }
-
-    function submitRating() {
-      const reviewInput = document.getElementById('reviewText').value.trim();
-      if (reviewInput && selectedPartner) {
-        selectedPartner.reviews.push(`'${reviewInput}'`);
-      }
-
-      document.getElementById('ratingModal').classList.add('hidden');
-      document.getElementById('reviewText').value = '';
-      verifiedWalks++;
-      totalKm += 1.2;
-      document.getElementById('userKm').innerText = `${totalKm.toFixed(1)} ק"מ`;
-      updateVerificationUI();
-      renderPartners();
-      switchTab('mainScreen');
-      alert("🏆 תודה! הדירוג והמשוב החיובי נשמרו בהצלחה.");
-    }
-
-    function sendMsg() {
-      const input = document.getElementById('chatInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const chatBox = document.getElementById('chatBox');
-      chatBox.innerHTML += `<div class="msg-user">${text}</div>`;
-      input.value = '';
-      chatBox.scrollTop = chatBox.scrollHeight;
-
-      setTimeout(() => {
-        let reply = "מעולה! נפגש בנקודת המפגש. לחץ על 'סגירת הליכה' ונצא לדרך 🔥";
-        chatBox.innerHTML += `<div class="msg-partner">${reply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 800);
-    }
-
-    function switchTab(screenId) {
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('profileScreen').classList.add('hidden');
-      document.getElementById('chatScreen').classList.add('hidden');
-      document.getElementById(screenId).classList.remove('hidden');
-
-      document.getElementById('navMap').classList.remove('active');
-      document.getElementById('navProfile').classList.remove('active');
-      if (screenId === 'mainScreen') document.getElementById('navMap').classList.add('active');
-      if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
-    }
-
-    function backToMap() { switchTab('mainScreen'); }
-    function openProfile(id) {
-      const partner = partners.find(p => p.id === id);
-      if (!partner) return;
-      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
-      document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating}`;
-      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🎧 העדפה: ${partner.pref}`;
-      document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>• ${r}</div>`).join('');
-      document.getElementById('profileModal').classList.remove('hidden');
-    }
-    function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
-    function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
-    function setTimeFilter(time) { selectedTime = time; filterPartners(); }
-    function filterPartners() {}
-    function locateUser() {}
-    function triggerSOS() { alert("🚀 קריאה נשלחה לכל המשתמשים בסביבה!"); }
-
-    document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
-  </script>
-</body>
-</html>
+      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${selectedPartner.
