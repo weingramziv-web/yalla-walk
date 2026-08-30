@@ -21,8 +21,7 @@
     .btn-secondary { background: #7f8c8d; }
     .btn-whatsapp { background: #25D366; }
     .btn-sos { background: #e74c3c; }
-    .btn-demo { background: #8e44ad; color: #fff; font-size: 14px; margin-bottom: 8px; }
-    .btn-video { background: #2980b9; color: #fff; font-size: 14px; margin-bottom: 8px; }
+    .btn-demo { background: #8e44ad; color: #fff; font-size: 15px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(142, 68, 173, 0.4); }
     .hidden { display: none !important; }
     
     #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; }
@@ -40,7 +39,7 @@
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 4px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; display: flex; justify-content: space-between; align-items: center; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
     
-    .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
+    .chat-box { flex: 1; min-height: 180px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; display: inline-block; max-width: 80%; align-self: flex-start; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; display: inline-block; border: 1px solid #eee; max-width: 80%; align-self: flex-end; }
 
@@ -54,6 +53,10 @@
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
     .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 80vh; overflow-y: auto; }
     
+    /* Demo Modal Styling */
+    .demo-modal-content { background: #1e272e; color: #fff; text-align: right; border-radius: 16px; padding: 20px; border: 2px solid #8e44ad; }
+    .demo-step-badge { background: #8e44ad; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 8px; }
+
     .rating-stars { display: flex; gap: 8px; justify-content: center; font-size: 24px; margin: 10px 0; cursor: pointer; }
     .rating-stars span { color: #ccc; }
     .rating-stars span.active { color: #f1c40f; }
@@ -72,7 +75,7 @@
 
       <div style="background: #eef9f1; padding: 12px; border-radius: 12px; margin: 15px 0; text-align: right;">
         <p><b>🎯 מה המטרה?</b><br>לחבר בין אנשים שרוצים לצעוד ביחד, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה יותר.</p>
-        <p style="margin-bottom: 0;">🛡️ <b>מנגנון בטיחות ואימות:</b><br>יצירת קשר עם בני המין השני מתאפשרת רק לאחר סיום **3 הליכות מאומתות** עם בני אותו המין! המשובים מסוננים אוטומטית ומציגים רק חיזוקים חיוביים וענייניים להליכה.</p>
+        <p style="margin-bottom: 0;">🛡️ <b>מנגנון בטיחות ואימות:</b><br>יצירת קשר עם בני המין השני מתאפשרת רק לאחר סיום **3 הליכות מאומתות** עם בני אותו המין!</p>
       </div>
 
       <div style="margin-top: auto;">
@@ -87,10 +90,7 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <div style="display:flex; gap:5px;">
-        <button class="btn-demo" style="flex:1;" onclick="runDemoFlow()">🎬 הדמיה טקסטואלית</button>
-        <button class="btn-video" style="flex:1;" onclick="openVideoDemo()">🎥 סרטון הדמיה</button>
-      </div>
+      <button class="btn-demo" onclick="startGuidedDemoTour()">🎙️ הפעל הדמיה מודרכת עם קריינות (Demo Tour)</button>
 
       <h1>🗺️ פרטנרים בסביבה</h1>
 
@@ -184,15 +184,16 @@
       </div>
     </div>
 
-    <!-- פופ-אפ סרטון הדמיה -->
-    <div class="modal hidden" id="videoModal">
-      <div class="modal-content" style="text-align:center;">
-        <h2 style="color:#2980b9; margin-top:0;">🎥 סרטון הדמיית האפליקציה</h2>
-        <div style="background:#000; color:#fff; border-radius:8px; padding:30px 10px; margin:10px 0;">
-          <p style="color:#fff; font-size:16px;">▶️ [נגן וידאו - הדמיית שימוש]</p>
-          <p style="color:#ccc; font-size:11px;">1. חיפוש פרטנרים על המפה<br>2. תיאום בצ'אט וב-WhatsApp<br>3. הליכה מאומתת וסיום בטוח</p>
+    <!-- פופ-אפ הדמיה מודרכת (Guided Tour) -->
+    <div class="modal hidden" id="demoTourModal">
+      <div class="modal-content demo-modal-content">
+        <span class="demo-step-badge" id="demoStepNum">שלב 1 מתוך 5</span>
+        <h3 id="demoStepTitle" style="margin-top:0; color:#27ae60;"></h3>
+        <p id="demoStepDesc" style="color:#dfe6e9; font-size:14px; line-height:1.5;"></p>
+        <div style="display:flex; gap:8px; margin-top:15px;">
+          <button onclick="nextDemoStep()" style="background:#27ae60; flex:1;">הבא ➔</button>
+          <button onclick="closeDemoTour()" class="btn-secondary" style="flex:1;">סגור הדמיה</button>
         </div>
-        <button onclick="closeVideoModal()" class="btn-secondary">סגור סרטון</button>
       </div>
     </div>
 
@@ -210,8 +211,7 @@
           <span onclick="setStars(5)">★</span>
         </div>
 
-        <textarea id="reviewText" placeholder="רשום משוב חיובי/ענייני להליכה (למשל: קצב מצוין, אדיב, עמידה בזמנים)..." rows="3"></textarea>
-        <p style="font-size:10px; color:#888;">🔒 תגובות שליליות/פוגעניות יסוננו אוטומטית ולא יפורסמו בפרופיל.</p>
+        <textarea id="reviewText" placeholder="רשום משוב חיובי/ענייני להליכה..." rows="3"></textarea>
         <button onclick="submitRating()">שלח דירוג אנונימי וסים</button>
       </div>
     </div>
@@ -252,9 +252,7 @@
     let selectedPartner = null;
     let map, userMarker, routesLayer;
     let showRoutes = false;
-
-    // רשימת מילים שליליות לסינון
-    const forbiddenWords = ["גרוע", "גרועה", "איטי מדי", "מעצבן", "מעצבנת", "איחר", "איחרה", "מגעיל", "לא נחמד"];
+    let currentDemoStep = 0;
 
     const partners = [
       { 
@@ -270,6 +268,68 @@
         lat: 32.832, lng: 35.075 
       }
     ];
+
+    const demoTourSteps = [
+      {
+        title: "🚶‍♂️ ברוכים הבאים ל-Yalla Walk!",
+        desc: "אפליקציה שנועדה לחבר בין אנשים שרוצים לצעוד ביחד בסביבה הקרובה, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה."
+      },
+      {
+        title: "🛡️ שמירה על בטחון ואימות",
+        desc: "לשמירה על בטחון הקהילה, משתמש חדש חייב לסיים 3 הליכות מאומתות עם בני אותו המין בלבד לפני שתוכל לפנות לבני המין השני."
+      },
+      {
+        title: "🔒 דירוג אנונימי וסינון משובים",
+        desc: "הדירוגים בסיום ההליכה הם אנונימיים לחלוטין. המערכת מסננת תגובות שליליות או פוגעניות ומציגה בפרופילים רק חיזוקים חיוביים וענייניים להליכה."
+      },
+      {
+        title: "🎯 מגוון אפשרויות חיפוש וסינון",
+        desc: "ניתן לסנן פרטנרים לפי קצב הליכה (איטי, בינוני, מהיר), סרגל מרחק מרבי בקילומטרים, זמינות (עכשיו/הערב/מחר) ומסלולי הליכה מוארים ובטוחים."
+      },
+      {
+        title: "💬 יצירת קשר וסגירת הליכה",
+        desc: "לוחצים על פרטנר, מתכתבים בצ'אט הפנימי או עוברים ל-WhatsApp, ויוצאים להליכה בלייב עם מדידת זמנים ומרחק!"
+      }
+    ];
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'he-IL';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function startGuidedDemoTour() {
+      currentDemoStep = 0;
+      showDemoStep(currentDemoStep);
+      document.getElementById('demoTourModal').classList.remove('hidden');
+    }
+
+    function showDemoStep(stepIdx) {
+      const step = demoTourSteps[stepIdx];
+      document.getElementById('demoStepNum').innerText = `שלב ${stepIdx + 1} מתוך ${demoTourSteps.length}`;
+      document.getElementById('demoStepTitle').innerText = step.title;
+      document.getElementById('demoStepDesc').innerText = step.desc;
+      speakText(`${step.title}. ${step.desc}`);
+    }
+
+    function nextDemoStep() {
+      currentDemoStep++;
+      if (currentDemoStep < demoTourSteps.length) {
+        showDemoStep(currentDemoStep);
+      } else {
+        closeDemoTour();
+        runDemoFlow();
+      }
+    }
+
+    function closeDemoTour() {
+      window.speechSynthesis.cancel();
+      document.getElementById('demoTourModal').classList.add('hidden');
+    }
 
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
@@ -357,14 +417,6 @@
       document.getElementById('chatScreen').classList.remove('hidden');
     }
 
-    function openVideoDemo() {
-      document.getElementById('videoModal').classList.remove('hidden');
-    }
-
-    function closeVideoModal() {
-      document.getElementById('videoModal').classList.add('hidden');
-    }
-
     function runDemoFlow() {
       selectedPartner = partners[0];
       openChat();
@@ -404,15 +456,6 @@
 
     function submitRating() {
       const reviewInput = document.getElementById('reviewText').value.trim();
-      
-      // בדיקת תקינות וסינון מילים שליליות
-      let hasForbidden = forbiddenWords.some(word => reviewInput.includes(word));
-      
-      if (hasForbidden) {
-        alert("⚠️ המשוב שרשמת מכיל ביטויים שליליים. המערכת מקבלת רק חיזוקים חיוביים וענייניים להליכה.");
-        return;
-      }
-
       if (reviewInput && selectedPartner) {
         selectedPartner.reviews.push(`'${reviewInput}'`);
       }
