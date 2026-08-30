@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>יאללה בוא נלך! - Yalla Walk</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=2.0" />
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; }
@@ -24,7 +24,7 @@
     .btn-demo { background: #8e44ad; color: #fff; font-size: 15px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(142, 68, 173, 0.4); }
     .hidden { display: none !important; }
     
-    #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; }
+    #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; background: #e0e0e0; }
     
     .filter-box { background: #eef9f1; padding: 10px; border-radius: 10px; font-size: 12px; }
     .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 4px; }
@@ -230,7 +230,7 @@
 
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=2.0"></script>
   <script>
     let userGender = "גבר";
     let verifiedWalks = 0;
@@ -239,7 +239,7 @@
     let userPos = { lat: 32.835, lng: 35.076 };
     let selectedTime = 'all';
     let selectedPartner = null;
-    let map, userMarker, routesLayer;
+    let map = null, userMarker = null, routesLayer = null;
     let showRoutes = false;
     let currentDemoStep = 0;
 
@@ -293,11 +293,6 @@
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'he-IL';
         utterance.rate = 0.9;
-        
-        const voices = window.speechSynthesis.getVoices();
-        const hebrewVoice = voices.find(v => v.lang.includes('he') || v.lang.includes('HE'));
-        if (hebrewVoice) utterance.voice = hebrewVoice;
-
         window.speechSynthesis.speak(utterance);
       }
     }
@@ -337,18 +332,20 @@
       document.getElementById('mainScreen').classList.remove('hidden');
       document.getElementById('bottomNav').classList.remove('hidden');
       
-      initMap();
-      setTimeout(() => {
-        if (map) map.invalidateSize();
-      }, 300);
-
       updateVerificationUI();
       renderPartners();
+
+      setTimeout(() => {
+        initMap();
+      }, 100);
     }
 
     function initMap() {
       try {
         if (map || typeof L === 'undefined') return;
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
+
         map = L.map('map').setView([userPos.lat, userPos.lng], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 7, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
@@ -357,8 +354,10 @@
         routesLayer = L.polyline([
           [32.835, 35.076], [32.838, 35.078], [32.840, 35.082]
         ], { color: '#8e44ad', weight: 5, opacity: 0.7, dashArray: '8, 8' });
+
+        map.invalidateSize();
       } catch (e) {
-        console.log("Map init deferred:", e);
+        console.log("Map init safe-mode:", e);
       }
     }
 
@@ -533,7 +532,4 @@
     function locateUser() {}
     function triggerSOS() { alert("🚀 קריאה נשלחה לכל המשתמשים בסביבה!"); }
 
-    document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
-  </script>
-</body>
-</html>
+    document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg
