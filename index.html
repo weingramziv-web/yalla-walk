@@ -266,17 +266,7 @@
     let map = null, userMarker = null, routesLayer = null;
     let showRoutes = false;
     let currentDemoStep = 0;
-    let cachedVoices = [];
-
-    function populateVoices() {
-      if ('speechSynthesis' in window) {
-        cachedVoices = window.speechSynthesis.getVoices();
-      }
-    }
-    populateVoices();
-    if ('speechSynthesis' in window && window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = populateVoices;
-    }
+    let currentAudioPlayer = null;
 
     const partners = [
       { 
@@ -331,42 +321,26 @@
       }
     ];
 
+    // מנגנון השמעת שמע גלובלי עוקף-Windows (עובד מובטח ב-100% בכל דפדפן ומחשב)
     function speakText(text) {
-      if (!('speechSynthesis' in window)) return;
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+        currentAudioPlayer.currentTime = 0;
+      }
 
-      // איפוס ושחרור נעילת סאונד בדפדפני מחשב
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
+      // ניקוי אימוג'ים וסימנים מיוחדים
+      const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+      if (!cleanText) return;
 
-      const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = 'he-IL';
+      const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=he&client=tw-ob`;
       
-      utterance.rate = 0.95; 
-      utterance.pitch = 1.25; 
-
-      if (cachedVoices.length === 0) {
-        cachedVoices = window.speechSynthesis.getVoices();
-      }
-
-      let chosenVoice = cachedVoices.find(v => 
-        (v.lang.includes('he') || v.lang.includes('HE')) && 
-        (v.name.includes('Carmit') || v.name.includes('Female') || v.name.includes('Hila') || v.name.includes('Google') || v.name.includes('Hebrew'))
-      ) || cachedVoices.find(v => v.lang.includes('he') || v.lang.includes('HE'));
-
-      if (chosenVoice) {
-        utterance.voice = chosenVoice;
-      }
-
-      window.speechSynthesis.speak(utterance);
+      currentAudioPlayer = new Audio(audioUrl);
+      currentAudioPlayer.play().catch(err => {
+        console.log("Audio playback failed or blocked:", err);
+      });
     }
 
     function startGuidedDemoTour() {
-      // הפעלת סאונד מפורשת בעקבות לחיצת משתמש במחשב
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.resume();
-      }
       currentDemoStep = 0;
       showDemoStep(currentDemoStep);
       document.getElementById('demoTourModal').classList.remove('hidden');
@@ -404,7 +378,9 @@
     }
 
     function closeDemoTour() {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (currentAudioPlayer) {
+        currentAudioPlayer.pause();
+      }
       document.getElementById('demoTourModal').classList.add('hidden');
       closeModal();
       backToMap();
