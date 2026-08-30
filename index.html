@@ -13,7 +13,7 @@
     .screen { padding: 15px; display: flex; flex-direction: column; flex: 1; }
     
     .screen-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .btn-back-header { background: #7f8c8d; color: #fff; border: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; width: auto; margin: 0; }
+    .btn-back-header { background: #7f8c8d; color: #fff; border: none; border-radius: 6px; padding: 8px 14px; font-size: 13px; cursor: pointer; width: auto; margin: 0; }
     
     h1 { color: #2c3e50; font-size: 20px; margin: 0; text-align: center; flex: 1; }
     p { font-size: 13px; color: #555; line-height: 1.4; margin: 0 0 10px 0; }
@@ -53,8 +53,8 @@
     .stat-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: center; }
     .stat-val { font-size: 22px; font-weight: bold; color: #27ae60; }
 
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 80vh; overflow-y: auto; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 85vh; overflow-y: auto; }
     
     .demo-modal-content { background: #1e272e; color: #fff; text-align: right; border-radius: 16px; padding: 20px; border: 2px solid #8e44ad; }
     .demo-step-badge { background: #8e44ad; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 8px; }
@@ -62,6 +62,9 @@
     .rating-stars { display: flex; gap: 8px; justify-content: center; font-size: 24px; margin: 10px 0; cursor: pointer; }
     .rating-stars span { color: #ccc; }
     .rating-stars span.active { color: #f1c40f; }
+
+    .demo-actions-row { display: flex; gap: 6px; margin-top: 15px; flex-wrap: wrap; }
+    .demo-actions-row button { flex: 1; min-width: 70px; padding: 10px 4px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -90,7 +93,7 @@
     </div>
 
     <div class="screen hidden" id="mainScreen">
-      <button class="btn-demo" onclick="startGuidedDemoTour()">🎙️ הפעל הדמיה מודרכת מורחבת (Demo Tour)</button>
+      <button class="btn-demo" onclick="startGuidedDemoTour()">🎙️ הפעל הדמיה מודרכת (Demo Tour)</button>
 
       <div class="screen-header">
         <h1>🗺️ פרטנרים בסביבה</h1>
@@ -198,10 +201,11 @@
         <span class="demo-step-badge" id="demoStepNum">שלב 1 מתוך 7</span>
         <h3 id="demoStepTitle" style="margin-top:0; color:#27ae60;"></h3>
         <p id="demoStepDesc" style="color:#dfe6e9; font-size:13px; line-height:1.5;"></p>
-        <div style="display:flex; gap:6px; margin-top:15px;">
-          <button onclick="prevDemoStep()" id="btnPrevDemo" class="btn-secondary" style="flex:1;">➔ חזור</button>
-          <button onclick="nextDemoStep()" style="background:#27ae60; flex:1.5;">הבא ➔</button>
-          <button onclick="closeDemoTour()" class="btn-secondary" style="flex:1; background:#e74c3c;">יציאה</button>
+        
+        <div class="demo-actions-row">
+          <button onclick="prevDemoStep()" id="btnPrevDemo" class="btn-secondary">➔ חזור</button>
+          <button onclick="nextDemoStep()" style="background:#27ae60;">הבא ➔</button>
+          <button onclick="closeDemoTour()" class="btn-secondary" style="background:#e74c3c;">יציאה</button>
         </div>
       </div>
     </div>
@@ -226,8 +230,11 @@
 
     <div class="modal hidden" id="profileModal">
       <div class="modal-content">
-        <h2 id="modalName" style="margin-top:0; color:#27ae60;"></h2>
-        <div id="modalRating" style="color:#f39c12; font-weight:bold; margin-bottom:4px;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 id="modalName" style="margin:0; color:#27ae60;"></h2>
+          <button class="btn-back-header" onclick="closeModal()">➔ חזור</button>
+        </div>
+        <div id="modalRating" style="color:#f39c12; font-weight:bold; margin-top:6px; margin-bottom:4px;"></div>
         <p id="modalDetails"></p>
         <hr style="border:none; border-top:1px solid #eee; margin:10px 0;">
         <b>💬 משובים חיוביים וענייניים להליכה:</b>
@@ -259,6 +266,18 @@
     let map = null, userMarker = null, routesLayer = null;
     let showRoutes = false;
     let currentDemoStep = 0;
+    let cachedVoices = [];
+
+    // טעינת מנוע קולות מראש לתמיכה מלאה במחשב ובמובייל
+    function initVoices() {
+      if ('speechSynthesis' in window) {
+        cachedVoices = window.speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+          cachedVoices = window.speechSynthesis.getVoices();
+        };
+      }
+    }
+    initVoices();
 
     const partners = [
       { 
@@ -278,7 +297,7 @@
     const demoTourSteps = [
       {
         title: "צעד ראשון: ברוכים הבאים לאפליקציה",
-        desc: "האפליקציה מחברת בין אנשים שרוצים לצעוד יחד בסביבה הקרובה, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה יותר.",
+        desc: "היי! ברוכים הבאים ליאללה בוא נלך. האפליקציה שלנו מחברת בין אנשים שרוצים לצעוד יחד בסביבה הקרובה, לשמור על כושר ולהנות מצעידה בטוחה.",
         action: () => switchTab('mainScreen')
       },
       {
@@ -288,27 +307,27 @@
       },
       {
         title: "צעד שלישי: חיפוש וסינון פרטנרים",
-        desc: "באפשרותכם לסנן פרטנרים לפי קצב הליכה איטי, בינוני או מהיר, לפי סרגל המרחק בקילומטרים ולפי זמינות של עכשיו, הערב או מחר.",
+        desc: "תוכלו לסנן פרטנרים לפי קצב הליכה, מרחק בקילומטרים וזמינות - כמו עכשיו, הערב או מחר.",
         action: () => switchTab('mainScreen')
       },
       {
         title: "צעד רביעי: צפייה בפרופיל של דניאל",
-        desc: "לחיצה על כפתור פרופיל מציגה את העדפות הצעידה, גיל, האם מגיע עם כלב, ומשובים חיוביים שנשמרו באופן אנונימי מצעידים קודמים.",
+        desc: "בלחיצה על פרופיל, תראו את העדפות הצעידה של דניאל, הגיל, והאם מגיע עם כלב, יחד עם משובים חיוביים מצעידים קודמים.",
         action: () => openProfile(1)
       },
       {
         title: "צעד חמישי: יצירת קשר בצ'אט הפנימי",
-        desc: "פותחים את חלון השיחה עם דניאל, מתאמים נקודת מפגש וזמן יציאה, או עוברים בלחיצת כפתור אחת ישירות לשיחת וואטסאפ.",
+        desc: "בואו נפתח שיחה עם דניאל, נתאם מקום מפגש וזמן יציאה, או נעבור בלחיצה אחת ישירות לוואטסאפ.",
         action: () => { closeModal(); openChat(); }
       },
       {
         title: "צעד שישי: הליכה פעילה בלייב",
-        desc: "לוחצים על סגירת הליכה ויציאה לדרך. האפליקציה מודדת בזמן אמת את זמן הצעידה ואת מרחק הדרך שנצבר קילומטר אחר קילומטר.",
+        desc: "עכשיו נלחץ על יציאה לדרך! האפליקציה מודדת בלייב את זמן הצעידה ואת המרחק שנצבר.",
         action: () => startActiveWalk()
       },
       {
         title: "צעד שביעי: סיום הליכה ודירוג אנונימי",
-        desc: "בסיום ההליכה מדרגים בכוכבים ומוסיפים משוב חיובי. הדירוג נשמר באופן אנונימי, מוסיף הליכה מאומתת לחשבונכם ומעדכן את האזור האישי.",
+        desc: "בסיום ההליכה מדרגים בכוכבים ומוסיפים משוב חיובי. הדירוג נשמר אנונימית ומעדכן את האזור האישי שלכם!",
         action: () => finishWalk()
       }
     ];
@@ -316,15 +335,29 @@
     function speakText(text) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+        window.speechSynthesis.resume(); // תיקון מיוחד לדפדפני מחשב
+
+        const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'he-IL';
-        utterance.rate = 0.85; // דיבור זורם ואנושי
-        utterance.pitch = 1.0;
         
-        const voices = window.speechSynthesis.getVoices();
-        const hebrewVoice = voices.find(v => v.lang.includes('he') || v.lang.includes('HE'));
-        if (hebrewVoice) utterance.voice = hebrewVoice;
+        // הגדרת טון נשי קליל וחברותי
+        utterance.rate = 0.92; 
+        utterance.pitch = 1.25; 
+
+        if (cachedVoices.length === 0) {
+          cachedVoices = window.speechSynthesis.getVoices();
+        }
+
+        // חיפוש עדיפות לקול נשי בעברית
+        const femaleVoice = cachedVoices.find(v => 
+          (v.lang.includes('he') || v.lang.includes('HE')) && 
+          (v.name.includes('Female') || v.name.includes('Carmit') || v.name.includes('Hebrew') || v.name.includes('Google'))
+        ) || cachedVoices.find(v => v.lang.includes('he') || v.lang.includes('HE'));
+
+        if (femaleVoice) {
+          utterance.voice = femaleVoice;
+        }
 
         window.speechSynthesis.speak(utterance);
       }
@@ -342,229 +375,9 @@
       document.getElementById('demoStepTitle').innerText = step.title;
       document.getElementById('demoStepDesc').innerText = step.desc;
       
-      document.getElementById('btnPrevDemo').style.display = (stepIdx === 0) ? 'none' : 'block';
-
-      if (step.action) step.action();
-      speakText(`${step.title}. ${step.desc}`);
-    }
-
-    function nextDemoStep() {
-      currentDemoStep++;
-      if (currentDemoStep < demoTourSteps.length) {
-        showDemoStep(currentDemoStep);
-      } else {
-        closeDemoTour();
-      }
-    }
-
-    function prevDemoStep() {
-      if (currentDemoStep > 0) {
-        currentDemoStep--;
-        showDemoStep(currentDemoStep);
-      }
-    }
-
-    function closeDemoTour() {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      document.getElementById('demoTourModal').classList.add('hidden');
-      closeModal();
-      backToMap();
-    }
-
-    function startApp() {
-      userGender = document.getElementById('userGenderInput').value;
-      document.getElementById('welcomeScreen').classList.add('hidden');
-      document.getElementById('mainScreen').classList.remove('hidden');
-      document.getElementById('bottomNav').classList.remove('hidden');
-      
-      updateVerificationUI();
-      renderPartners();
-
-      setTimeout(() => {
-        initMap();
-      }, 100);
-    }
-
-    function initMap() {
-      try {
-        if (map || typeof L === 'undefined') return;
-        const mapContainer = document.getElementById('map');
-        if (!mapContainer) return;
-
-        map = L.map('map').setView([userPos.lat, userPos.lng], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 7, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
-          .addTo(map).bindPopup("<b>המיקום שלך</b>");
-
-        routesLayer = L.polyline([
-          [32.835, 35.076], [32.838, 35.078], [32.840, 35.082]
-        ], { color: '#8e44ad', weight: 5, opacity: 0.7, dashArray: '8, 8' });
-
-        map.invalidateSize();
-      } catch (e) {
-        console.log("Map init safe-mode:", e);
-      }
-    }
-
-    function toggleRoutes() {
-      showRoutes = !showRoutes;
-      if (showRoutes && map) { routesLayer.addTo(map); alert("🛣️ מוצגים מסלולי הליכה מוארים ובטוחים!"); }
-      else if (map) { map.removeLayer(routesLayer); }
-    }
-
-    function updateVerificationUI() {
-      const text = document.getElementById('verifyText');
-      if (verifiedWalks >= 3) {
-        document.getElementById('verificationBadge').className = "verification-badge verified-badge";
-        document.getElementById('verificationBadge').innerHTML = "✅ <b>חשבון מאומת!</b> באפשרותך לצאת להליכות עם כל המשתמשים.";
-      } else {
-        text.innerText = `${verifiedWalks}/3 הליכות עם בני אותו המין (${userGender})`;
-      }
-    }
-
-    function renderPartners() {
-      const listContainer = document.getElementById('partnersList');
-      listContainer.innerHTML = '';
-
-      partners.forEach(partner => {
-        const isOppositeGender = partner.gender !== userGender;
-        const isLocked = isOppositeGender && verifiedWalks < 3;
-
-        if (map && partner.marker) map.removeLayer(partner.marker);
-
-        if (map) {
-          partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name}</b> (${partner.gender}) - ${partner.rating}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות</b>' : ''}`);
-        }
-
-        const item = document.createElement('div');
-        item.className = `partner-item ${isLocked ? 'locked' : ''}`;
-        item.innerHTML = `
-          <div>
-            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
-            <span style="color:#666;">קצב: ${partner.pace} | העדפה: <b>${partner.pref}</b></span>
-          </div>
-          <button style="width:auto; padding: 4px 8px; font-size:11px;" onclick="event.stopPropagation(); openProfile(${partner.id})">פרופיל</button>
-        `;
-        item.onclick = () => focusOnPartner(partner, isLocked);
-        listContainer.appendChild(item);
-      });
-      selectedPartner = partners[0];
-    }
-
-    function focusOnPartner(partner, isLocked) {
-      if (isLocked) { alert("🔒 גישה מוגבלת: נדרשות 3 הליכות מאומתות עם בני אותו המין."); return; }
-      selectedPartner = partner;
-      if (map) {
-        map.flyTo([partner.lat, partner.lng], 15, { duration: 1 });
-        if (partner.marker) partner.marker.openPopup();
-      }
-    }
-
-    function openWhatsApp() {
-      if (!selectedPartner) selectedPartner = partners[0];
-      const text = encodeURIComponent(`היי ${selectedPartner.name}, ראיתי ב-Yalla Walk שאת/ה בסביבה, מעוניין/ת לצאת להליכה?`);
-      window.open(`https://wa.me/${selectedPartner.phone}?text=${text}`, '_blank');
-    }
-
-    function openChat() {
-      if (!selectedPartner) selectedPartner = partners[0];
-      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${selectedPartner.name}`;
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('chatScreen').classList.remove('hidden');
-    }
-
-    function startActiveWalk() {
-      document.getElementById('chatScreen').classList.add('hidden');
-      document.getElementById('activeWalkScreen').classList.remove('hidden');
-      document.getElementById('activePartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
-    }
-
-    function finishWalk() {
-      document.getElementById('activeWalkScreen').classList.add('hidden');
-      document.getElementById('ratedPartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
-      document.getElementById('ratingModal').classList.remove('hidden');
-      setStars(5);
-    }
-
-    function setStars(num) {
-      selectedRating = num;
-      const stars = document.querySelectorAll('#starRating span');
-      stars.forEach((s, idx) => {
-        if (idx < num) s.classList.add('active');
-        else s.classList.remove('active');
-      });
-    }
-
-    function submitRating() {
-      const reviewInput = document.getElementById('reviewText').value.trim();
-      if (reviewInput && selectedPartner) {
-        selectedPartner.reviews.push(`'${reviewInput}'`);
+      const btnPrev = document.getElementById('btnPrevDemo');
+      if (btnPrev) {
+        btnPrev.style.display = (stepIdx === 0) ? 'none' : 'block';
       }
 
-      document.getElementById('ratingModal').classList.add('hidden');
-      document.getElementById('reviewText').value = '';
-      verifiedWalks++;
-      totalKm += 1.2;
-      document.getElementById('userKm').innerText = `${totalKm.toFixed(1)} ק"מ`;
-      updateVerificationUI();
-      renderPartners();
-      switchTab('mainScreen');
-      alert("🏆 תודה! הדירוג והמשוב החיובי נשמרו בהצלחה.");
-    }
-
-    function sendMsg() {
-      const input = document.getElementById('chatInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const chatBox = document.getElementById('chatBox');
-      chatBox.innerHTML += `<div class="msg-user">${text}</div>`;
-      input.value = '';
-      chatBox.scrollTop = chatBox.scrollHeight;
-
-      setTimeout(() => {
-        let reply = "מעולה! נפגש בנקודת המפגש. לחץ על 'סגירת הליכה' ונצא לדרך 🔥";
-        chatBox.innerHTML += `<div class="msg-partner">${reply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 800);
-    }
-
-    function switchTab(screenId) {
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('profileScreen').classList.add('hidden');
-      document.getElementById('chatScreen').classList.add('hidden');
-      document.getElementById('activeWalkScreen').classList.add('hidden');
-      
-      document.getElementById(screenId).classList.remove('hidden');
-
-      document.getElementById('navMap').classList.remove('active');
-      document.getElementById('navProfile').classList.remove('active');
-      if (screenId === 'mainScreen') {
-        document.getElementById('navMap').classList.add('active');
-        if (map) setTimeout(() => map.invalidateSize(), 200);
-      }
-      if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
-    }
-
-    function backToMap() { switchTab('mainScreen'); }
-    function openProfile(id) {
-      const partner = partners.find(p => p.id === id);
-      if (!partner) return;
-      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
-      document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating}`;
-      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🎧 העדפה: ${partner.pref}`;
-      document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>• ${r}</div>`).join('');
-      document.getElementById('profileModal').classList.remove('hidden');
-    }
-    function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
-    function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
-    function setTimeFilter(time) { selectedTime = time; filterPartners(); }
-    function filterPartners() {}
-    function locateUser() {}
-    function triggerSOS() { alert("🚀 קריאה נשלחה לכל המשתמשים בסביבה!"); }
-
-    document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
-  </script>
-</body>
-</html>
+      if (step.action)
