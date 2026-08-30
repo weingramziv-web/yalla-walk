@@ -21,7 +21,8 @@
     .btn-secondary { background: #7f8c8d; }
     .btn-whatsapp { background: #25D366; }
     .btn-sos { background: #e74c3c; }
-    .btn-demo { background: #8e44ad; color: #fff; font-size: 15px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(142, 68, 173, 0.4); }
+    .btn-demo { background: #8e44ad; color: #fff; font-size: 14px; margin-bottom: 8px; }
+    .btn-video { background: #2980b9; color: #fff; font-size: 14px; margin-bottom: 8px; }
     .hidden { display: none !important; }
     
     #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; }
@@ -71,7 +72,7 @@
 
       <div style="background: #eef9f1; padding: 12px; border-radius: 12px; margin: 15px 0; text-align: right;">
         <p><b>🎯 מה המטרה?</b><br>לחבר בין אנשים שרוצים לצעוד ביחד, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה יותר.</p>
-        <p style="margin-bottom: 0;">🛡️ <b>מנגנון בטיחות ואימות:</b><br>יצירת קשר עם בני המין השני מתאפשרת רק לאחר סיום **3 הליכות מאומתות** עם בני אותו המין!</p>
+        <p style="margin-bottom: 0;">🛡️ <b>מנגנון בטיחות ואימות:</b><br>יצירת קשר עם בני המין השני מתאפשרת רק לאחר סיום **3 הליכות מאומתות** עם בני אותו המין! המשובים מסוננים אוטומטית ומציגים רק חיזוקים חיוביים וענייניים להליכה.</p>
       </div>
 
       <div style="margin-top: auto;">
@@ -84,9 +85,12 @@
       </div>
     </div>
 
-    <!-- מסך ראשי - מפה ופרטנרים -->
+    <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <button class="btn-demo" onclick="runDemoFlow()">🎬 הפעל הדמיית הליכה מלאה (Demo)</button>
+      <div style="display:flex; gap:5px;">
+        <button class="btn-demo" style="flex:1;" onclick="runDemoFlow()">🎬 הדמיה טקסטואלית</button>
+        <button class="btn-video" style="flex:1;" onclick="openVideoDemo()">🎥 סרטון הדמיה</button>
+      </div>
 
       <h1>🗺️ פרטנרים בסביבה</h1>
 
@@ -143,7 +147,7 @@
       <button onclick="backToMap()" class="btn-secondary">חזרה למפה</button>
     </div>
 
-    <!-- מסך הליכה פעילה (LIVE) -->
+    <!-- מסך הליכה פעילה -->
     <div class="screen hidden" id="activeWalkScreen" style="text-align:center;">
       <h1 style="color:#27ae60;">🚶‍♂️ הליכה פעילה בלייב</h1>
       <p>אתה כרגע בצדה של הליכה עם <b id="activePartnerName">דניאל</b>!</p>
@@ -180,6 +184,18 @@
       </div>
     </div>
 
+    <!-- פופ-אפ סרטון הדמיה -->
+    <div class="modal hidden" id="videoModal">
+      <div class="modal-content" style="text-align:center;">
+        <h2 style="color:#2980b9; margin-top:0;">🎥 סרטון הדמיית האפליקציה</h2>
+        <div style="background:#000; color:#fff; border-radius:8px; padding:30px 10px; margin:10px 0;">
+          <p style="color:#fff; font-size:16px;">▶️ [נגן וידאו - הדמיית שימוש]</p>
+          <p style="color:#ccc; font-size:11px;">1. חיפוש פרטנרים על המפה<br>2. תיאום בצ'אט וב-WhatsApp<br>3. הליכה מאומתת וסיום בטוח</p>
+        </div>
+        <button onclick="closeVideoModal()" class="btn-secondary">סגור סרטון</button>
+      </div>
+    </div>
+
     <!-- פופ-אפ דירוג אנונימי בסיום הליכה -->
     <div class="modal hidden" id="ratingModal">
       <div class="modal-content" style="text-align:center;">
@@ -194,7 +210,8 @@
           <span onclick="setStars(5)">★</span>
         </div>
 
-        <textarea id="reviewText" placeholder="כתוב חוות דעת אנונימית (אופציונלי)..." rows="3"></textarea>
+        <textarea id="reviewText" placeholder="רשום משוב חיובי/ענייני להליכה (למשל: קצב מצוין, אדיב, עמידה בזמנים)..." rows="3"></textarea>
+        <p style="font-size:10px; color:#888;">🔒 תגובות שליליות/פוגעניות יסוננו אוטומטית ולא יפורסמו בפרופיל.</p>
         <button onclick="submitRating()">שלח דירוג אנונימי וסים</button>
       </div>
     </div>
@@ -206,7 +223,7 @@
         <div id="modalRating" style="color:#f39c12; font-weight:bold; margin-bottom:4px;"></div>
         <p id="modalDetails"></p>
         <hr style="border:none; border-top:1px solid #eee; margin:10px 0;">
-        <b>💬 חוות דעת אנונימיות:</b>
+        <b>💬 משובים חיוביים וענייניים להליכה:</b>
         <div id="modalReviews" style="font-size:12px; color:#555; margin-top:6px;"></div>
         <button onclick="closeModal()" class="btn-secondary" style="margin-top: 12px;">סגור</button>
       </div>
@@ -236,17 +253,20 @@
     let map, userMarker, routesLayer;
     let showRoutes = false;
 
+    // רשימת מילים שליליות לסינון
+    const forbiddenWords = ["גרוע", "גרועה", "איטי מדי", "מעצבן", "מעצבנת", "איחר", "איחרה", "מגעיל", "לא נחמד"];
+
     const partners = [
       { 
         id: 1, name: "דניאל", gender: "גבר", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", 
         phone: "972500000000", age: 28, dog: "כן", route: "פארק", pref: "פתוח לשיחה 🗣️", rating: "4.9 ⭐",
-        reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מאוד אדיב ומדויק בזמנים'"],
+        reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מדויק בזמנים ואדיב מאוד'"],
         lat: 32.838, lng: 35.078 
       },
       { 
         id: 2, name: "מיכל", gender: "אישה", location: "קריות", pace: "מהיר", dist: 3.8, time: "הערב", 
         phone: "972500000001", age: 34, dog: "לא", route: "כביש/מדרכה", pref: "אוהבת פודקאסטים 🎧", rating: "5.0 ⭐",
-        reviews: ["'אלופה! קצב מהיר ומאתגר'"],
+        reviews: ["'קצב מהיר ומאתגר, מומלצת מאוד!'"],
         lat: 32.832, lng: 35.075 
       }
     ];
@@ -337,6 +357,14 @@
       document.getElementById('chatScreen').classList.remove('hidden');
     }
 
+    function openVideoDemo() {
+      document.getElementById('videoModal').classList.remove('hidden');
+    }
+
+    function closeVideoModal() {
+      document.getElementById('videoModal').classList.add('hidden');
+    }
+
     function runDemoFlow() {
       selectedPartner = partners[0];
       openChat();
@@ -375,14 +403,29 @@
     }
 
     function submitRating() {
+      const reviewInput = document.getElementById('reviewText').value.trim();
+      
+      // בדיקת תקינות וסינון מילים שליליות
+      let hasForbidden = forbiddenWords.some(word => reviewInput.includes(word));
+      
+      if (hasForbidden) {
+        alert("⚠️ המשוב שרשמת מכיל ביטויים שליליים. המערכת מקבלת רק חיזוקים חיוביים וענייניים להליכה.");
+        return;
+      }
+
+      if (reviewInput && selectedPartner) {
+        selectedPartner.reviews.push(`'${reviewInput}'`);
+      }
+
       document.getElementById('ratingModal').classList.add('hidden');
+      document.getElementById('reviewText').value = '';
       verifiedWalks++;
       totalKm += 1.2;
       document.getElementById('userKm').innerText = `${totalKm.toFixed(1)} ק"מ`;
       updateVerificationUI();
       renderPartners();
       switchTab('mainScreen');
-      alert("🏆 תודה! הדירוג נשמר באופן אנונימי. הליכה מאומתת נוספה לחשבונך!");
+      alert("🏆 תודה! הדירוג והמשוב החיובי נשמרו בהצלחה.");
     }
 
     function sendMsg() {
@@ -419,7 +462,7 @@
       const partner = partners.find(p => p.id === id);
       if (!partner) return;
       document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
-      document.getElementById('modalRating').innerText = `דירוג אנונימי: ${partner.rating}`;
+      document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating}`;
       document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🎧 העדפה: ${partner.pref}`;
       document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>• ${r}</div>`).join('');
       document.getElementById('profileModal').classList.remove('hidden');
