@@ -9,58 +9,73 @@
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; }
     
-    .app-container { width: 100%; max-width: 500px; background: #fff; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    .app-container { width: 100%; max-width: 500px; background: #fff; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding-bottom: 60px; }
     .screen { padding: 15px; display: flex; flex-direction: column; flex: 1; }
     
     h1 { color: #2c3e50; font-size: 22px; margin: 0 0 10px 0; text-align: center; }
-    p { font-size: 14px; color: #555; line-height: 1.5; margin: 0 0 15px 0; }
+    p { font-size: 13px; color: #555; line-height: 1.4; margin: 0 0 10px 0; }
     
-    input, select { width: 100%; padding: 12px; margin: 6px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 6px; }
+    input, select { width: 100%; padding: 10px; margin: 4px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; }
+    button { width: 100%; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 6px; }
     button:active { opacity: 0.9; }
     .btn-secondary { background: #7f8c8d; }
     .btn-whatsapp { background: #25D366; }
     .btn-sos { background: #e74c3c; }
-    .btn-verify { background: #3498db; margin-top: 6px; padding: 6px 10px; font-size: 12px; }
+    .btn-verify { background: #3498db; margin-top: 4px; padding: 4px 8px; font-size: 11px; }
     .hidden { display: none !important; }
     
-    #map { height: 200px; width: 100%; border-radius: 12px; margin: 8px 0; }
+    #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; }
     
     .filter-box { background: #eef9f1; padding: 10px; border-radius: 10px; font-size: 12px; }
-    .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 6px; }
+    .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 4px; }
     
     .time-tags { display: flex; gap: 5px; margin-top: 4px; }
-    .tag-btn { padding: 6px; font-size: 12px; background: #fff; color: #2c3e50; border: 1px solid #27ae60; border-radius: 12px; flex: 1; }
+    .tag-btn { padding: 6px; font-size: 11px; background: #fff; color: #2c3e50; border: 1px solid #27ae60; border-radius: 12px; flex: 1; }
     .tag-btn.active { background: #27ae60; color: #fff; }
     
-    .verification-badge { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 12px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 8px; }
+    .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
 
-    .partner-item { background: #f9f9f9; padding: 12px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 13px; border-right: 4px solid #27ae60; display: flex; justify-content: space-between; align-items: center; }
+    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 4px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; display: flex; justify-content: space-between; align-items: center; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
     
-    .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
+    .chat-box { flex: 1; min-height: 180px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; display: inline-block; max-width: 80%; align-self: flex-start; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; display: inline-block; border: 1px solid #eee; max-width: 80%; align-self: flex-end; }
 
-    .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; text-align: right; font-size: 14px; }
+    /* Bottom Nav Bar */
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 8px 0; z-index: 999; }
+    .nav-btn { background: none; color: #7f8c8d; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0; margin: 0; }
+    .nav-btn.active { color: #27ae60; font-weight: bold; }
+
+    /* Profile / Dashboard Stats */
+    .stat-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: center; }
+    .stat-val { font-size: 22px; font-weight: bold; color: #27ae60; }
+    .badge-icon { display: inline-block; background: #eef9f1; border-radius: 20px; padding: 4px 10px; font-size: 11px; margin: 2px; }
+
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 80vh; overflow-y: auto; }
+    
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #2c3e50; color: #fff; padding: 10px 16px; border-radius: 20px; font-size: 12px; z-index: 2000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
 
   <div class="app-container">
 
+    <!-- התראת פוש פופ-אפ -->
+    <div id="toast" class="toast hidden">🔔 התראה: מיכל פתחה קריאה להליכה עכשיו ברדיוס של 2 ק"מ!</div>
+
     <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 20px;">
-        <h1 style="font-size: 28px; color: #27ae60;">🚶‍♂️ יאללה בוא נלך!</h1>
-        <p style="font-size: 15px; font-weight: bold; color: #2c3e50;">מוצאים פרטנרים להליכה בסביבה בקלות ובביטחון</p>
+        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ יאללה בוא נלך!</h1>
+        <p style="font-size: 14px; font-weight: bold; color: #2c3e50;">מוצאים פרטנרים להליכה בסביבה בקלות ובביטחון</p>
       </div>
 
-      <div style="background: #eef9f1; padding: 15px; border-radius: 12px; margin: 15px 0; text-align: right;">
+      <div style="background: #eef9f1; padding: 12px; border-radius: 12px; margin: 15px 0; text-align: right;">
         <p><b>🎯 מה המטרה?</b><br>לחבר בין אנשים שרוצים לצעוד ביחד, לשמור על כושר ולהפוך את ההליכה למהנה ובטוחה יותר.</p>
-        <p style="margin-bottom: 0;">🛡️ <b>מנגנון בטיחות ואימות:</b><br>לשמירה על בטחון הקהילה, יצירת קשר עם בני המין השני מתאפשרת רק לאחר סיום **3 הליכות מאומתות** עם בני אותו המין!</p>
+        <p style="margin-bottom: 0;">🛡️ <b>מנגנון בטיחות ואימות:</b><br>יצירת קשר עם בני המין השני מתאפשרת רק לאחר סיום **3 הליכות מאומתות** עם בני אותו המין! הדירוגים והמשובים דיסקרטיים ואנונימיים לחלוטין.</p>
       </div>
 
       <div style="margin-top: auto;">
@@ -69,11 +84,11 @@
           <option value="גבר">גבר</option>
           <option value="אישה">אישה</option>
         </select>
-        <button onclick="startApp()" style="margin-top: 15px; font-size: 18px;">קדימה, נכנסים! 🚀</button>
+        <button onclick="startApp()" style="margin-top: 10px; font-size: 16px;">קדימה, נכנסים! 🚀</button>
       </div>
     </div>
 
-    <!-- מסך ראשי -->
+    <!-- מסך ראשי - מפה ופרטנרים -->
     <div class="screen hidden" id="mainScreen">
       <h1>🗺️ פרטנרים בסביבה</h1>
 
@@ -106,7 +121,10 @@
         </div>
       </div>
 
-      <button class="btn-secondary" style="padding: 6px; font-size: 12px; margin-top: 6px;" onclick="locateUser()">📍 אתר את המיקום שלי</button>
+      <div style="display:flex; gap:5px; margin-top:4px;">
+        <button class="btn-secondary" style="padding: 6px; font-size: 11px;" onclick="locateUser()">📍 אתר אותי</button>
+        <button class="btn-secondary" style="padding: 6px; font-size: 11px; background:#8e44ad;" onclick="toggleRoutes()">🛣️ מסלולים בטוחים</button>
+      </div>
 
       <div id="map"></div>
 
@@ -117,24 +135,69 @@
       <button class="btn-sos" onclick="triggerSOS()">📢 קריאה להליכה עכשיו!</button>
     </div>
 
+    <!-- מסך אזור אישי וסטטיסטיקה -->
+    <div class="screen hidden" id="profileScreen">
+      <h1>📊 האזור האישי שלי</h1>
+      
+      <div class="stat-card">
+        <div style="color:#7f8c8d; font-size:12px;">סה"כ קילומטרים בצעידה</div>
+        <div class="stat-val" id="userKm">24.5 ק"מ</div>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <div class="stat-card" style="flex:1;">
+          <div style="color:#7f8c8d; font-size:11px;">הליכות שבוצעו</div>
+          <div class="stat-val" id="userWalksCount">8</div>
+        </div>
+        <div class="stat-card" style="flex:1;">
+          <div style="color:#7f8c8d; font-size:11px;">יעד שבועי (3/4)</div>
+          <div class="stat-val" style="color:#f39c12;">75%</div>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #eee; padding:10px; border-radius:10px; margin-bottom:10px; text-align:right;">
+        <b style="font-size:13px;">🏆 הישגים ומדליות:</b><br>
+        <span class="badge-icon">🥇 צועד מתחיל</span>
+        <span class="badge-icon">🌟 5 הליכות מאומתות</span>
+        <span class="badge-icon">🚀 קצב מהיר</span>
+      </div>
+
+      <button style="background:#34495e;" onclick="triggerPushDemo()">🔔 הדגמת התראת Push לדוגמה</button>
+    </div>
+
     <!-- מסך צ'אט -->
     <div class="screen hidden" id="chatScreen">
       <h1 id="chatTitle">💬 שיחה עם דניאל</h1>
       <div class="chat-box" id="chatBox">
         <div class="msg-partner">היי! יוצא להליכה עוד מעט. מצטרף?</div>
       </div>
-      <input type="text" id="chatInput" placeholder="רשום הודעה (אנטר לשליחה)..." style="margin-top: 10px;">
+      <input type="text" id="chatInput" placeholder="רשום הודעה (אנטר לשליחה)..." style="margin-top: 8px;">
       <button onclick="sendMsg()">שלח</button>
       <button onclick="backToMap()" class="btn-secondary">חזרה למפה</button>
     </div>
 
-    <!-- פופ-אפ פרופיל מורחב -->
+    <!-- פופ-אפ פרופיל מורחב ודירוג אנונימי -->
     <div class="modal hidden" id="profileModal">
       <div class="modal-content">
         <h2 id="modalName" style="margin-top:0; color:#27ae60;"></h2>
+        <div id="modalRating" style="color:#f39c12; font-weight:bold; margin-bottom:4px;"></div>
+        <p style="font-size:11px; color:#888; margin-bottom:8px;">🔒 הדירוגים והביקורות אנונימיים לשמירה על פרטיות המשתמשים.</p>
         <p id="modalDetails"></p>
-        <button onclick="closeModal()" class="btn-secondary">סגור</button>
+        <hr style="border:none; border-top:1px solid #eee; margin:10px 0;">
+        <b>💬 חוות דעת אנונימיות מצעידים:</b>
+        <div id="modalReviews" style="font-size:12px; color:#555; margin-top:6px;"></div>
+        <button onclick="closeModal()" class="btn-secondary" style="margin-top: 12px;">סגור</button>
       </div>
+    </div>
+
+    <!-- ניווט תחתון (Bottom Nav) -->
+    <div class="bottom-nav hidden" id="bottomNav">
+      <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
+        <span style="font-size:18px;">🗺️</span> ראשי
+      </button>
+      <button class="nav-btn" id="navProfile" onclick="switchTab('profileScreen')">
+        <span style="font-size:18px;">📊</span> פרופיל וסטטיסטיקה
+      </button>
     </div>
 
   </div>
@@ -146,18 +209,35 @@
     let userPos = { lat: 32.835, lng: 35.076 };
     let selectedTime = 'all';
     let selectedPartner = null;
-    let map, userMarker;
+    let map, userMarker, routesLayer;
+    let showRoutes = false;
 
     const partners = [
-      { id: 1, name: "דניאל", gender: "גבר", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", phone: "972500000000", age: 28, dog: "כן", route: "פארק", lat: 32.838, lng: 35.078 },
-      { id: 2, name: "מיכל", gender: "אישה", location: "קריות", pace: "מהיר", dist: 3.8, time: "הערב", phone: "972500000001", age: 34, dog: "לא", route: "כביש/מדרכה", lat: 32.832, lng: 35.075 },
-      { id: 3, name: "עומר", gender: "גבר", location: "ביאליק", pace: "איטי", dist: 6.5, time: "מחר", phone: "972500000002", age: 22, dog: "כן", route: "מסלול מעגלי", lat: 32.820, lng: 35.085 }
+      { 
+        id: 1, name: "דניאל", gender: "גבר", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", 
+        phone: "972500000000", age: 28, dog: "כן", route: "פארק", pref: "פתוח לשיחה 🗣️", rating: "4.9 ⭐",
+        reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מאוד אדיב ומדויק בזמנים'"],
+        lat: 32.838, lng: 35.078 
+      },
+      { 
+        id: 2, name: "מיכל", gender: "אישה", location: "קריות", pace: "מהיר", dist: 3.8, time: "הערב", 
+        phone: "972500000001", age: 34, dog: "לא", route: "כביש/מדרכה", pref: "אוהבת פודקאסטים 🎧", rating: "5.0 ⭐",
+        reviews: ["'אלופה! קצב מהיר ומאתגר'"],
+        lat: 32.832, lng: 35.075 
+      },
+      { 
+        id: 3, name: "עומר", gender: "גבר", location: "ביאליק", pace: "איטי", dist: 6.5, time: "מחר", 
+        phone: "972500000002", age: 22, dog: "כן", route: "מסלול מעגלי", pref: "מעדיף הליכה בשקט 🤫", rating: "4.7 ⭐",
+        reviews: ["'הליכה רגועה וכיפית עם הכלב'"],
+        lat: 32.820, lng: 35.085 
+      }
     ];
 
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.remove('hidden');
+      document.getElementById('bottomNav').classList.remove('hidden');
       initMap();
       updateVerificationUI();
       renderPartners();
@@ -169,6 +249,22 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
       userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 7, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
         .addTo(map).bindPopup("<b>המיקום שלך</b>");
+
+      routesLayer = L.polyline([
+        [32.835, 35.076],
+        [32.838, 35.078],
+        [32.840, 35.082]
+      ], { color: '#8e44ad', weight: 5, opacity: 0.7, dashArray: '8, 8' });
+    }
+
+    function toggleRoutes() {
+      showRoutes = !showRoutes;
+      if (showRoutes) {
+        routesLayer.addTo(map);
+        alert("🛣️ מוצגים מסלולי הליכה מוארים ובטוחים באזורך (סגול מקווקו)!");
+      } else {
+        map.removeLayer(routesLayer);
+      }
     }
 
     function updateVerificationUI() {
@@ -203,15 +299,15 @@
 
         partner.marker = L.marker([partner.lat, partner.lng])
           .addTo(map)
-          .bindPopup(`<b>${partner.name}</b> (${partner.gender})<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות 3 הליכות</b>' : ''}`);
+          .bindPopup(`<b>${partner.name}</b> (${partner.gender}) - ${partner.rating}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות 3 הליכות</b>' : ''}`);
 
         const item = document.createElement('div');
         item.className = `partner-item ${isLocked ? 'locked' : ''}`;
         item.id = `partner-${partner.id}`;
         item.innerHTML = `
           <div>
-            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${isLocked ? '🔒' : ''}<br>
-            <span style="color:#666;">קצב: ${partner.pace} | זמינות: ${partner.time}</span>
+            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
+            <span style="color:#666;">קצב: ${partner.pace} | העדפה: <b>${partner.pref}</b></span>
           </div>
           <button style="width:auto; padding: 4px 8px; font-size:11px;" onclick="event.stopPropagation(); openProfile(${partner.id})">פרופיל</button>
         `;
@@ -277,13 +373,16 @@
       const partner = partners.find(p => p.id === id);
       if (!partner) return;
       document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
+      document.getElementById('modalRating').innerText = `דירוג אנונימי משוקלל: ${partner.rating}`;
       document.getElementById('modalDetails').innerHTML = `
         📍 <b>אזור:</b> ${partner.location}<br>
         🏃‍♂️ <b>קצב:</b> ${partner.pace}<br>
         🎂 <b>גיל:</b> ${partner.age}<br>
         🐕 <b>הולך עם כלב:</b> ${partner.dog}<br>
-        🛣️ <b>מסלול מועדף:</b> ${partner.route}
+        🛣️ <b>מסלול מועדף:</b> ${partner.route}<br>
+        🎧 <b>סגנון הליכה:</b> ${partner.pref}
       `;
+      document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>👤 <i>מצעיד/ה אנונימי/ת:</i> ${r}</div>`).join('<br>');
       document.getElementById('profileModal').classList.remove('hidden');
     }
 
@@ -314,6 +413,7 @@
       if (!canInteractWithSelected()) return;
       document.getElementById('chatTitle').innerText = `💬 שיחה עם ${selectedPartner.name}`;
       document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('profileScreen').classList.add('hidden');
       document.getElementById('chatScreen').classList.remove('hidden');
     }
 
@@ -343,6 +443,26 @@
         chatBox.innerHTML += `<div class="msg-partner">${reply}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
       }, 800);
+    }
+
+    function switchTab(screenId) {
+      document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('profileScreen').classList.add('hidden');
+      document.getElementById('chatScreen').classList.add('hidden');
+      
+      document.getElementById(screenId).classList.remove('hidden');
+
+      document.getElementById('navMap').classList.remove('active');
+      document.getElementById('navProfile').classList.remove('active');
+
+      if (screenId === 'mainScreen') document.getElementById('navMap').classList.add('active');
+      if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
+    }
+
+    function triggerPushDemo() {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('hidden');
+      setTimeout(() => toast.classList.add('hidden'), 4000);
     }
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) {
