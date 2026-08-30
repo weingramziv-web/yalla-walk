@@ -2,26 +2,43 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>יאללה בוא נלך!</title>
+  <title>יאללה בוא נלך! - Yalla Walk</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 340px; text-align: center; }
-    h1 { color: #2c3e50; font-size: 20px; margin-bottom: 10px; }
-    p { font-size: 13px; color: #666; margin-bottom: 15px; }
-    input, select { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
+    body { font-family: Arial, sans-serif; background: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; box-sizing: border-box; }
+    .card { background: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 350px; text-align: center; position: relative; }
+    h1 { color: #2c3e50; font-size: 20px; margin-top: 0; margin-bottom: 10px; }
+    input, select { width: 100%; padding: 8px; margin: 4px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+    button { width: 100%; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     button:hover { background: #219150; }
-    .hidden { display: none; }
-    #map { height: 180px; width: 100%; border-radius: 8px; margin-top: 10px; }
-    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 8px 0; text-align: right; font-size: 13px; border-right: 4px solid #27ae60; }
-    .filter-box { background: #eef9f1; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: right; font-size: 13px; }
-    .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-bottom: 4px; }
+    .btn-secondary { background: #7f8c8d; }
+    .btn-secondary:hover { background: #6c7a7d; }
+    .btn-whatsapp { background: #25D366; color: #fff; margin-top: 6px; }
+    .btn-whatsapp:hover { background: #1ebc57; }
+    .btn-sos { background: #e74c3c; margin-top: 8px; }
+    .btn-sos:hover { background: #c0392b; }
+    .hidden { display: none !important; }
+    #map { height: 180px; width: 100%; border-radius: 8px; margin-top: 8px; }
+    
+    .filter-box { background: #eef9f1; padding: 10px; border-radius: 8px; margin-bottom: 8px; text-align: right; font-size: 12px; }
+    .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 6px; }
+    
+    .time-tags { display: flex; gap: 4px; margin-top: 4px; justify-content: space-between; }
+    .tag-btn { width: auto; padding: 4px 8px; font-size: 11px; background: #fff; color: #2c3e50; border: 1px solid #27ae60; border-radius: 12px; cursor: pointer; flex: 1; }
+    .tag-btn.active { background: #27ae60; color: #fff; }
+    
+    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 8px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .partner-item:hover { background: #eef9f1; }
+    
     .chat-box { height: 160px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
     .msg-wrapper-user { text-align: left; }
     .msg-wrapper-partner { text-align: right; }
     .msg-user { background: #dcf8c6; padding: 6px 12px; border-radius: 12px; display: inline-block; max-width: 80%; }
     .msg-partner { background: #fff; padding: 6px 12px; border-radius: 12px; display: inline-block; border: 1px solid #eee; max-width: 80%; }
+
+    /* Modal Styling */
+    .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; border-radius: 16px; z-index: 1000; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 80%; text-align: right; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -30,6 +47,7 @@
   <div class="card" id="mainScreen">
     <h1>🗺️ פרטנרים בסביבה</h1>
     
+    <!-- סינונים -->
     <div class="filter-box">
       <label for="paceFilter">🏃‍♂️ קצב הליכה:</label>
       <select id="paceFilter" onchange="filterPartners()">
@@ -40,44 +58,69 @@
         <option value="ריצה">ריצה</option>
       </select>
 
-      <label style="margin-top: 8px;">📍 מרחק מרבי: <span id="distVal">5</span> ק"מ</label>
+      <label>📍 מרחק מרבי: <span id="distVal">5</span> ק"מ</label>
       <input type="range" id="distFilter" min="1" max="10" value="5" oninput="updateDistVal(); filterPartners();">
+
+      <label>🕒 זמינות:</label>
+      <div class="time-tags">
+        <button class="tag-btn active" id="time-all" onclick="setTimeFilter('all')">הכל</button>
+        <button class="tag-btn" id="time-עכשיו" onclick="setTimeFilter('עכשיו')">עכשיו</button>
+        <button class="tag-btn" id="time-הערב" onclick="setTimeFilter('הערב')">הערב</button>
+        <button class="tag-btn" id="time-מחר" onclick="setTimeFilter('מחר')">מחר</button>
+      </div>
     </div>
 
-    <div id="map"></div>
-    <div id="partnersList" style="margin-top: 10px;"></div>
+    <!-- כפתור איתור GPS -->
+    <button class="btn-secondary" style="padding: 6px; font-size: 12px;" onclick="locateUser()">📍 אתר את המיקום שלי</button>
 
-    <button style="margin-top: 12px;" onclick="openChat()">💬 צור קשר להליכה</button>
+    <!-- מפה -->
+    <div id="map"></div>
+
+    <!-- רשימה -->
+    <div id="partnersList" style="margin-top: 6px;"></div>
+
+    <!-- כפתורים תחתונים -->
+    <button style="margin-top: 6px;" onclick="openChat()">💬 צור קשר בצ'אט</button>
+    <button class="btn-whatsapp" onclick="openWhatsApp()">📱 שלח הודעת WhatsApp</button>
+    <button class="btn-sos" onclick="triggerSOS()">📢 קריאה להליכה עכשיו!</button>
   </div>
 
   <!-- מסך צ'אט -->
   <div class="card hidden" id="chatScreen">
-    <h1>💬 שיחה עם דניאל</h1>
+    <h1 id="chatTitle">💬 שיחה עם דניאל</h1>
     <div class="chat-box" id="chatBox">
-      <div class="msg-wrapper-partner"><span class="msg-partner">היי! יוצא להליכה בקריות עוד מעט. מצטרף?</span></div>
+      <div class="msg-wrapper-partner"><span class="msg-partner">היי! יוצא להליכה עוד מעט. מצטרף?</span></div>
     </div>
-    <input type="text" id="chatInput" placeholder="רשום הודעה ואנטר לשליחה..." style="margin-top: 10px;">
+    <input type="text" id="chatInput" placeholder="רשום הודעה (אנטר לשליחה)..." style="margin-top: 10px;">
     <button onclick="sendMsg()" style="margin-top: 6px;">שלח</button>
-    <button onclick="backToMap()" style="background: #7f8c8d; margin-top: 6px;">חזרה למפה</button>
+    <button onclick="backToMap()" class="btn-secondary" style="margin-top: 6px;">חזרה למפה</button>
+  </div>
+
+  <!-- פופ-אפ פרופיל מורחב -->
+  <div class="modal hidden" id="profileModal">
+    <div class="modal-content">
+      <h2 id="modalName" style="margin-top:0; color:#27ae60;"></h2>
+      <p id="modalDetails"></p>
+      <button onclick="closeModal()" class="btn-secondary" style="margin-top: 10px;">סגור</button>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const userPos = { lat: 32.835, lng: 35.076 };
-    const map = L.map('map').setView([userPos.lat, userPos.lng], 13);
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
+    let userPos = { lat: 32.835, lng: 35.076 };
+    let selectedTime = 'all';
+    let selectedPartner = null;
 
-    // סמן מיקום משתמש
-    L.circleMarker([userPos.lat, userPos.lng], { radius: 7, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
+    const map = L.map('map').setView([userPos.lat, userPos.lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+
+    let userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 7, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
       .addTo(map).bindPopup("<b>המיקום שלך</b>");
 
     const partners = [
-      { id: 1, name: "דניאל", location: "מוצקין", pace: "בינוני", dist: 1.2, lat: 32.838, lng: 35.078 },
-      { id: 2, name: "מיכל", location: "קריות", pace: "מהיר", dist: 3.8, lat: 32.832, lng: 35.075 },
-      { id: 3, name: "עומר", location: "ביאליק", pace: "איטי", dist: 6.5, lat: 32.820, lng: 35.085 }
+      { id: 1, name: "דניאל", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", phone: "972500000000", age: 28, dog: "כן", route: "פארק", lat: 32.838, lng: 35.078 },
+      { id: 2, name: "מיכל", location: "קריות", pace: "מהיר", dist: 3.8, time: "הערב", phone: "972500000001", age: 34, dog: "לא", route: "כביש/מדרכה", lat: 32.832, lng: 35.075 },
+      { id: 3, name: "עומר", location: "ביאליק", pace: "איטי", dist: 6.5, time: "מחר", phone: "972500000002", age: 22, dog: "כן", route: "מסלול מעגלי", lat: 32.820, lng: 35.085 }
     ];
 
     function renderPartners() {
@@ -87,18 +130,40 @@
       partners.forEach(partner => {
         partner.marker = L.marker([partner.lat, partner.lng])
           .addTo(map)
-          .bindPopup(`<b>${partner.name}</b> - ${partner.location}<br>קצב: ${partner.pace}<br>מרחק: ${partner.dist} ק"מ`);
+          .bindPopup(`<b>${partner.name}</b> - ${partner.location}<br>קצב: ${partner.pace}<br>זמינות: ${partner.time}`);
 
         const item = document.createElement('div');
         item.className = 'partner-item';
         item.id = `partner-${partner.id}`;
-        item.innerHTML = `<b>${partner.name}</b> - ${partner.location} (${partner.dist} ק"מ)<br>קצב: <b>${partner.pace}</b>`;
+        item.innerHTML = `
+          <div>
+            <b>${partner.name}</b> (${partner.dist} ק"מ)<br>
+            <span style="color:#666;">קצב: ${partner.pace} | זמינות: ${partner.time}</span>
+          </div>
+          <button style="width:auto; padding: 4px 8px; font-size:11px;" onclick="event.stopPropagation(); openProfile(${partner.id})">פרופיל</button>
+        `;
+        
+        item.onclick = () => focusOnPartner(partner);
         listContainer.appendChild(item);
       });
+      selectedPartner = partners[0];
+    }
+
+    function focusOnPartner(partner) {
+      selectedPartner = partner;
+      map.flyTo([partner.lat, partner.lng], 15, { duration: 1 });
+      partner.marker.openPopup();
     }
 
     function updateDistVal() {
       document.getElementById('distVal').innerText = document.getElementById('distFilter').value;
+    }
+
+    function setTimeFilter(time) {
+      selectedTime = time;
+      document.querySelectorAll('.tag-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`time-${time}`).classList.add('active');
+      filterPartners();
     }
 
     function filterPartners() {
@@ -108,24 +173,59 @@
       partners.forEach(partner => {
         const matchesPace = (selectedPace === 'all' || partner.pace === selectedPace);
         const matchesDist = partner.dist <= maxDist;
-        const isVisible = matchesPace && matchesDist;
+        const matchesTime = (selectedTime === 'all' || partner.time === selectedTime);
+        const isVisible = matchesPace && matchesDist && matchesTime;
 
         if (partner.marker) {
-          if (isVisible) {
-            partner.marker.addTo(map);
-          } else {
-            map.removeLayer(partner.marker);
-          }
+          if (isVisible) partner.marker.addTo(map);
+          else map.removeLayer(partner.marker);
         }
 
         const itemElement = document.getElementById(`partner-${partner.id}`);
-        if (itemElement) {
-          itemElement.style.display = isVisible ? 'block' : 'none';
-        }
+        if (itemElement) itemElement.style.display = isVisible ? 'flex' : 'none';
       });
     }
 
+    function locateUser() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          userPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+          map.flyTo([userPos.lat, userPos.lng], 14);
+          userMarker.setLatLng([userPos.lat, userPos.lng]).bindPopup("<b>המיקום המעודכן שלך</b>").openPopup();
+        }, () => alert("לא ניתן לחלץ מיקום GPS."));
+      }
+    }
+
+    function openProfile(id) {
+      const partner = partners.find(p => p.id === id);
+      if (!partner) return;
+      document.getElementById('modalName').innerText = partner.name;
+      document.getElementById('modalDetails').innerHTML = `
+        📍 <b>אזור:</b> ${partner.location}<br>
+        🏃‍♂️ <b>קצב:</b> ${partner.pace}<br>
+        🎂 <b>גיל:</b> ${partner.age}<br>
+        🐕 <b>הולך עם כלב:</b> ${partner.dog}<br>
+        🛣️ <b>מסלול מועדף:</b> ${partner.route}
+      `;
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    function openWhatsApp() {
+      const target = selectedPartner || partners[0];
+      const text = encodeURIComponent(`היי ${target.name}, ראיתי ב-Yalla Walk שאת/ה מחפש/ת פרטנר להליכה!`);
+      window.open(`https://wa.me/${target.phone}?text=${text}`, '_blank');
+    }
+
+    function triggerSOS() {
+      alert("🚀 הקריאה שלך נשלחה לכל הפרטנרים בסביבה! מי שמחפש הליכה עכשיו יראה אותך.");
+    }
+
     function openChat() {
+      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${selectedPartner ? selectedPartner.name : 'דניאל'}`;
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('chatScreen').classList.remove('hidden');
     }
@@ -148,27 +248,18 @@
       setTimeout(() => {
         let reply = "";
         const lowerText = text.toLowerCase();
-
-        if (lowerText.includes("לא") || lowerText.includes("פחות") || lowerText.includes("עסוק")) {
-          reply = "חבל! אולי בפעם אחרת? 🙂";
-        } else if (lowerText.includes("כן") || lowerText.includes("סגור") || lowerText.includes("בטח") || lowerText.includes("מעולה")) {
-          reply = "מעולה! נפגש עוד 10 דקות 🔥";
-        } else if (lowerText.includes("איפה") || lowerText.includes("מתי")) {
-          reply = "בפארק המרכזי בעוד כ-15 דקות, מתאים?";
-        } else {
-          reply = "סגור, נשתמע קרוב לזמן היציאה!";
-        }
+        if (lowerText.includes("לא") || lowerText.includes("פחות")) reply = "חבל! אולי בפעם אחרת? 🙂";
+        else if (lowerText.includes("כן") || lowerText.includes("סגור") || lowerText.includes("מעולה")) reply = "מעולה! נפגש עוד 10 דקות 🔥";
+        else if (lowerText.includes("איפה") || lowerText.includes("מתי")) reply = "בפארק המרכזי בעוד כ-15 דקות, מתאים?";
+        else reply = "סגור, נשתמע קרוב לזמן היציאה!";
 
         chatBox.innerHTML += `<div class="msg-wrapper-partner"><span class="msg-partner">${reply}</span></div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
       }, 800);
     }
 
-    // האזנה למקש Enter בצ'אט
     document.getElementById('chatInput').addEventListener('keyup', function(e) {
-      if (e.key === 'Enter') {
-        sendMsg();
-      }
+      if (e.key === 'Enter') sendMsg();
     });
 
     renderPartners();
