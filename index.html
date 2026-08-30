@@ -31,14 +31,17 @@
     <h1>🗺️ פרטנרים בסביבה</h1>
     
     <div class="filter-box">
-      <label for="paceFilter">🏃‍♂️ סינון לפי קצב הליכה:</label>
-      <select id="paceFilter" onchange="filterByPace()">
+      <label for="paceFilter">🏃‍♂️ קצב הליכה:</label>
+      <select id="paceFilter" onchange="filterPartners()">
         <option value="all">הכל</option>
         <option value="איטי">איטי</option>
         <option value="בינוני">בינוני</option>
         <option value="מהיר">מהיר</option>
         <option value="ריצה">ריצה</option>
       </select>
+
+      <label style="margin-top: 8px;">📍 מרחק מרבי: <span id="distVal">5</span> ק"מ</label>
+      <input type="range" id="distFilter" min="1" max="10" value="5" oninput="updateDistVal(); filterPartners();">
     </div>
 
     <div id="map"></div>
@@ -53,21 +56,28 @@
     <div class="chat-box" id="chatBox">
       <div class="msg-wrapper-partner"><span class="msg-partner">היי! יוצא להליכה בקריות עוד מעט. מצטרף?</span></div>
     </div>
-    <input type="text" id="chatInput" placeholder="רשום הודעה..." onkeydown="if(event.key === 'Enter') sendMsg()" style="margin-top: 10px;">
+    <input type="text" id="chatInput" placeholder="רשום הודעה ואנטר לשליחה..." style="margin-top: 10px;">
     <button onclick="sendMsg()" style="margin-top: 6px;">שלח</button>
     <button onclick="backToMap()" style="background: #7f8c8d; margin-top: 6px;">חזרה למפה</button>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([32.835, 35.076], 13);
+    const userPos = { lat: 32.835, lng: 35.076 };
+    const map = L.map('map').setView([userPos.lat, userPos.lng], 13);
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
+    // סמן מיקום משתמש
+    L.circleMarker([userPos.lat, userPos.lng], { radius: 7, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
+      .addTo(map).bindPopup("<b>המיקום שלך</b>");
+
     const partners = [
-      { id: 1, name: "דניאל", location: "מוצקין", pace: "בינוני", lat: 32.838, lng: 35.078 },
-      { id: 2, name: "מיכל", location: "קריות", pace: "מהיר", lat: 32.832, lng: 35.075 }
+      { id: 1, name: "דניאל", location: "מוצקין", pace: "בינוני", dist: 1.2, lat: 32.838, lng: 35.078 },
+      { id: 2, name: "מיכל", location: "קריות", pace: "מהיר", dist: 3.8, lat: 32.832, lng: 35.075 },
+      { id: 3, name: "עומר", location: "ביאליק", pace: "איטי", dist: 6.5, lat: 32.820, lng: 35.085 }
     ];
 
     function renderPartners() {
@@ -77,21 +87,28 @@
       partners.forEach(partner => {
         partner.marker = L.marker([partner.lat, partner.lng])
           .addTo(map)
-          .bindPopup(`<b>${partner.name}</b> - ${partner.location}<br>קצב: ${partner.pace}`);
+          .bindPopup(`<b>${partner.name}</b> - ${partner.location}<br>קצב: ${partner.pace}<br>מרחק: ${partner.dist} ק"מ`);
 
         const item = document.createElement('div');
         item.className = 'partner-item';
         item.id = `partner-${partner.id}`;
-        item.innerHTML = `<b>${partner.name}</b> - ${partner.location} | קצב: <b>${partner.pace}</b>`;
+        item.innerHTML = `<b>${partner.name}</b> - ${partner.location} (${partner.dist} ק"מ)<br>קצב: <b>${partner.pace}</b>`;
         listContainer.appendChild(item);
       });
     }
 
-    function filterByPace() {
+    function updateDistVal() {
+      document.getElementById('distVal').innerText = document.getElementById('distFilter').value;
+    }
+
+    function filterPartners() {
       const selectedPace = document.getElementById('paceFilter').value;
+      const maxDist = parseFloat(document.getElementById('distFilter').value);
 
       partners.forEach(partner => {
-        const isVisible = (selectedPace === 'all' || partner.pace === selectedPace);
+        const matchesPace = (selectedPace === 'all' || partner.pace === selectedPace);
+        const matchesDist = partner.dist <= maxDist;
+        const isVisible = matchesPace && matchesDist;
 
         if (partner.marker) {
           if (isVisible) {
@@ -146,6 +163,13 @@
         chatBox.scrollTop = chatBox.scrollHeight;
       }, 800);
     }
+
+    // האזנה למקש Enter בצ'אט
+    document.getElementById('chatInput').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') {
+        sendMsg();
+      }
+    });
 
     renderPartners();
   </script>
