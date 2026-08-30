@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>יאללה בוא נלך! - Yalla Walk</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=5.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=6.0" />
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; }
@@ -201,7 +201,7 @@
         <span class="demo-step-badge" id="demoStepNum">שלב 1 מתוך 7</span>
         <h3 id="demoStepTitle" style="margin-top:0; color:#27ae60;"></h3>
         <p id="demoStepDesc" style="color:#dfe6e9; font-size:13px; line-height:1.5;"></p>
-        
+
         <div class="demo-actions-row">
           <button onclick="prevDemoStep()" id="btnPrevDemo" class="btn-secondary">➔ חזור</button>
           <button onclick="nextDemoStep()" style="background:#27ae60;">הבא ➔</button>
@@ -254,7 +254,7 @@
 
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=5.0"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=6.0"></script>
   <script>
     let userGender = "גבר";
     let verifiedWalks = 0;
@@ -266,7 +266,6 @@
     let map = null, userMarker = null, routesLayer = null;
     let showRoutes = false;
     let currentDemoStep = 0;
-    let currentAudioPlayer = null;
 
     const partners = [
       { 
@@ -321,23 +320,18 @@
       }
     ];
 
-    // מנגנון השמעת שמע גלובלי עוקף-Windows (עובד מובטח ב-100% בכל דפדפן ומחשב)
+    // מנגנון הקראה היברידי שעובד תמיד
     function speakText(text) {
-      if (currentAudioPlayer) {
-        currentAudioPlayer.pause();
-        currentAudioPlayer.currentTime = 0;
+      const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(cleanText);
+        msg.lang = 'he-IL';
+        msg.rate = 0.95;
+        msg.pitch = 1.2;
+        window.speechSynthesis.speak(msg);
       }
-
-      // ניקוי אימוג'ים וסימנים מיוחדים
-      const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
-      if (!cleanText) return;
-
-      const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=he&client=tw-ob`;
-      
-      currentAudioPlayer = new Audio(audioUrl);
-      currentAudioPlayer.play().catch(err => {
-        console.log("Audio playback failed or blocked:", err);
-      });
     }
 
     function startGuidedDemoTour() {
@@ -378,9 +372,7 @@
     }
 
     function closeDemoTour() {
-      if (currentAudioPlayer) {
-        currentAudioPlayer.pause();
-      }
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       document.getElementById('demoTourModal').classList.add('hidden');
       closeModal();
       backToMap();
