@@ -5,106 +5,119 @@
   <title>יאללה בוא נלך!</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+    body { font-family: Arial, sans-serif; background: #f4f6f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #fff; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 340px; text-align: center; }
     h1 { color: #2c3e50; font-size: 20px; margin-bottom: 10px; }
     p { font-size: 13px; color: #666; margin-bottom: 15px; }
     input, select { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    button { width: 100%; padding: 12px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; }
     button:hover { background: #219150; }
     .hidden { display: none; }
     #map { height: 180px; width: 100%; border-radius: 8px; margin-top: 10px; }
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 8px 0; text-align: right; font-size: 13px; border-right: 4px solid #27ae60; }
-    
-    /* עיצוב חלון הצ'אט */
-    .chat-box { height: 150px; border: 1px solid #eee; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; margin-bottom: 10px; }
-    .msg-user { background: #dcf8c6; padding: 6px 10px; border-radius: 8px; margin: 4px 0; display: inline-block; clear: both; float: right; }
-    .msg-partner { background: #fff; border: 1px solid #ddd; padding: 6px 10px; border-radius: 8px; margin: 4px 0; display: inline-block; clear: both; float: left; }
+    .filter-box { background: #eef9f1; padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: right; font-size: 13px; }
+    .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-bottom: 4px; }
+    .chat-box { height: 150px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; }
+    .msg-user { background: #dcf8c6; padding: 6px 10px; border-radius: 8px; margin: 4px 0; display: inline-block; }
+    .msg-partner { background: #fff; padding: 6px 10px; border-radius: 8px; margin: 4px 0; display: inline-block; border: 1px solid #eee; }
   </style>
 </head>
 <body>
 
-  <!-- מסך התחברות -->
-  <div id="authScreen" class="card">
-    <h1>🚶‍♂️ יאללה בוא נלך!</h1>
-    <p>מוצאים פרטנרים להליכה</p>
-    <input type="email" id="email" value="weingram.ziv@gmail.com">
-    <input type="password" id="password" value="12345678">
-    <div style="margin:8px 0;text-align:right;font-size:12px">
-      <input type="checkbox" id="ageCheck" checked> אני 18+
-    </div>
-    <button onclick="handleAuth()">התחבר / הרשם</button>
-    <div id="msg" style="color:red;font-size:12px;margin-top:8px"></div>
-  </div>
-
-  <!-- מסך פרופיל -->
-  <div id="profileScreen" class="card hidden">
-    <h1>👤 פרופיל הליכה</h1>
-    <input type="text" id="fullName" placeholder="שם מלא" value="זיו">
-    <input type="text" id="city" placeholder="עיר" value="מוצקין">
-    <select id="pace">
-      <option value="" disabled>קצב הליכה</option>
-      <option value="איטי">איטי</option>
-      <option value="בינוני" selected>בינוני</option>
-      <option value="מהיר">מהיר</option>
-    </select>
-    <button onclick="saveProfile()">שמור פרופיל 🚀</button>
-  </div>
-
-  <!-- מסך מפה ופרטנרים -->
-  <div id="mainScreen" class="card hidden">
+  <div class="card" id="mainScreen">
     <h1>🗺️ פרטנרים בסביבה</h1>
-    <div id="map"></div>
-    <div style="margin-top: 10px;">
-      <div class="partner-item"><b>דניאל</b> - מוצקין | קצב: בינוני</div>
-      <div class="partner-item"><b>מיכל</b> - קריות | קצב: מהיר</div>
+    
+    <!-- סרגל סינון לפי קצב -->
+    <div class="filter-box">
+      <label for="paceFilter">🏃‍♂️ סינון לפי קצב הליכה:</label>
+      <select id="paceFilter" onchange="filterByPace()">
+        <option value="all">הכל</option>
+        <option value="איטי">איטי</option>
+        <option value="בינוני">בינוני</option>
+        <option value="מהיר">מהיר</option>
+        <option value="ריצה">ריצה</option>
+      </select>
     </div>
-    <button onclick="openChat()">צור קשר להליכה 💬</button>
+
+    <!-- מפה -->
+    <div id="map"></div>
+
+    <!-- רשימת פרטנרים -->
+    <div id="partnersList" style="margin-top: 10px;"></div>
+
+    <button style="margin-top: 12px;" onclick="openChat()">💬 צור קשר להליכה</button>
   </div>
 
   <!-- מסך צ'אט -->
-  <div id="chatScreen" class="card hidden">
-    <h1>💬 צ'אט עם דניאל</h1>
+  <div class="card hidden" id="chatScreen">
+    <h1>💬 שיחה עם דניאל</h1>
     <div class="chat-box" id="chatBox">
-      <div class="msg-partner">היי זיו! יוצא להליכה במוצקין?</div>
+      <div class="msg-partner">היי! יוצא להליכה בקריות עוד מעט. מצטרף?</div>
     </div>
-    <input type="text" id="chatInput" placeholder="רשום הודעה...">
-    <button onclick="sendMsg()">שלח 📤</button>
-    <button onclick="backToMap()" style="background:#7f8c8d; margin-top:5px;">חזרה למפה 🗺️</button>
+    <input type="text" id="chatInput" placeholder="רשום הודעה..." style="margin-top: 10px;">
+    <button onclick="sendMsg()" style="margin-top: 6px;">שלח</button>
+    <button onclick="backToMap()" style="background: #7f8c8d; margin-top: 6px;">חזרה למפה</button>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    function handleAuth() {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('password').value;
-      const isOver18 = document.getElementById('ageCheck').checked;
-      const msg = document.getElementById('msg');
+    // יצירת המפה
+    const map = L.map('map').setView([32.835, 35.076], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-      if (!email || !pass) { msg.innerText = 'נא להזין אימייל וסיסמה'; return; }
-      if (!isOver18) { msg.innerText = 'מיועד לגילאי 18+ בלבד'; return; }
+    // נתוני הפרטנרים
+    const partners = [
+      { id: 1, name: "דניאל", location: "מוצקין", pace: "בינוני", lat: 32.838, lng: 35.078 },
+      { id: 2, name: "מיכל", location: "קריות", pace: "מהיר", lat: 32.832, lng: 35.075 }
+    ];
 
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('profileScreen').classList.remove('hidden');
+    // הוספת הסמנים למפה והרשימה
+    function renderPartners() {
+      const listContainer = document.getElementById('partnersList');
+      listContainer.innerHTML = '';
+
+      partners.forEach(partner => {
+        // יצירת סמן במפה
+        partner.marker = L.marker([partner.lat, partner.lng])
+          .addTo(map)
+          .bindPopup(`<b>${partner.name}</b> - ${partner.location}<br>קצב: ${partner.pace}`);
+
+        // יצירת אלמנט ברשימה
+        const item = document.createElement('div');
+        item.className = 'partner-item';
+        item.id = `partner-${partner.id}`;
+        item.innerHTML = `<b>${partner.name}</b> - ${partner.location} | קצב: <b>${partner.pace}</b>`;
+        listContainer.appendChild(item);
+      });
     }
 
-    function saveProfile() {
-      const name = document.getElementById('fullName').value;
-      const city = document.getElementById('city').value;
-      const pace = document.getElementById('pace').value;
+    // פונקציית הסינון
+    function filterByPace() {
+      const selectedPace = document.getElementById('paceFilter').value;
 
-      if (!name || !city || !pace) { alert('נא למלא את כל השדות'); return; }
+      partners.forEach(partner => {
+        const isVisible = (selectedPace === 'all' || partner.pace === selectedPace);
 
-      document.getElementById('profileScreen').classList.add('hidden');
-      document.getElementById('mainScreen').classList.remove('hidden');
+        // עדכון הסמנים במפה
+        if (partner.marker) {
+          if (isVisible) {
+            partner.marker.addTo(map);
+          } else {
+            map.removeLayer(partner.marker);
+          }
+        }
 
-      setTimeout(() => {
-        const map = L.map('map').setView([32.8333, 35.0833], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        L.marker([32.8333, 35.0833]).addTo(map).bindPopup('זיו - מוצקין').openPopup();
-      }, 100);
+        // עדכון ברשימה
+        const itemElement = document.getElementById(`partner-${partner.id}`);
+        if (itemElement) {
+          itemElement.style.display = isVisible ? 'block' : 'none';
+        }
+      });
     }
 
+    // ניהול צ'אט
     function openChat() {
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('chatScreen').classList.remove('hidden');
@@ -121,15 +134,17 @@
       if (!text) return;
 
       const chatBox = document.getElementById('chatBox');
-      chatBox.innerHTML += `<div class="msg-user">${text}</div>`;
+      chatBox.innerHTML += `<div><span class="msg-user">${text}</span></div>`;
       input.value = '';
 
       setTimeout(() => {
-        chatBox.innerHTML += `<div class="msg-partner">מעולה! נפגש עוד 10 דקות? 🔥</div>`;
+        chatBox.innerHTML += `<div><span class="msg-partner">מעולה! נפגש עוד 10 דקות 🔥</span></div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
       }, 1000);
     }
-  </script>
 
+    // הפעלה ראשונית
+    renderPartners();
+  </script>
 </body>
 </html>
