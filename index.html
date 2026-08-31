@@ -415,13 +415,13 @@
     let partners = [
       { 
         id: 1, name: "דניאל", gender: "גבר", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", 
-        phone: "972500000000", age: 28, dog: "כן", route: "פארק", pref: "פתוח לשיחה 🗣️", rating: "4.9 ⭐",
+        phone: "972501234567", age: 28, dog: "כן", route: "פארק", pref: "פתוח לשיחה 🗣️", rating: "4.9 ⭐",
         reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מדויק בזמנים ואדיב מאוד'"],
         lat: 32.838, lng: 35.078, activeNow: true 
       },
       { 
         id: 2, name: "מיכל", gender: "אישה", location: "קריות", pace: "מהיר", dist: 3.8, time: "הערב", 
-        phone: "972500000001", age: 34, dog: "לא", route: "כביש/מדרכה", pref: "אוהבת פודקאסטים 🎧", rating: "5.0 ⭐",
+        phone: "972501234568", age: 34, dog: "לא", route: "כביש/מדרכה", pref: "אוהבת פודקאסטים 🎧", rating: "5.0 ⭐",
         reviews: ["'קצב מהיר ומאתגר, מומלצת מאוד!'"],
         lat: 32.832, lng: 35.075, activeNow: false 
       }
@@ -540,7 +540,6 @@
       renderPartners();
       renderGroups();
 
-      // הדגמת התרעה בלייב לאחר 3 שניות
       setTimeout(() => {
         document.getElementById('liveAlertBanner').classList.remove('hidden');
       }, 3000);
@@ -597,7 +596,6 @@
       const maxDistVal = parseFloat(document.getElementById('distFilter').value);
 
       partners.forEach(partner => {
-        // סינונים
         if (paceFilterVal !== 'all' && partner.pace !== paceFilterVal) return;
         if (dogFilterVal !== 'all' && partner.dog !== dogFilterVal) return;
         if (partner.dist > maxDistVal) return;
