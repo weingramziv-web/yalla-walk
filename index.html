@@ -10,19 +10,19 @@
 
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; }
+    html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; direction: rtl; text-align: right; }
     
     .app-container { width: 100%; max-width: 500px; background: #fff; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding-bottom: 65px; }
-    .screen { padding: 15px; display: flex; flex-direction: column; flex: 1; }
+    .screen { padding: 15px; display: flex; flex-direction: column; flex: 1; text-align: right; }
     
-    .screen-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .screen-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; direction: rtl; }
     .btn-back-header { background: #7f8c8d; color: #fff; border: none; border-radius: 6px; padding: 8px 14px; font-size: 13px; cursor: pointer; width: auto; margin: 0; }
     
     h1 { color: #2c3e50; font-size: 20px; margin: 0; text-align: center; flex: 1; }
-    p { font-size: 13px; color: #555; line-height: 1.4; margin: 0 0 10px 0; }
+    p { font-size: 13px; color: #555; line-height: 1.4; margin: 0 0 10px 0; text-align: right; }
     
-    input, select, textarea { width: 100%; padding: 10px; margin: 4px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; }
-    button { width: 100%; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 6px; }
+    input, select, textarea { width: 100%; padding: 10px; margin: 4px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; text-align: right; direction: rtl; }
+    button { width: 100%; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 6px; text-align: center; }
     button:active { opacity: 0.9; }
     .btn-google { background: #4285F4; color: #fff; margin-top: 8px; }
     .btn-secondary { background: #7f8c8d; }
@@ -34,36 +34,36 @@
 
     #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; background: #e0e0e0; }
     
-    .filter-box { background: #eef9f1; padding: 10px; border-radius: 10px; font-size: 12px; }
+    .filter-box { background: #eef9f1; padding: 10px; border-radius: 10px; font-size: 12px; text-align: right; }
     .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 4px; }
-    .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+    .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; direction: rtl; }
 
     .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
-    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
     .partner-item.active-now { border-right-color: #e67e22; background: #fef9e7; }
     
     .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
 
-    .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
-    .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; max-width: 80%; align-self: flex-start; }
-    .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; border: 1px solid #eee; max-width: 80%; align-self: flex-end; }
+    .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
+    .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; max-width: 80%; align-self: flex-start; text-align: right; }
+    .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; border: 1px solid #eee; max-width: 80%; align-self: flex-end; text-align: right; }
 
-    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 8px 0; z-index: 999; }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 8px 0; z-index: 999; direction: rtl; }
     .nav-btn { background: none; color: #7f8c8d; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0; margin: 0; width: 25%; }
     .nav-btn.active { color: #27ae60; font-weight: bold; }
 
     .stat-card { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: center; }
     .stat-val { font-size: 22px; font-weight: bold; color: #27ae60; }
 
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; direction: rtl; }
     .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 85vh; overflow-y: auto; }
     
-    .alert-banner { background: #e74c3c; color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-    .rating-stars { display: flex; gap: 8px; justify-content: center; font-size: 24px; margin: 10px 0; cursor: pointer; }
+    .alert-banner { background: #e74c3c; color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
+    .rating-stars { display: flex; gap: 8px; justify-content: center; font-size: 24px; margin: 10px 0; cursor: pointer; direction: ltr; }
     .rating-stars span { color: #ccc; }
     .rating-stars span.active { color: #f1c40f; }
   </style>
@@ -76,7 +76,7 @@
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 20px;">
         <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ יאללה בוא נלך!</h1>
-        <p style="font-size: 14px; font-weight: bold; color: #2c3e50;">מוצאים פרטנרים להליכה בסביבה בקלות ובביטחון</p>
+        <p style="font-size: 14px; font-weight: bold; color: #2c3e50; text-align: center;">מוצאים פרטנרים להליכה בסביבה בקלות ובביטחון</p>
       </div>
 
       <div style="background: #eef9f1; padding: 12px; border-radius: 12px; margin: 15px 0; text-align: right;">
@@ -97,7 +97,6 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <!-- התרעה בלייב -->
       <div class="alert-banner hidden" id="liveAlertBanner">
         <span>🔔 <b>דניאל</b> יצא לצעידה בסביבה שלך!</span>
         <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="autoOpenPartnerChat(1)">הצטרף בצ'אט</button>
@@ -117,7 +116,6 @@
 
       <button class="btn-sos" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
 
-      <!-- סינונים -->
       <div class="filter-box" style="margin-top:8px;">
         <div class="filter-row">
           <div style="flex:1;">
@@ -275,7 +273,7 @@
         <div id="modalReviews" style="font-size:12px; color:#555; margin-top:6px;"></div>
         
         <div style="margin-top:12px; display:flex; gap:6px;">
-          <button onclick="openChatFromModal()" style="flex:1;">💬 צור קשר בצ'אט</button>
+          <button id="modalChatBtn" onclick="openChatFromModal()" style="flex:1;">💬 צור קשר בצ'אט</button>
           <button onclick="closeModal()" class="btn-secondary" style="width:auto;">סגור</button>
         </div>
       </div>
@@ -321,7 +319,6 @@
     const auth = getAuth(app);
     window.firebaseAuth = auth;
 
-    // קליטת תוצאת התחברות Google לאחר העברה (Redirect)
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
         if (result.user.displayName) {
@@ -337,6 +334,9 @@
           document.getElementById('authUserName').innerText = "אורח (זמני)";
         } else if (user.displayName) {
           document.getElementById('authUserName').innerText = user.displayName;
+          if (!document.getElementById('welcomeScreen').classList.contains('hidden')) {
+            window.startApp();
+          }
         }
       }
     });
@@ -433,11 +433,11 @@
         userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 8, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.9 })
           .addTo(map).bindPopup("<b>המיקום שלך</b>");
 
-        safeRoutesGroup = L.layerGroup([
-          L.polyline([[32.835, 35.076], [32.838, 35.078], [32.842, 35.085]], { color: '#2980b9', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול פארק מואר"),
-          L.polyline([[32.831, 35.071], [32.834, 35.074], [32.837, 35.076]], { color: '#8e44ad', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול טיילת מרכזית"),
-          L.polyline([[32.839, 35.073], [32.843, 35.075], [32.845, 35.079]], { color: '#27ae60', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול היקפי מאובטח")
-        ]);
+        const line1 = L.polyline([[32.835, 35.076], [32.838, 35.078], [32.842, 35.085]], { color: '#2980b9', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול פארק מואר");
+        const line2 = L.polyline([[32.831, 35.071], [32.834, 35.074], [32.837, 35.076]], { color: '#8e44ad', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול טיילת מרכזית");
+        const line3 = L.polyline([[32.839, 35.073], [32.843, 35.075], [32.845, 35.079]], { color: '#27ae60', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול היקפי מאובטח");
+
+        safeRoutesGroup = L.featureGroup([line1, line2, line3]);
 
         map.invalidateSize();
       } catch (e) {
@@ -449,6 +449,7 @@
       showRoutes = !showRoutes;
       if (showRoutes && map && safeRoutesGroup) { 
         safeRoutesGroup.addTo(map); 
+        map.fitBounds(safeRoutesGroup.getBounds(), { padding: [20, 20] });
         alert("🛣️ מוצגים 3 מסלולי הליכה מוארים ובטוחים על המפה!"); 
       } else if (map && safeRoutesGroup) { 
         map.removeLayer(safeRoutesGroup); 
@@ -557,7 +558,9 @@
     function openChatFromModal() {
       closeModal();
       if (selectedPartner) {
-        autoOpenPartnerChat(selectedPartner.id);
+        const isOppositeGender = selectedPartner.gender !== userGender;
+        const isLocked = isOppositeGender && verifiedWalks < 3;
+        selectPartnerAndOpenChat(selectedPartner, isLocked);
       }
     }
 
@@ -697,6 +700,14 @@
 
       setTimeout(() => {
         let reply = "מעולה! נפגש בנקודת המפגש. לחץ על 'צעדנו יחד' בסיום 🔥";
+        const lower = text.toLowerCase();
+        
+        if (lower.includes("לא") || lower.includes("ביטול") || lower.includes("עסוק")) {
+          reply = "חבל! אולי בפעם אחרת, תהיה איתי בקשר מתי שתוכל 🙂";
+        } else if (lower.includes("כן") || lower.includes("בטח") || lower.includes("סגור") || lower.includes("יאללה")) {
+          reply = "סגור, אני יוצא לדרך לכיוון פארק מוצקין! ניפגש עוד מעט 🔥";
+        }
+
         chatBox.innerHTML += `<div class="msg-partner">${reply}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
       }, 800);
@@ -730,12 +741,26 @@
       const partner = partners.find(p => p.id === id);
       if (!partner) return;
       selectedPartner = partner;
+      
+      const isOppositeGender = partner.gender !== userGender;
+      const isLocked = isOppositeGender && verifiedWalks < 3;
+      const modalChatBtn = document.getElementById('modalChatBtn');
+      
+      if (isLocked) {
+        modalChatBtn.innerText = "🔒 נדרש אימות ליצירת קשר";
+        modalChatBtn.style.background = "#e74c3c";
+      } else {
+        modalChatBtn.innerText = "💬 צור קשר בצ'אט";
+        modalChatBtn.style.background = "#27ae60";
+      }
+
       document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
       document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating}`;
       document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}<br>📲 WhatsApp: ${partner.allowWhatsApp ? 'מאושר' : 'חסום'}<br>🎧 העדפה: ${partner.pref}`;
       document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>• ${r}</div>`).join('');
       document.getElementById('profileModal').classList.remove('hidden');
     }
+
     function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
     function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
 
