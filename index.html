@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>יאללה בוא נלך! - Yalla Walk</title>
+
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=6.0" />
+
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; }
@@ -21,6 +24,7 @@
     input, select, textarea { width: 100%; padding: 10px; margin: 4px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; }
     button { width: 100%; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 6px; }
     button:active { opacity: 0.9; }
+    .btn-google { background: #4285F4; color: #fff; margin-top: 8px; }
     .btn-secondary { background: #7f8c8d; }
     .btn-whatsapp { background: #25D366; }
     .btn-sos { background: #e74c3c; }
@@ -38,6 +42,8 @@
     
     .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+
+    .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 4px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; display: flex; justify-content: space-between; align-items: center; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
@@ -71,6 +77,7 @@
 
   <div class="app-container">
 
+    <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 20px;">
         <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ יאללה בוא נלך!</h1>
@@ -88,10 +95,12 @@
           <option value="גבר">גבר</option>
           <option value="אישה">אישה</option>
         </select>
-        <button onclick="startApp()" style="margin-top: 10px; font-size: 16px;">קדימה, נכנסים! 🚀</button>
+        <button onclick="startAppAsGuest()" style="margin-top: 10px; font-size: 16px;">כניסה מהירה כאורח 🚀</button>
+        <button onclick="loginWithGoogle()" class="btn-google">🌐 התחברות מאובטחת עם Google</button>
       </div>
     </div>
 
+    <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
       <button class="btn-demo" onclick="startGuidedDemoTour()">🎙️ הפעל הדמיה מודרכת (Demo Tour)</button>
 
@@ -99,10 +108,15 @@
         <h1>🗺️ פרטנרים בסביבה</h1>
       </div>
 
+      <div class="user-auth-badge" id="userAuthBadge">
+        👤 מחובר כ: <b id="authUserName">אורח</b>
+      </div>
+
       <div class="verification-badge" id="verificationBadge">
         ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
       </div>
 
+      <!-- סינונים -->
       <div class="filter-box">
         <label for="paceFilter">🏃‍♂️ קצב הליכה:</label>
         <select id="paceFilter" onchange="filterPartners()">
@@ -138,6 +152,7 @@
       <button class="btn-sos" onclick="triggerSOS()">📢 קריאה להליכה עכשיו!</button>
     </div>
 
+    <!-- מסך צ'אט -->
     <div class="screen hidden" id="chatScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="backToMap()">➔ חזרה למפה</button>
@@ -153,6 +168,7 @@
       <button style="background:#e67e22;" onclick="startActiveWalk()">🏃‍♂️ סגירת הליכה ויציאה לדרך!</button>
     </div>
 
+    <!-- מסך הליכה פעילה -->
     <div class="screen hidden" id="activeWalkScreen" style="text-align:center;">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('chatScreen')">➔ ביטול וחזרה לצ'אט</button>
@@ -174,6 +190,7 @@
       <button class="btn-sos" style="margin-top:auto; font-size:16px; padding:15px;" onclick="finishWalk()">🏁 סיום הליכה ודירוג</button>
     </div>
 
+    <!-- מסך אזור אישי -->
     <div class="screen hidden" id="profileScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="backToMap()">➔ חזרה למפה</button>
@@ -196,6 +213,7 @@
       </div>
     </div>
 
+    <!-- פופ-אפ הדמיה מודרכת -->
     <div class="modal hidden" id="demoTourModal">
       <div class="modal-content demo-modal-content">
         <span class="demo-step-badge" id="demoStepNum">שלב 1 מתוך 7</span>
@@ -210,6 +228,7 @@
       </div>
     </div>
 
+    <!-- פופ-אפ דירוג אנונימי -->
     <div class="modal hidden" id="ratingModal">
       <div class="modal-content" style="text-align:center;">
         <h2 style="color:#27ae60; margin-top:0;">🎉 הליכה הושלמה בהצלחה!</h2>
@@ -228,6 +247,7 @@
       </div>
     </div>
 
+    <!-- פופ-אפ פרופיל מורחב -->
     <div class="modal hidden" id="profileModal">
       <div class="modal-content">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -243,6 +263,7 @@
       </div>
     </div>
 
+    <!-- ניווט תחתון -->
     <div class="bottom-nav hidden" id="bottomNav">
       <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
         <span style="font-size:18px;">🗺️</span> ראשי
@@ -254,7 +275,58 @@
 
   </div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=6.0"></script>
+
+  <!-- Firebase v10 SDK via Modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAx_rBL-U1XxL59cXW-wBO26aUXyfg-Lsw",
+      authDomain: "yalla-walk-app-9bc5c.firebaseapp.com",
+      projectId: "yalla-walk-app-9bc5c",
+      storageBucket: "yalla-walk-app-9bc5c.firebasestorage.app",
+      messagingSenderId: "1033889831016",
+      appId: "1:1033889831016:web:f25be682404749a5dc03dd",
+      measurementId: "G-YSVR0XV9S9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    window.firebaseAuth = auth;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        if (user.isAnonymous) {
+          document.getElementById('authUserName').innerText = "אורח (זמני)";
+        } else if (user.displayName) {
+          document.getElementById('authUserName').innerText = user.displayName;
+        }
+      }
+    });
+
+    window.startAppAsGuest = function() {
+      signInAnonymously(auth).then(() => {
+        window.startApp();
+      }).catch((err) => {
+        console.log("Guest Auth Fallback:", err);
+        window.startApp();
+      });
+    };
+
+    window.loginWithGoogle = function() {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider).then((result) => {
+        alert("👋 שלום " + result.user.displayName + ", התחברת בהצלחה!");
+        window.startApp();
+      }).catch((err) => {
+        alert("התחברות Google בוטלה או נכשלה: " + err.message);
+      });
+    };
+  </script>
+
   <script>
     let userGender = "גבר";
     let verifiedWalks = 0;
@@ -320,12 +392,10 @@
       }
     ];
 
-    // מנגנון הקראה היברידי שעובד תמיד
     function speakText(text) {
-      const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
-
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
+        const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
         const msg = new SpeechSynthesisUtterance(cleanText);
         msg.lang = 'he-IL';
         msg.rate = 0.95;
