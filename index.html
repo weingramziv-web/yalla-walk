@@ -12,7 +12,7 @@
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; }
     
-    .app-container { width: 100%; max-width: 500px; background: #fff; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding-bottom: 60px; }
+    .app-container { width: 100%; max-width: 500px; background: #fff; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding-bottom: 65px; }
     .screen { padding: 15px; display: flex; flex-direction: column; flex: 1; }
     
     .screen-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -27,6 +27,7 @@
     .btn-google { background: #4285F4; color: #fff; margin-top: 8px; }
     .btn-secondary { background: #7f8c8d; }
     .btn-whatsapp { background: #25D366; }
+    .btn-fav { background: #f1c40f; color: #2c3e50; }
     .btn-sos { background: #e74c3c; animation: pulse 2s infinite; }
     .btn-demo { background: #8e44ad; color: #fff; font-size: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(142, 68, 173, 0.4); }
     .btn-group { background: #2980b9; }
@@ -38,7 +39,7 @@
       100% { transform: scale(1); }
     }
 
-    #map { height: 170px; width: 100%; border-radius: 12px; margin: 6px 0; background: #e0e0e0; }
+    #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; background: #e0e0e0; }
     
     .filter-box { background: #eef9f1; padding: 10px; border-radius: 10px; font-size: 12px; }
     .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 4px; }
@@ -54,14 +55,14 @@
 
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
-    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; transition: background 0.2s; }
+    .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; }
     .partner-item:active { background: #e8f8f5; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
     .partner-item.active-now { border-right-color: #e67e22; background: #fef9e7; }
     
     .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
 
-    .chat-box { flex: 1; min-height: 180px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
+    .chat-box { flex: 1; min-height: 220px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; display: inline-block; max-width: 80%; align-self: flex-start; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; display: inline-block; border: 1px solid #eee; max-width: 80%; align-self: flex-end; }
 
@@ -175,13 +176,13 @@
       </div>
 
       <div style="display:flex; gap:5px; margin-top:4px;">
-        <button class="btn-secondary" style="padding: 6px; font-size: 11px;" onclick="locateUser()">📍 אתר אותי</button>
+        <button class="btn-secondary" style="padding: 6px; font-size: 11px;" onclick="locateUser()">📍 אתר אותי במפה</button>
         <button class="btn-secondary" style="padding: 6px; font-size: 11px; background:#8e44ad;" onclick="toggleRoutes()">🛣️ מסלולים בטוחים</button>
       </div>
 
       <div id="map"></div>
       
-      <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#2c3e50;">👇 לחץ על פרטנר כדי ליצור קשר בצ'אט או בוואטסאפ:</p>
+      <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#2c3e50;">👇 לחץ על פרטנר כדי להתחיל שיחה:</p>
       <div id="partnersList"></div>
     </div>
 
@@ -199,6 +200,17 @@
       <div id="groupsList" style="margin-top:10px;"></div>
     </div>
 
+    <!-- מסך מועדפים (Favorites) -->
+    <div class="screen hidden" id="favScreen">
+      <div class="screen-header">
+        <button class="btn-back-header" onclick="backToMap()">➔ חזרה למפה</button>
+        <h1>⭐ המועדפים שלי</h1>
+      </div>
+
+      <p>פרטנרים וקבוצות ששמרת לגישה מהירה:</p>
+      <div id="favList"></div>
+    </div>
+
     <!-- מסך צ'אט אישי -->
     <div class="screen hidden" id="chatScreen">
       <div class="screen-header">
@@ -209,36 +221,19 @@
       <div class="chat-box" id="chatBox">
         <div class="msg-partner">היי! ראיתי שאתה קרוב, יוצאים להליכה?</div>
       </div>
-      <input type="text" id="chatInput" placeholder="רשום הודעה (אנטר לשליחה)..." style="margin-top: 8px;">
-      <button onclick="sendMsg()">שלח הודעה</button>
       
+      <div style="display:flex; gap:4px; margin-top:8px;">
+        <input type="text" id="chatInput" placeholder="רשום הודעה (לחץ Enter לשליחה)..." style="margin:0;">
+      </div>
+
       <!-- כפתור WhatsApp מופיע רק אם הפרטנר אישר -->
-      <button class="btn-whatsapp hidden" id="btnChatWhatsApp" onclick="openWhatsApp()">📱 מעבר ל-WhatsApp ישיר</button>
+      <button class="btn-whatsapp hidden" id="btnChatWhatsApp" onclick="openWhatsApp()">📱 המשך התכתבות ב-WhatsApp</button>
       <div id="waPrivacyNotice" style="font-size:11px; color:#7f8c8d; text-align:center; margin-top:4px;" class="hidden">🔒 המשתמש מעדיף לתקשר בצ'אט הפנימי בלבד</div>
 
-      <button style="background:#e67e22;" onclick="startActiveWalk()">🏃‍♂️ סגירת הליכה ויציאה לדרך!</button>
-    </div>
-
-    <!-- מסך הליכה פעילה -->
-    <div class="screen hidden" id="activeWalkScreen" style="text-align:center;">
-      <div class="screen-header">
-        <button class="btn-back-header" onclick="switchTab('chatScreen')">➔ ביטול וחזרה לצ'אט</button>
-        <h1 style="color:#27ae60;">🚶‍♂️ הליכה בלייב</h1>
+      <div style="display:flex; gap:6px; margin-top:6px;">
+        <button class="btn-fav" style="flex:1;" onclick="toggleCurrentPartnerFav()">⭐ הוסף לפייבוריטים</button>
+        <button style="background:#e67e22; flex:1;" onclick="recordWalkWithPartner()">🏃‍♂️ צעדנו יחד! (תיעוד)</button>
       </div>
-
-      <p>אתה כרגע בצדה של הליכה עם <b id="activePartnerName">דניאל</b>!</p>
-      
-      <div class="stat-card" style="margin-top:20px;">
-        <div style="font-size:14px; color:#7f8c8d;">זמן הליכה</div>
-        <div class="stat-val" id="walkTimer">00:15</div>
-      </div>
-
-      <div class="stat-card">
-        <div style="font-size:14px; color:#7f8c8d;">מרחק שנצבר</div>
-        <div class="stat-val" id="walkKm">1.2 ק"מ</div>
-      </div>
-
-      <button class="btn-sos" style="margin-top:auto; font-size:16px; padding:15px;" onclick="finishWalk()">🏁 סיום הליכה ודירוג</button>
     </div>
 
     <!-- מסך אזור אישי -->
@@ -315,7 +310,7 @@
         </div>
 
         <textarea id="reviewText" placeholder="רשום משוב חיובי/ענייני להליכה..." rows="3"></textarea>
-        <button onclick="submitRating()">שלח דירוג אנונימי וסים</button>
+        <button onclick="submitRating()">שלח דירוג אנונימי וספק</button>
       </div>
     </div>
 
@@ -346,6 +341,9 @@
       </button>
       <button class="nav-btn" id="navGroups" onclick="switchTab('groupsScreen')">
         <span style="font-size:18px;">👥</span> קבוצות
+      </button>
+      <button class="nav-btn" id="navFav" onclick="switchTab('favScreen')">
+        <span style="font-size:18px;">⭐</span> מועדפים
       </button>
       <button class="nav-btn" id="navProfile" onclick="switchTab('profileScreen')">
         <span style="font-size:18px;">📊</span> פרופיל
@@ -430,7 +428,8 @@
     let showRoutes = false;
     let currentDemoStep = 0;
 
-    // הגדרת פרטיות WhatsApp לכל פרטנר (allowWhatsApp: true/false)
+    let favoritesList = []; // רשימת מועדפים
+
     let partners = [
       { 
         id: 1, name: "דניאל", gender: "גבר", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", 
@@ -477,9 +476,9 @@
         action: () => { closeModal(); autoOpenPartnerChat(1); }
       },
       {
-        title: "צעד שישי: הליכה פעילה בלייב",
-        desc: "עכשיו נלחץ על יציאה לדרך! האפליקציה מודדת בלייב את זמן הצעידה ואת המרחק שנצבר.",
-        action: () => startActiveWalk()
+        title: "צעד שישי: תיעוד הליכה משותפת",
+        desc: "עכשיו נלחץ על צעדנו יחד! האפליקציה תשמור את הצעידה ותעדכן את הסטטוס שלך.",
+        action: () => recordWalkWithPartner()
       },
       {
         title: "צעד שביעי: סיום הליכה ודירוג אנונימי",
@@ -558,6 +557,7 @@
       updateVerificationUI();
       renderPartners();
       renderGroups();
+      renderFavorites();
 
       setTimeout(() => {
         document.getElementById('liveAlertBanner').classList.remove('hidden');
@@ -586,6 +586,22 @@
         map.invalidateSize();
       } catch (e) {
         console.log("Map init safe-mode:", e);
+      }
+    }
+
+    function locateUser() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          userPos.lat = pos.coords.latitude;
+          userPos.lng = pos.coords.longitude;
+          if (map) {
+            map.flyTo([userPos.lat, userPos.lng], 15);
+            if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
+          }
+          alert("📍 מיקומך עודכן בהצלחה במפה!");
+        }, () => {
+          alert("📍 לא ניתן להשיג את המיקום. וודא שה-GPS מופעל בדפדפן.");
+        });
       }
     }
 
@@ -659,7 +675,6 @@
 
       document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
       
-      // בדיקת הרשאת WhatsApp דו-צדדית
       const btnWa = document.getElementById('btnChatWhatsApp');
       const waNotice = document.getElementById('waPrivacyNotice');
       
@@ -688,6 +703,46 @@
       }
       const text = encodeURIComponent(`היי ${selectedPartner.name}, ראיתי ב-Yalla Walk שאת/ה בסביבה, מעוניין/ת לצאת להליכה?`);
       window.open(`https://wa.me/${selectedPartner.phone}?text=${text}`, '_blank');
+    }
+
+    function toggleCurrentPartnerFav() {
+      if (!selectedPartner) return;
+      const idx = favoritesList.findIndex(f => f.id === selectedPartner.id);
+      if (idx > -1) {
+        favoritesList.splice(idx, 1);
+        alert(`❌ ${selectedPartner.name} הוסר/ה מרשימת המועדפים.`);
+      } else {
+        favoritesList.push(selectedPartner);
+        alert(`⭐ ${selectedPartner.name} נווספ/ה בהצלחה לפייבוריטים!`);
+      }
+      renderFavorites();
+    }
+
+    function renderFavorites() {
+      const container = document.getElementById('favList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (favoritesList.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#7f8c8d; margin-top:20px;">טרם הוספת מועדפים. לחץ על ⭐ בשיחה עם פרטנר כדי לשמור אותו כאן!</p>`;
+        return;
+      }
+
+      favoritesList.forEach(fav => {
+        container.innerHTML += `
+          <div class="partner-item" onclick="autoOpenPartnerChat(${fav.id})">
+            <div>
+              <b>⭐ ${fav.name}</b> (${fav.gender})<br>
+              <span style="color:#666;">אזור: ${fav.location} | קצב: ${fav.pace}</span>
+            </div>
+            <button style="width:auto; padding:6px;" onclick="event.stopPropagation(); autoOpenPartnerChat(${fav.id})">💬 צ'אט</button>
+          </div>
+        `;
+      });
+    }
+
+    function recordWalkWithPartner() {
+      finishWalk();
     }
 
     function renderGroups() {
@@ -736,14 +791,8 @@
       alert(isChecked ? "🔓 אפשרת למשתמשים לפנות אליך ב-WhatsApp" : "🔒 הגדרת שמשתמשים יוכלו לפנות אליך בצ'אט הפנימי בלבד");
     }
 
-    function startActiveWalk() {
-      document.getElementById('chatScreen').classList.add('hidden');
-      document.getElementById('activeWalkScreen').classList.remove('hidden');
-      document.getElementById('activePartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
-    }
-
     function finishWalk() {
-      document.getElementById('activeWalkScreen').classList.add('hidden');
+      document.getElementById('chatScreen').classList.add('hidden');
       document.getElementById('ratedPartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
       document.getElementById('ratingModal').classList.remove('hidden');
       setStars(5);
@@ -786,7 +835,7 @@
       chatBox.scrollTop = chatBox.scrollHeight;
 
       setTimeout(() => {
-        let reply = "מעולה! נפגש בנקודת המפגש. לחץ על 'סגירת הליכה' ונצא לדרך 🔥";
+        let reply = "מעולה! נפגש בנקודת המפגש. לחץ על 'צעדנו יחד' בסיום 🔥";
         chatBox.innerHTML += `<div class="msg-partner">${reply}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
       }, 800);
@@ -795,6 +844,7 @@
     function switchTab(screenId) {
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('groupsScreen').classList.add('hidden');
+      document.getElementById('favScreen').classList.add('hidden');
       document.getElementById('profileScreen').classList.add('hidden');
       document.getElementById('chatScreen').classList.add('hidden');
       document.getElementById('activeWalkScreen').classList.add('hidden');
@@ -803,6 +853,7 @@
 
       document.getElementById('navMap').classList.remove('active');
       document.getElementById('navGroups').classList.remove('active');
+      document.getElementById('navFav').classList.remove('active');
       document.getElementById('navProfile').classList.remove('active');
       
       if (screenId === 'mainScreen') {
@@ -810,6 +861,7 @@
         if (map) setTimeout(() => map.invalidateSize(), 200);
       }
       if (screenId === 'groupsScreen') document.getElementById('navGroups').classList.add('active');
+      if (screenId === 'favScreen') document.getElementById('navFav').classList.add('active');
       if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
     }
 
@@ -827,7 +879,6 @@
     function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
     function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
     function setTimeFilter(time) { selectedTime = time; renderPartners(); }
-    function locateUser() {}
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
