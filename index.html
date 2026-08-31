@@ -27,15 +27,24 @@
     .btn-google { background: #4285F4; color: #fff; margin-top: 8px; }
     .btn-secondary { background: #7f8c8d; }
     .btn-whatsapp { background: #25D366; }
-    .btn-sos { background: #e74c3c; }
+    .btn-sos { background: #e74c3c; animation: pulse 2s infinite; }
     .btn-demo { background: #8e44ad; color: #fff; font-size: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(142, 68, 173, 0.4); }
+    .btn-group { background: #2980b9; }
     .hidden { display: none !important; }
     
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+
     #map { height: 170px; width: 100%; border-radius: 12px; margin: 6px 0; background: #e0e0e0; }
     
     .filter-box { background: #eef9f1; padding: 10px; border-radius: 10px; font-size: 12px; }
     .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 4px; }
     
+    .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
+
     .time-tags { display: flex; gap: 5px; margin-top: 4px; }
     .tag-btn { padding: 6px; font-size: 11px; background: #fff; color: #2c3e50; border: 1px solid #27ae60; border-radius: 12px; flex: 1; }
     .tag-btn.active { background: #27ae60; color: #fff; }
@@ -47,7 +56,10 @@
 
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 4px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; display: flex; justify-content: space-between; align-items: center; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
+    .partner-item.active-now { border-right-color: #e67e22; background: #fef9e7; }
     
+    .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
+
     .chat-box { flex: 1; min-height: 180px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; }
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; display: inline-block; max-width: 80%; align-self: flex-start; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; display: inline-block; border: 1px solid #eee; max-width: 80%; align-self: flex-end; }
@@ -64,6 +76,8 @@
     
     .demo-modal-content { background: #1e272e; color: #fff; text-align: right; border-radius: 16px; padding: 20px; border: 2px solid #8e44ad; }
     .demo-step-badge { background: #8e44ad; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 8px; }
+
+    .alert-banner { background: #e74c3c; color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
 
     .rating-stars { display: flex; gap: 8px; justify-content: center; font-size: 24px; margin: 10px 0; cursor: pointer; }
     .rating-stars span { color: #ccc; }
@@ -104,6 +118,12 @@
     <div class="screen hidden" id="mainScreen">
       <button class="btn-demo" onclick="startGuidedDemoTour()">🎙️ הפעל הדמיה מודרכת (Demo Tour)</button>
 
+      <!-- התרעה בלייב -->
+      <div class="alert-banner hidden" id="liveAlertBanner">
+        <span>🔔 <b>דניאל</b> יצא לצעידה בסביבה שלך!</span>
+        <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="openChat()">הצטרף</button>
+      </div>
+
       <div class="screen-header">
         <h1>🗺️ פרטנרים בסביבה</h1>
       </div>
@@ -116,19 +136,33 @@
         ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
       </div>
 
+      <!-- כפתור יציאה לצעידה עכשיו -->
+      <button class="btn-sos" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
+
       <!-- סינונים -->
-      <div class="filter-box">
-        <label for="paceFilter">🏃‍♂️ קצב הליכה:</label>
-        <select id="paceFilter" onchange="filterPartners()">
-          <option value="all">הכל</option>
-          <option value="איטי">איטי</option>
-          <option value="בינוני">בינוני</option>
-          <option value="מהיר">מהיר</option>
-          <option value="ריצה">ריצה</option>
-        </select>
+      <div class="filter-box" style="margin-top:8px;">
+        <div class="filter-row">
+          <div style="flex:1;">
+            <label for="paceFilter">🏃‍♂️ קצב:</label>
+            <select id="paceFilter" onchange="renderPartners()">
+              <option value="all">הכל</option>
+              <option value="איטי">איטי</option>
+              <option value="בינוני">בינוני</option>
+              <option value="מהיר">מהיר</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label for="dogFilter">🐶 חיות מחמד:</label>
+            <select id="dogFilter" onchange="renderPartners()">
+              <option value="all">הכל</option>
+              <option value="כן">מגיע עם כלב 🐶</option>
+              <option value="לא">ללא כלב 🚫</option>
+            </select>
+          </div>
+        </div>
 
         <label>📍 מרחק מרבי: <span id="distVal">5</span> ק"מ</label>
-        <input type="range" id="distFilter" min="1" max="10" value="5" oninput="updateDistVal(); filterPartners();">
+        <input type="range" id="distFilter" min="1" max="10" value="5" oninput="updateDistVal(); renderPartners();">
 
         <label>🕒 זמינות:</label>
         <div class="time-tags">
@@ -149,7 +183,20 @@
 
       <button onclick="openChat()">💬 צור קשר בצ'אט הפנימי</button>
       <button class="btn-whatsapp" onclick="openWhatsApp()">📱 פתח שיחת WhatsApp ישירה</button>
-      <button class="btn-sos" onclick="triggerSOS()">📢 קריאה להליכה עכשיו!</button>
+    </div>
+
+    <!-- מסך הליכות קבוצתיות -->
+    <div class="screen hidden" id="groupsScreen">
+      <div class="screen-header">
+        <button class="btn-back-header" onclick="backToMap()">➔ חזרה למפה</button>
+        <h1>👥 הליכות קבוצתיות</h1>
+      </div>
+
+      <p>הצטרף לקבוצת הליכה בסביבה או פתח קבוצה חדשה!</p>
+      
+      <button class="btn-group" onclick="openCreateGroupModal()">➕ פתח קבוצת הליכה חדשה</button>
+
+      <div id="groupsList" style="margin-top:10px;"></div>
     </div>
 
     <!-- מסך צ'אט -->
@@ -213,6 +260,17 @@
       </div>
     </div>
 
+    <!-- פופ-אפ יצירת קבוצה -->
+    <div class="modal hidden" id="createGroupModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#2980b9;">➕ יצירת קבוצת הליכה חדשה</h3>
+        <input type="text" id="newGroupTitle" placeholder="שם הקבוצה (לדוגמה: הליכת שקיעה במואבת)">
+        <input type="text" id="newGroupTime" placeholder="זמן ומקום (למשל: היום ב-19:00 בפארק)">
+        <button onclick="createNewGroup()" class="btn-group">אישור ופרסום קבוצה</button>
+        <button onclick="closeGroupModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
+      </div>
+    </div>
+
     <!-- פופ-אפ הדמיה מודרכת -->
     <div class="modal hidden" id="demoTourModal">
       <div class="modal-content demo-modal-content">
@@ -268,6 +326,9 @@
       <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
         <span style="font-size:18px;">🗺️</span> ראשי
       </button>
+      <button class="nav-btn" id="navGroups" onclick="switchTab('groupsScreen')">
+        <span style="font-size:18px;">👥</span> קבוצות
+      </button>
       <button class="nav-btn" id="navProfile" onclick="switchTab('profileScreen')">
         <span style="font-size:18px;">📊</span> פרופיל
       </button>
@@ -281,7 +342,7 @@
   <!-- Firebase v10 SDK via Modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAx_rBL-U1XxL59cXW-wBO26aUXyfg-Lsw",
@@ -296,6 +357,12 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     window.firebaseAuth = auth;
+
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        window.startApp();
+      }
+    }).catch((error) => console.log("Redirect Auth error:", error));
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -318,12 +385,18 @@
 
     window.loginWithGoogle = function() {
       const provider = new GoogleAuthProvider();
-      signInWithPopup(auth, provider).then((result) => {
-        alert("👋 שלום " + result.user.displayName + ", התחברת בהצלחה!");
-        window.startApp();
-      }).catch((err) => {
-        alert("התחברות Google בוטלה או נכשלה: " + err.message);
-      });
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        signInWithRedirect(auth, provider);
+      } else {
+        signInWithPopup(auth, provider).then((result) => {
+          alert("👋 שלום " + result.user.displayName + ", התחברת בהצלחה!");
+          window.startApp();
+        }).catch((err) => {
+          alert("התחברות Google בוטלה או נכשלה: " + err.message);
+        });
+      }
     };
   </script>
 
@@ -339,25 +412,29 @@
     let showRoutes = false;
     let currentDemoStep = 0;
 
-    const partners = [
+    let partners = [
       { 
         id: 1, name: "דניאל", gender: "גבר", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", 
         phone: "972500000000", age: 28, dog: "כן", route: "פארק", pref: "פתוח לשיחה 🗣️", rating: "4.9 ⭐",
         reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מדויק בזמנים ואדיב מאוד'"],
-        lat: 32.838, lng: 35.078 
+        lat: 32.838, lng: 35.078, activeNow: true 
       },
       { 
         id: 2, name: "מיכל", gender: "אישה", location: "קריות", pace: "מהיר", dist: 3.8, time: "הערב", 
         phone: "972500000001", age: 34, dog: "לא", route: "כביש/מדרכה", pref: "אוהבת פודקאסטים 🎧", rating: "5.0 ⭐",
         reviews: ["'קצב מהיר ומאתגר, מומלצת מאוד!'"],
-        lat: 32.832, lng: 35.075 
+        lat: 32.832, lng: 35.075, activeNow: false 
       }
+    ];
+
+    let groupWalks = [
+      { id: 1, title: "הליכת שקיעה קבוצתית 🌅", time: "היום ב-19:00 בפארק מוצקין", members: 4 }
     ];
 
     const demoTourSteps = [
       {
         title: "צעד ראשון: ברוכים הבאים לאפליקציה",
-        desc: "היי! ברוכים הבאים ליאללה בוא נלך. האפליקציה שלנו מחברת בין אנשים שרוצים לצעוד יחד בסביבה הקרובה, לשמור על כושר ולהנות מצעידה בטוחה.",
+        desc: "היי! ברוכים הבאים ליאללה בוא נלך. האפליקציה מחברת בין אנשים שרוצים לצעוד יחד בסביבה הקרובה, לשמור על כושר ולהנות מצעידה בטוחה.",
         action: () => switchTab('mainScreen')
       },
       {
@@ -367,12 +444,12 @@
       },
       {
         title: "צעד שלישי: חיפוש וסינון פרטנרים",
-        desc: "תוכלו לסנן פרטנרים לפי קצב הליכה, מרחק בקילומטרים וזמינות - כמו עכשיו, הערב או מחר.",
+        desc: "תוכלו לסנן פרטנרים לפי קצב הליכה, חיות מחמד, מרחק בקילומטרים וזמינות.",
         action: () => switchTab('mainScreen')
       },
       {
         title: "צעד רביעי: צפייה בפרופיל של דניאל",
-        desc: "בלחיצה על פרופיל, תראו את העדפות הצעידה של דניאל, הגיל, והאם מגיע עם כלב, יחד עם משובים חיוביים מצעידים קודמים.",
+        desc: "בלחיצה על פרופיל, תראו את העדפות הצעידה של דניאל, הגיל, והאם מגיע עם כלב, יחד עם משובים חיוביים.",
         action: () => openProfile(1)
       },
       {
@@ -398,8 +475,8 @@
         const cleanText = text.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F800}-\u{1F8FF}\u{1FA00}-\u{1FA6F}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '').trim();
         const msg = new SpeechSynthesisUtterance(cleanText);
         msg.lang = 'he-IL';
-        msg.rate = 0.95;
-        msg.pitch = 1.2;
+        msg.rate = 0.88;
+        msg.pitch = 1.25;
         window.speechSynthesis.speak(msg);
       }
     }
@@ -448,6 +525,11 @@
       backToMap();
     }
 
+    function broadcastMyWalk() {
+      alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים הנמצאים ברדיוס הקרוב אליך.");
+      document.getElementById('liveAlertBanner').classList.remove('hidden');
+    }
+
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
       document.getElementById('welcomeScreen').classList.add('hidden');
@@ -456,6 +538,12 @@
       
       updateVerificationUI();
       renderPartners();
+      renderGroups();
+
+      // הדגמת התרעה בלייב לאחר 3 שניות
+      setTimeout(() => {
+        document.getElementById('liveAlertBanner').classList.remove('hidden');
+      }, 3000);
 
       setTimeout(() => {
         initMap();
@@ -501,9 +589,19 @@
 
     function renderPartners() {
       const listContainer = document.getElementById('partnersList');
+      if (!listContainer) return;
       listContainer.innerHTML = '';
 
+      const paceFilterVal = document.getElementById('paceFilter').value;
+      const dogFilterVal = document.getElementById('dogFilter').value;
+      const maxDistVal = parseFloat(document.getElementById('distFilter').value);
+
       partners.forEach(partner => {
+        // סינונים
+        if (paceFilterVal !== 'all' && partner.pace !== paceFilterVal) return;
+        if (dogFilterVal !== 'all' && partner.dog !== dogFilterVal) return;
+        if (partner.dist > maxDistVal) return;
+
         const isOppositeGender = partner.gender !== userGender;
         const isLocked = isOppositeGender && verifiedWalks < 3;
 
@@ -511,15 +609,15 @@
 
         if (map) {
           partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name}</b> (${partner.gender}) - ${partner.rating}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות</b>' : ''}`);
+            .bindPopup(`<b>${partner.name}</b> (${partner.gender}) ${partner.dog === 'כן' ? '🐶' : ''}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות</b>' : ''}`);
         }
 
         const item = document.createElement('div');
-        item.className = `partner-item ${isLocked ? 'locked' : ''}`;
+        item.className = `partner-item ${isLocked ? 'locked' : ''} ${partner.activeNow ? 'active-now' : ''}`;
         item.innerHTML = `
           <div>
-            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
-            <span style="color:#666;">קצב: ${partner.pace} | העדפה: <b>${partner.pref}</b></span>
+            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${partner.dog === 'כן' ? '🐶' : ''} ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
+            <span style="color:#666;">קצב: ${partner.pace} ${partner.activeNow ? '• <b style="color:#e67e22;">🚶‍♂️ בצד צעידה עכשיו!</b>' : ''}</span>
           </div>
           <button style="width:auto; padding: 4px 8px; font-size:11px;" onclick="event.stopPropagation(); openProfile(${partner.id})">פרופיל</button>
         `;
@@ -527,6 +625,47 @@
         listContainer.appendChild(item);
       });
       selectedPartner = partners[0];
+    }
+
+    function renderGroups() {
+      const container = document.getElementById('groupsList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      groupWalks.forEach(g => {
+        container.innerHTML += `
+          <div class="group-item">
+            <b>${g.title}</b><br>
+            <span style="color:#555;">📍 ${g.time} | 👥 ${g.members} משתתפים צועדים</span>
+            <button class="btn-group" style="padding:6px; font-size:12px; margin-top:6px;" onclick="joinGroup('${g.title}')">הצטרף לקבוצה</button>
+          </div>
+        `;
+      });
+    }
+
+    function joinGroup(title) {
+      alert(`🎉 הצטרפת בהצלחה לקבוצה: ${title}!`);
+    }
+
+    function openCreateGroupModal() {
+      document.getElementById('createGroupModal').classList.remove('hidden');
+    }
+
+    function closeGroupModal() {
+      document.getElementById('createGroupModal').classList.add('hidden');
+    }
+
+    function createNewGroup() {
+      const title = document.getElementById('newGroupTitle').value.trim();
+      const time = document.getElementById('newGroupTime').value.trim();
+      if (!title || !time) { alert("נא למלא את כל השדות!"); return; }
+
+      groupWalks.push({ id: Date.now(), title: title, time: time, members: 1 });
+      renderGroups();
+      closeGroupModal();
+      document.getElementById('newGroupTitle').value = '';
+      document.getElementById('newGroupTime').value = '';
+      alert("👥 הקבוצה פורסמה בהצלחה!");
     }
 
     function focusOnPartner(partner, isLocked) {
@@ -609,6 +748,7 @@
 
     function switchTab(screenId) {
       document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('groupsScreen').classList.add('hidden');
       document.getElementById('profileScreen').classList.add('hidden');
       document.getElementById('chatScreen').classList.add('hidden');
       document.getElementById('activeWalkScreen').classList.add('hidden');
@@ -616,11 +756,14 @@
       document.getElementById(screenId).classList.remove('hidden');
 
       document.getElementById('navMap').classList.remove('active');
+      document.getElementById('navGroups').classList.remove('active');
       document.getElementById('navProfile').classList.remove('active');
+      
       if (screenId === 'mainScreen') {
         document.getElementById('navMap').classList.add('active');
         if (map) setTimeout(() => map.invalidateSize(), 200);
       }
+      if (screenId === 'groupsScreen') document.getElementById('navGroups').classList.add('active');
       if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
     }
 
@@ -630,14 +773,13 @@
       if (!partner) return;
       document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
       document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating}`;
-      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🎧 העדפה: ${partner.pref}`;
+      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}<br>🎧 העדפה: ${partner.pref}`;
       document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>• ${r}</div>`).join('');
       document.getElementById('profileModal').classList.remove('hidden');
     }
     function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
     function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
-    function setTimeFilter(time) { selectedTime = time; filterPartners(); }
-    function filterPartners() {}
+    function setTimeFilter(time) { selectedTime = time; renderPartners(); }
     function locateUser() {}
     function triggerSOS() { alert("🚀 קריאה נשלחה לכל המשתמשים בסביבה!"); }
 
