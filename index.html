@@ -319,24 +319,17 @@
     const auth = getAuth(app);
     window.firebaseAuth = auth;
 
-    getRedirectResult(auth).then((result) => {
-      if (result && result.user) {
-        if (result.user.displayName) {
-          document.getElementById('authUserName').innerText = result.user.displayName;
-        }
-        window.startApp();
-      }
-    }).catch((error) => console.log("Redirect Auth:", error));
-
+    // האזנה אקטיבית ורציפה למצב התחברות המשתמש
     onAuthStateChanged(auth, (user) => {
       if (user) {
         if (user.isAnonymous) {
           document.getElementById('authUserName').innerText = "אורח (זמני)";
         } else if (user.displayName) {
           document.getElementById('authUserName').innerText = user.displayName;
-          if (!document.getElementById('welcomeScreen').classList.contains('hidden')) {
-            window.startApp();
-          }
+        }
+        // מעבר אוטומטי ומיידי למסך הראשי
+        if (!document.getElementById('welcomeScreen').classList.contains('hidden')) {
+          window.startApp();
         }
       }
     });
@@ -351,21 +344,17 @@
 
     window.loginWithGoogle = function() {
       const provider = new GoogleAuthProvider();
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
-      if (isMobile) {
+      provider.setCustomParameters({ prompt: 'select_account' });
+
+      signInWithPopup(auth, provider).then((result) => {
+        if (result.user && result.user.displayName) {
+          document.getElementById('authUserName').innerText = result.user.displayName;
+        }
+        window.startApp();
+      }).catch((err) => {
+        // במידה ופתרון Popup נחסם בנייד, מעבר אוטומטי ל-Redirect
         signInWithRedirect(auth, provider);
-      } else {
-        signInWithPopup(auth, provider).then((result) => {
-          if (result.user && result.user.displayName) {
-            document.getElementById('authUserName').innerText = result.user.displayName;
-            alert("👋 שלום " + result.user.displayName + ", התחברת בהצלחה עם Google!");
-          }
-          window.startApp();
-        }).catch((err) => {
-          alert("שגיאת התחברות Google: " + err.message);
-        });
-      }
+      });
     };
   </script>
 
