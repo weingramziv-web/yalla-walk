@@ -29,7 +29,6 @@
     .btn-whatsapp { background: #25D366; }
     .btn-fav { background: #f1c40f; color: #2c3e50; }
     .btn-sos { background: #e74c3c; }
-    .btn-demo { background: #8e44ad; color: #fff; font-size: 14px; margin-bottom: 10px; }
     .btn-group { background: #2980b9; }
     .hidden { display: none !important; }
 
@@ -39,10 +38,6 @@
     .filter-box label { font-weight: bold; color: #2c3e50; display: block; margin-top: 4px; }
     .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; }
 
-    .time-tags { display: flex; gap: 5px; margin-top: 4px; }
-    .tag-btn { padding: 6px; font-size: 11px; background: #fff; color: #2c3e50; border: 1px solid #27ae60; border-radius: 12px; flex: 1; }
-    .tag-btn.active { background: #27ae60; color: #fff; }
-    
     .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
@@ -326,11 +321,15 @@
     const auth = getAuth(app);
     window.firebaseAuth = auth;
 
+    // קליטת תוצאת התחברות Google לאחר העברה (Redirect)
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
+        if (result.user.displayName) {
+          document.getElementById('authUserName').innerText = result.user.displayName;
+        }
         window.startApp();
       }
-    }).catch((error) => console.log("Redirect Auth error:", error));
+    }).catch((error) => console.log("Redirect Auth:", error));
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -358,10 +357,13 @@
         signInWithRedirect(auth, provider);
       } else {
         signInWithPopup(auth, provider).then((result) => {
-          alert("👋 שלום " + result.user.displayName + ", התחברת בהצלחה!");
+          if (result.user && result.user.displayName) {
+            document.getElementById('authUserName').innerText = result.user.displayName;
+            alert("👋 שלום " + result.user.displayName + ", התחברת בהצלחה עם Google!");
+          }
           window.startApp();
         }).catch((err) => {
-          alert("התחברות Google בוטלה או נכשלה: " + err.message);
+          alert("שגיאת התחברות Google: " + err.message);
         });
       }
     };
@@ -374,7 +376,8 @@
     let selectedRating = 5;
     let userPos = { lat: 32.835, lng: 35.076 };
     let selectedPartner = null;
-    let map = null, userMarker = null, safeRouteLine = null;
+    let map = null, userMarker = null;
+    let safeRoutesGroup = null;
     let showRoutes = false;
 
     let favoritesList = [];
@@ -430,10 +433,11 @@
         userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 8, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.9 })
           .addTo(map).bindPopup("<b>המיקום שלך</b>");
 
-        // קו מסלולים בטוחים כחול וברור
-        safeRouteLine = L.polyline([
-          [32.835, 35.076], [32.838, 35.078], [32.842, 35.085]
-        ], { color: '#2980b9', weight: 6, opacity: 0.9 });
+        safeRoutesGroup = L.layerGroup([
+          L.polyline([[32.835, 35.076], [32.838, 35.078], [32.842, 35.085]], { color: '#2980b9', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול פארק מואר"),
+          L.polyline([[32.831, 35.071], [32.834, 35.074], [32.837, 35.076]], { color: '#8e44ad', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול טיילת מרכזית"),
+          L.polyline([[32.839, 35.073], [32.843, 35.075], [32.845, 35.079]], { color: '#27ae60', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול היקפי מאובטח")
+        ]);
 
         map.invalidateSize();
       } catch (e) {
@@ -443,12 +447,11 @@
 
     function toggleRoutes() {
       showRoutes = !showRoutes;
-      if (showRoutes && map && safeRouteLine) { 
-        safeRouteLine.addTo(map); 
-        map.fitBounds(safeRouteLine.getBounds());
-        alert("🛣️ מסלולי הליכה מוארים ובטוחים מוצגים בכחול על המפה!"); 
-      } else if (map && safeRouteLine) { 
-        map.removeLayer(safeRouteLine); 
+      if (showRoutes && map && safeRoutesGroup) { 
+        safeRoutesGroup.addTo(map); 
+        alert("🛣️ מוצגים 3 מסלולי הליכה מוארים ובטוחים על המפה!"); 
+      } else if (map && safeRoutesGroup) { 
+        map.removeLayer(safeRoutesGroup); 
       }
     }
 
