@@ -30,6 +30,7 @@
     .btn-fav { background: #f1c40f; color: #2c3e50; }
     .btn-sos { background: #e74c3c; }
     .btn-group { background: #2980b9; }
+    .btn-logout { background: #c0392b; margin-top: 15px; }
     .hidden { display: none !important; }
 
     #map { height: 180px; width: 100%; border-radius: 12px; margin: 6px 0; background: #e0e0e0; }
@@ -227,6 +228,8 @@
           <div class="stat-val" style="color:#f39c12;">75%</div>
         </div>
       </div>
+
+      <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחזר למסך הכניסה</button>
     </div>
 
     <!-- פופ-אפ יצירת קבוצה -->
@@ -303,7 +306,7 @@
   <!-- Firebase v10 SDK via Modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAx_rBL-U1XxL59cXW-wBO26aUXyfg-Lsw",
@@ -319,18 +322,20 @@
     const auth = getAuth(app);
     window.firebaseAuth = auth;
 
-    // האזנה אקטיבית ורציפה למצב התחברות המשתמש
     onAuthStateChanged(auth, (user) => {
       if (user) {
         if (user.isAnonymous) {
           document.getElementById('authUserName').innerText = "אורח (זמני)";
         } else if (user.displayName) {
           document.getElementById('authUserName').innerText = user.displayName;
+        } else if (user.email) {
+          document.getElementById('authUserName').innerText = user.email.split('@')[0];
         }
-        // מעבר אוטומטי ומיידי למסך הראשי
-        if (!document.getElementById('welcomeScreen').classList.contains('hidden')) {
-          window.startApp();
-        }
+      } else {
+        // במידה והתנתקת - חזרה למסך הכניסה הראשי
+        document.getElementById('welcomeScreen').classList.remove('hidden');
+        document.getElementById('mainScreen').classList.add('hidden');
+        document.getElementById('bottomNav').classList.add('hidden');
       }
     });
 
@@ -347,13 +352,20 @@
       provider.setCustomParameters({ prompt: 'select_account' });
 
       signInWithPopup(auth, provider).then((result) => {
-        if (result.user && result.user.displayName) {
-          document.getElementById('authUserName').innerText = result.user.displayName;
+        if (result.user) {
+          const name = result.user.displayName || result.user.email;
+          document.getElementById('authUserName').innerText = name;
         }
         window.startApp();
       }).catch((err) => {
-        // במידה ופתרון Popup נחסם בנייד, מעבר אוטומטי ל-Redirect
         signInWithRedirect(auth, provider);
+      });
+    };
+
+    window.logoutUser = function() {
+      signOut(auth).then(() => {
+        alert("👋 התנתקת בהצלחה. הועברת למסך הכניסה!");
+        location.reload();
       });
     };
   </script>
@@ -688,12 +700,14 @@
       chatBox.scrollTop = chatBox.scrollHeight;
 
       setTimeout(() => {
-        let reply = "מעולה! נפגש בנקודת המפגש. לחץ על 'צעדנו יחד' בסיום 🔥";
-        const lower = text.toLowerCase();
-        
-        if (lower.includes("לא") || lower.includes("ביטול") || lower.includes("עסוק")) {
+        let reply = "מעולה! ניפגש בנקודת המפגש. לחץ על 'צעדנו יחד' בסיום 🔥";
+        const clean = text.replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "").trim();
+
+        if (clean.includes("רגע") || clean.includes("חכה") || clean.includes("דקה") || clean.includes("אולי")) {
+          reply = "אין בעיה, קח את הזמן! תעדכן אותי כשתהיה מוכן 👍";
+        } else if (clean.includes("לא") || clean.includes("ביטול") || clean.includes("עסוק") || clean.includes("במקום")) {
           reply = "חבל! אולי בפעם אחרת, תהיה איתי בקשר מתי שתוכל 🙂";
-        } else if (lower.includes("כן") || lower.includes("בטח") || lower.includes("סגור") || lower.includes("יאללה")) {
+        } else if (clean.includes("כן") || clean.includes("סבבה") || clean.includes("בטח") || clean.includes("סגור") || clean.includes("יאללה")) {
           reply = "סגור, אני יוצא לדרך לכיוון פארק מוצקין! ניפגש עוד מעט 🔥";
         }
 
