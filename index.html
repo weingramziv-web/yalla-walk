@@ -701,7 +701,7 @@
 
       setTimeout(() => {
         let reply = "מעולה! ניפגש בנקודת המפגש. לחץ על 'צעדנו יחד' בסיום 🔥";
-        const clean = text.replace(/[^\u0590-\u05FFa-zA-Z0-9\s]/g, "").trim();
+        const clean = text.toLowerCase();
 
         if (clean.includes("רגע") || clean.includes("חכה") || clean.includes("דקה") || clean.includes("אולי")) {
           reply = "אין בעיה, קח את הזמן! תעדכן אותי כשתהיה מוכן 👍";
