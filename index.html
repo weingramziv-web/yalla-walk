@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>יאללה בוא נלך! - Yalla Walk</title>
+  <title>OK, Let's Go!</title>
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -42,6 +42,13 @@
     .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
+
+    /* סרגל מחוברים בלייב (סגנון פייסבוק) */
+    .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
+    .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
+    .avatar-circle { width: 42px; height: 42px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+    .avatar-name { font-size: 10px; color: #333; margin-top: 4px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 55px; text-align: center; }
+    .status-dot { width: 11px; height: 11px; background-color: #2ecc71; border-radius: 50%; position: absolute; bottom: 0; left: 0; border: 2px solid #fff; }
 
     .online-dot { width: 10px; height: 10px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-left: 5px; box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.4); animation: pulse-dot 1.5s infinite; }
     .offline-dot { width: 10px; height: 10px; background-color: #95a5a6; border-radius: 50%; display: inline-block; margin-left: 5px; }
@@ -85,7 +92,7 @@
     <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 20px;">
-        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ יאללה בוא נלך!</h1>
+        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ OK, Let's Go!</h1>
         <p style="font-size: 14px; font-weight: bold; color: #2c3e50; text-align: center;">מוצאים פרטנרים להליכה בסביבה בקלות ובביטחון</p>
       </div>
 
@@ -114,11 +121,17 @@
       </div>
 
       <div class="screen-header">
-        <h1>🗺️ פרטנרים בסביבה</h1>
+        <h1>🗺️ OK, Let's Go!</h1>
       </div>
 
       <div class="user-auth-badge" id="userAuthBadge">
         👤 מחובר כ: <b id="authUserName">אורח</b>
+      </div>
+
+      <!-- סרגל מחוברים בלייב (סגנון פייסבוק) -->
+      <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px;">🟢 מחוברים עכשיו באפליקציה:</div>
+      <div class="live-users-bar" id="liveUsersBar">
+        <div style="font-size:11px; color:#888;">מחפש משתמשים...</div>
       </div>
 
       <div class="verification-badge" id="verificationBadge">
@@ -403,10 +416,10 @@
         });
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
+        if (window.renderLiveBar) window.renderLiveBar();
       });
     }
 
-    // שידור התרעת צעידה בזמן אמת ב-Firestore
     window.broadcastMyWalk = function() {
       if (!auth.currentUser) return;
       const userName = document.getElementById('authUserName').innerText;
@@ -422,7 +435,6 @@
       });
     };
 
-    // האזנה להתרעות צעידה בלייב שנשלחו ע"י משתמשים אחרים
     function listenToWalkAlerts() {
       const q = query(collection(db, "walk_alerts"), orderBy("timestamp", "desc"), limit(1));
       onSnapshot(q, (snapshot) => {
@@ -437,6 +449,7 @@
             banner.classList.remove('hidden');
 
             focusBtn.onclick = function() {
+              banner.classList.add('hidden'); // העלמת הבאנר בלחיצה
               window.switchTab('mainScreen');
               if (window.map && alertData.lat && alertData.lng) {
                 window.map.flyTo([alertData.lat, alertData.lng], 16, { duration: 1.5 });
@@ -501,6 +514,7 @@
       
       updateVerificationUI();
       renderLivePartners();
+      renderLiveBar();
       renderGroups();
       renderFavorites();
 
@@ -530,6 +544,36 @@
       } catch (e) {
         console.log("Map init:", e);
       }
+    }
+
+    // רנדור סרגל מחוברים בלייב (פייסבוק סטייל)
+    function renderLiveBar() {
+      const bar = document.getElementById('liveUsersBar');
+      if (!bar) return;
+      bar.innerHTML = '';
+
+      if (!liveUsers || liveUsers.length === 0) {
+        bar.innerHTML = `<div style="font-size:11px; color:#888;">אין צועדים נוספים כרגע במערכת</div>`;
+        return;
+      }
+
+      liveUsers.forEach(u => {
+        const firstLetter = u.name ? u.name.charAt(0).toUpperCase() : '?';
+        const isOppositeGender = u.gender !== userGender;
+        const isLocked = isOppositeGender && verifiedWalks < 3;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'live-user-avatar';
+        avatar.innerHTML = `
+          <div class="avatar-circle">
+            ${firstLetter}
+            ${u.isOnline ? '<div class="status-dot"></div>' : ''}
+          </div>
+          <div class="avatar-name">${u.name}</div>
+        `;
+        avatar.onclick = () => selectPartnerAndOpenChat(u, isLocked);
+        bar.appendChild(avatar);
+      });
     }
 
     function renderLivePartners() {
@@ -735,6 +779,7 @@
     }
 
     window.switchTab = switchTab;
+    window.renderLiveBar = renderLiveBar;
 
     function renderGroups() {}
     function finishWalk() { document.getElementById('ratingModal').classList.remove('hidden'); }
