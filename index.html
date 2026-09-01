@@ -136,8 +136,8 @@
       </div>
 
       <div style="margin-top: auto;">
-        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">שם פרטי (עבור כניסה כאורח):</label>
-        <input type="text" id="guestNameInput" placeholder="רשום את שמך (למשל: שירה)">
+        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">שם פרטי (חובה לכניסה כאורח):</label>
+        <input type="text" id="guestNameInput" placeholder="רשום את שמך הפרטי...">
 
         <label style="display:block; text-align:right; font-weight:bold; margin-top:8px; margin-bottom:2px;">בחר את המין שלך להרשמה:</label>
         <select id="userGenderInput">
@@ -407,7 +407,7 @@
     });
 
     function handleUserLogin(user) {
-      let customGuestName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
+      let customGuestName = sessionStorage.getItem('customGuestName') || (document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '');
       let name = "אורח";
       
       if (customGuestName) {
@@ -443,8 +443,15 @@
     }
 
     window.startAppAsGuest = function() {
+      const nameVal = document.getElementById('guestNameInput').value.trim();
+      if (!nameVal) {
+        alert("⚠️ אנא רשום את שמך הפרטי לפני הכניסה כאורח!");
+        return;
+      }
+      sessionStorage.setItem('customGuestName', nameVal);
       sessionStorage.setItem('userLoggedIn', 'true');
       window.userLoggingOut = false;
+      
       signInAnonymously(auth).then((res) => { 
         handleUserLogin(res.user); 
       }).catch(() => { 
@@ -462,6 +469,7 @@
 
     window.logoutUser = function() {
       sessionStorage.removeItem('userLoggedIn');
+      sessionStorage.removeItem('customGuestName');
       window.userLoggingOut = true;
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true });
@@ -726,7 +734,7 @@
         waNotice.classList.add('hidden');
       } else {
         btnWa.classList.add('hidden');
-        waNotice.classList.remove('hidden');
+        waNotice.remove('hidden');
       }
 
       switchTab('chatScreen');
