@@ -64,7 +64,7 @@
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
-    /* סרגל מחוברים בלייב */
+    /* סרגל מחוברים בסביבה */
     .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
     .avatar-circle { width: 42px; height: 42px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
@@ -84,8 +84,6 @@
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
     .partner-item.active-now { border-right-color: #e67e22; background: #fef9e7; }
     
-    .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
-
     .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; max-width: 80%; align-self: flex-start; text-align: right; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; border: 1px solid #eee; max-width: 80%; align-self: flex-end; text-align: right; }
@@ -165,9 +163,9 @@
       </div>
 
       <!-- סרגל מחוברים בלייב -->
-      <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px;">🟢 מחוברים עכשיו באפליקציה:</div>
+      <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
       <div class="live-users-bar" id="liveUsersBar">
-        <div style="font-size:11px; color:#888;">מחפש משתמשים...</div>
+        <div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>
       </div>
 
       <div class="verification-badge" id="verificationBadge">
@@ -360,7 +358,7 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Firebase v10 SDK via Modules (Firestore & Auth) -->
+  <!-- Firebase v10 SDK via Modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -387,7 +385,6 @@
     let liveUnsubUsers = null;
     let liveUnsubChat = null;
 
-    // טיפול בתוצאת ההפניה של Google בלחיצה אחת
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
         sessionStorage.setItem('userLoggedIn', 'true');
@@ -431,7 +428,7 @@
         listenToLiveUsers();
         listenToWalkAlerts();
         window.startApp();
-      }).catch(err => console.log("Login save error:", err));
+      });
     }
 
     window.startAppAsGuest = function() {
@@ -444,7 +441,6 @@
       });
     };
 
-    // התחברות Google ישירה בלחיצה אחת
     window.loginWithGoogle = function() {
       sessionStorage.setItem('userLoggedIn', 'true');
       window.userLoggingOut = false;
@@ -462,6 +458,7 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
+    // האזנה גלובלית ואמינה לכל המשתמשים המחוברים
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -469,7 +466,7 @@
         let liveUsersList = [];
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '') && data.isOnline !== false) {
+          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '')) {
             liveUsersList.push(data);
           }
         });
@@ -479,6 +476,7 @@
       });
     }
 
+    // שליחת התראה בלייב רק בלחיצה יזוקה על הכפתור האדום
     window.broadcastMyWalk = function() {
       if (!auth.currentUser) return;
       const userName = document.getElementById('authUserName').innerText;
@@ -612,17 +610,43 @@
       }
     }
 
+    // חישוב מרחק בקילומטרים בין שתי נקודות גיאוגרפיות
+    function getKmDistance(lat1, lon1, lat2, lng2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lng2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    // תצוגת מחוברים סקלאבילית - סינון לפי רדיוס קרוב
     function renderLiveBar() {
       const bar = document.getElementById('liveUsersBar');
+      const header = document.getElementById('liveUsersHeader');
       if (!bar) return;
       bar.innerHTML = '';
 
       if (!liveUsers || liveUsers.length === 0) {
+        if (header) header.innerText = "🟢 מחוברים בסביבה:";
         bar.innerHTML = `<div style="font-size:11px; color:#888;">אין צועדים נוספים כרגע במערכת</div>`;
         return;
       }
 
-      liveUsers.forEach(u => {
+      // סינון משתמשים הנמצאים עד 15 ק"מ ממיקום המשתמש
+      let nearbyUsers = liveUsers.filter(u => {
+        if (!u.lat || !u.lng) return true;
+        const dist = getKmDistance(userPos.lat, userPos.lng, u.lat, u.lng);
+        return dist <= 15;
+      });
+
+      if (header) {
+        header.innerText = `🟢 מחוברים בסביבה (${nearbyUsers.length}):`;
+      }
+
+      nearbyUsers.forEach(u => {
         const firstLetter = u.name ? u.name.charAt(0).toUpperCase() : '?';
         const isOppositeGender = u.gender !== userGender;
         const isLocked = isOppositeGender && verifiedWalks < 3;
@@ -632,7 +656,7 @@
         avatar.innerHTML = `
           <div class="avatar-circle">
             ${firstLetter}
-            ${u.isOnline ? '<div class="status-dot"></div>' : ''}
+            ${u.isOnline !== false ? '<div class="status-dot"></div>' : ''}
           </div>
           <div class="avatar-name">${u.name}</div>
         `;
@@ -658,14 +682,14 @@
         if (map && partner.marker) map.removeLayer(partner.marker);
         if (map && partner.lat && partner.lng) {
           partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name}</b> ${partner.isOnline ? '🟢' : ''}<br>קצב: ${partner.pace || 'בינוני'}`);
+            .bindPopup(`<b>${partner.name}</b> ${partner.isOnline !== false ? '🟢' : ''}<br>קצב: ${partner.pace || 'בינוני'}`);
         }
 
         const item = document.createElement('div');
         item.className = `partner-item ${isLocked ? 'locked' : ''}`;
         item.innerHTML = `
           <div style="flex:1;">
-            <b>${partner.name}</b> <span class="${partner.isOnline ? 'online-dot' : 'offline-dot'}"></span> ${partner.isOnline ? '<b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b>' : ''} ${isLocked ? '🔒' : ''}<br>
+            <b>${partner.name}</b> <span class="${partner.isOnline !== false ? 'online-dot' : 'offline-dot'}"></span> ${partner.isOnline !== false ? '<b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b>' : ''} ${isLocked ? '🔒' : ''}<br>
             <span style="color:#666;">קצב: ${partner.pace || 'בינוני'} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
           </div>
           <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openProfileObj('${partner.uid}')">פרופיל</button>
