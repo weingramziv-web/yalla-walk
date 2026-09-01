@@ -64,7 +64,7 @@
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
-    /* סרגל מחוברים בסביבה */
+    /* סרגל מחוברים בלייב */
     .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
     .avatar-circle { width: 42px; height: 42px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
@@ -136,7 +136,10 @@
       </div>
 
       <div style="margin-top: auto;">
-        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:4px;">בחר את המין שלך להרשמה:</label>
+        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">שם פרטי (עבור כניסה כאורח):</label>
+        <input type="text" id="guestNameInput" placeholder="רשום את שמך (למשל: שירה)">
+
+        <label style="display:block; text-align:right; font-weight:bold; margin-top:8px; margin-bottom:2px;">בחר את המין שלך להרשמה:</label>
         <select id="userGenderInput">
           <option value="גבר">גבר</option>
           <option value="אישה">אישה</option>
@@ -404,10 +407,18 @@
     });
 
     function handleUserLogin(user) {
-      let name = "אורח (זמני)";
-      if (user.displayName) name = user.displayName;
-      else if (user.email) name = user.email.split('@')[0];
-      else if (user.isAnonymous) name = "אורח_" + user.uid.substring(0, 4);
+      let customGuestName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
+      let name = "אורח";
+      
+      if (customGuestName) {
+        name = customGuestName;
+      } else if (user.displayName) {
+        name = user.displayName;
+      } else if (user.email) {
+        name = user.email.split('@')[0];
+      } else if (user.isAnonymous) {
+        name = "אורח_" + user.uid.substring(0, 4);
+      }
 
       document.getElementById('authUserName').innerText = name;
 
@@ -458,7 +469,6 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // האזנה גלובלית ואמינה לכל המשתמשים המחוברים
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -476,7 +486,6 @@
       });
     }
 
-    // שליחת התראה בלייב רק בלחיצה יזוקה על הכפתור האדום
     window.broadcastMyWalk = function() {
       if (!auth.currentUser) return;
       const userName = document.getElementById('authUserName').innerText;
@@ -610,7 +619,6 @@
       }
     }
 
-    // חישוב מרחק בקילומטרים בין שתי נקודות גיאוגרפיות
     function getKmDistance(lat1, lon1, lat2, lng2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -622,7 +630,6 @@
       return R * c;
     }
 
-    // תצוגת מחוברים סקלאבילית - סינון לפי רדיוס קרוב
     function renderLiveBar() {
       const bar = document.getElementById('liveUsersBar');
       const header = document.getElementById('liveUsersHeader');
@@ -635,7 +642,6 @@
         return;
       }
 
-      // סינון משתמשים הנמצאים עד 15 ק"מ ממיקום המשתמש
       let nearbyUsers = liveUsers.filter(u => {
         if (!u.lat || !u.lng) return true;
         const dist = getKmDistance(userPos.lat, userPos.lng, u.lat, u.lng);
