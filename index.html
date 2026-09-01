@@ -161,6 +161,12 @@
         • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ!</p>
       </div>
 
+      <div class="feature-comparison-box">
+        <b>💡 איזה מסלול כניסה עדיף לך?</b><br>
+        • <b>התחברות עם Google (מומלץ):</b> היסטוריית קילומטרים נשמרת, אפשרות לפתוח קבוצות הליכה ושמירת מועדפים קבועה.<br>
+        • <b>כניסה כאורח (מצב מוגבל):</b> ללא שמירת היסטוריה, אי אפשר לפתוח קבוצות חדשות, והנתונים נמחקים בסגירת הדפדפן.
+      </div>
+
       <div style="margin-top: auto;">
         <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#c0392b;">* שם פרטי:</label>
         <input type="text" id="guestNameInput" placeholder="רשום את שמך הפרטי...">
@@ -184,7 +190,7 @@
         </div>
 
         <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
-        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח לבדיקה 🚀</button>
+        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח מוגבל 🚀</button>
 
         <div class="legal-disclaimer">
           בלחיצה על התחברות, הנך מצהיר/ה כי גילך מעל 18 וכי הנך מסכים/ה לתקנון הקהילה ובטיחות המשתמשים.
@@ -506,16 +512,19 @@
 
       currentUserDoc = doc(db, "users", user.uid);
       
-      const initLat = window.userPos ? window.userPos.lat : 32.835;
-      const initLng = window.userPos ? window.userPos.lng : 35.076;
+      // הוספת תזוזה קלה (Jitter) במיקום למניעת חפיפת נעצים במכשירים מאותו הבית
+      const baseLat = window.userPos ? window.userPos.lat : 32.835;
+      const baseLng = window.userPos ? window.userPos.lng : 35.076;
+      const jitterLat = baseLat + (Math.random() - 0.5) * 0.002;
+      const jitterLng = baseLng + (Math.random() - 0.5) * 0.002;
 
       setDoc(currentUserDoc, {
         uid: user.uid,
         name: finalName,
         gender: window.userGender || "גבר",
         isGuest: window.isGuestMode,
-        lat: initLat,
-        lng: initLng,
+        lat: jitterLat,
+        lng: jitterLng,
         isOnline: true,
         lastSeen: serverTimestamp(),
         pace: "בינוני",
@@ -526,7 +535,8 @@
         listenToLiveGroups();
       });
 
-      window.startApp();
+      const savedScreen = sessionStorage.getItem('activeScreenTab') || 'mainScreen';
+      window.startApp(savedScreen);
     }
 
     window.startAppAsGuest = function() {
@@ -550,7 +560,7 @@
       signInAnonymously(auth).then((res) => { 
         handleUserLogin(res.user); 
       }).catch(() => { 
-        window.startApp(); 
+        window.startApp('mainScreen'); 
       });
     };
 
@@ -571,6 +581,7 @@
       sessionStorage.removeItem('userLoggedIn');
       sessionStorage.removeItem('customGuestName');
       sessionStorage.removeItem('isGoogleVerified');
+      sessionStorage.removeItem('activeScreenTab');
       window.userLoggingOut = true;
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true });
@@ -772,14 +783,13 @@
       }
     }
 
-    function startApp() {
+    function startApp(targetScreen) {
       userGender = document.getElementById('userGenderInput').value;
       window.userGender = userGender;
 
-      document.getElementById('welcomeScreen').classList.add('hidden');
-      document.getElementById('mainScreen').classList.remove('hidden');
-      document.getElementById('bottomNav').classList.remove('hidden');
-      
+      const screenToOpen = targetScreen || sessionStorage.getItem('activeScreenTab') || 'mainScreen';
+      switchTab(screenToOpen);
+
       updateVerificationUI();
       renderLivePartners();
       renderLiveBar();
@@ -867,7 +877,6 @@
       }
     }
 
-    // נוסחת חישוב מרחק גיאוגרפית במדויק בקילומטרים
     function getKmDistance(lat1, lon1, lat2, lng2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -891,24 +900,11 @@
         return;
       }
 
-      let maxDist = parseFloat(document.getElementById('distFilter') ? document.getElementById('distFilter').value : 10);
-
-      let nearbyUsers = liveUsers.filter(u => {
-        if (!u.lat || !u.lng) return true;
-        const dist = getKmDistance(userPos.lat, userPos.lng, u.lat, u.lng);
-        return dist <= maxDist;
-      });
-
       if (header) {
-        header.innerText = `🟢 מחוברים בסביבה (${nearbyUsers.length}):`;
+        header.innerText = `🟢 מחוברים בסביבה (${liveUsers.length}):`;
       }
 
-      if (nearbyUsers.length === 0) {
-        bar.innerHTML = `<div style="font-size:11px; color:#888;">אין צועדים בטווח ${maxDist} ק"מ שנבחר</div>`;
-        return;
-      }
-
-      nearbyUsers.forEach(u => {
+      liveUsers.forEach(u => {
         const firstLetter = u.name ? u.name.charAt(0).toUpperCase() : '?';
         const isOppositeGender = u.gender !== userGender;
         const isLocked = isOppositeGender && verifiedWalks < 3;
@@ -927,7 +923,6 @@
       });
     }
 
-    // רינדור רשימה ומפה מסוננים בצורה הרמטית לפי סרגל המרחק
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
@@ -938,30 +933,7 @@
         return;
       }
 
-      let maxDist = parseFloat(document.getElementById('distFilter') ? document.getElementById('distFilter').value : 10);
-      let selectedPace = document.getElementById('paceFilter') ? document.getElementById('paceFilter').value : 'all';
-      let selectedDog = document.getElementById('dogFilter') ? document.getElementById('dogFilter').value : 'all';
-
-      let filteredUsers = liveUsers.filter(partner => {
-        // סינון לפי מרחק
-        if (partner.lat && partner.lng) {
-          const dist = getKmDistance(userPos.lat, userPos.lng, partner.lat, partner.lng);
-          if (dist > maxDist) return false;
-        }
-        // סינון לפי קצב
-        if (selectedPace !== 'all' && partner.pace && partner.pace !== selectedPace) return false;
-        // סינון לפי כלב
-        if (selectedDog !== 'all' && partner.dog && partner.dog !== selectedDog) return false;
-
-        return true;
-      });
-
-      if (filteredUsers.length === 0) {
-        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">אין צועדים התואמים את הסינון בטווח ${maxDist} ק"מ</p>`;
-        return;
-      }
-
-      filteredUsers.forEach(partner => {
+      liveUsers.forEach(partner => {
         const isOppositeGender = partner.gender !== userGender;
         const isLocked = isOppositeGender && verifiedWalks < 3;
 
@@ -1096,6 +1068,7 @@
       document.getElementById('chatScreen').classList.add('hidden');
       
       document.getElementById(screenId).classList.remove('hidden');
+      sessionStorage.setItem('activeScreenTab', screenId);
 
       document.getElementById('navMap').classList.remove('active');
       document.getElementById('navGroups').classList.remove('active');
@@ -1111,6 +1084,7 @@
       if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
     }
 
+    window.startApp = startApp;
     window.switchTab = switchTab;
     window.renderLiveBar = renderLiveBar;
     window.openCreateGroupModal = openCreateGroupModal;
