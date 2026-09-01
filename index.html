@@ -363,7 +363,7 @@
   <!-- Firebase v10 SDK via Modules (Firestore & Auth) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, setPersistence, inMemoryPersistence, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -379,6 +379,9 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    // ביטול שמירת סשן אוטומטית - מחייב כניסה מסודרת בכל רענון
+    setPersistence(auth, inMemoryPersistence).catch(() => {});
 
     window.firebaseAuth = auth;
     window.db = db;
@@ -462,7 +465,7 @@
         let liveUsersList = [];
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '')) {
+          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '') && data.isOnline !== false) {
             liveUsersList.push(data);
           }
         });
@@ -487,7 +490,6 @@
       });
     };
 
-    // האזנה להתרעות עם סינון תפוגה (15 דקות מקסימום)
     function listenToWalkAlerts() {
       const q = query(collection(db, "walk_alerts"), orderBy("timestamp", "desc"), limit(1));
       onSnapshot(q, (snapshot) => {
@@ -499,7 +501,6 @@
             const currentTime = new Date().getTime();
             const diffMinutes = (currentTime - alertTime) / (1000 * 60);
 
-            // הצג התראה רק אם נשלחה ב-15 הדקות האחרונות
             if (diffMinutes <= 15 && auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
               const banner = document.getElementById('liveAlertBanner');
               const textSpan = document.getElementById('alertBannerText');
