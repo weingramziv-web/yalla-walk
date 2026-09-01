@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>OK, Let's Go!</title>
 
   <!-- Leaflet CSS -->
@@ -10,9 +10,30 @@
 
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    html, body { margin: 0; padding: 0; background: #f4f6f8; min-height: 100vh; display: flex; justify-content: center; direction: rtl; text-align: right; }
+    html, body { 
+      margin: 0; 
+      padding: 0; 
+      background: #f4f6f8; 
+      min-height: 100vh; 
+      min-height: 100dvh;
+      display: flex; 
+      justify-content: center; 
+      direction: rtl; 
+      text-align: right; 
+    }
     
-    .app-container { width: 100%; max-width: 500px; background: #fff; min-height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding-bottom: 65px; }
+    .app-container { 
+      width: 100%; 
+      max-width: 500px; 
+      background: #fff; 
+      min-height: 100vh; 
+      min-height: 100dvh;
+      display: flex; 
+      flex-direction: column; 
+      position: relative; 
+      box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+      padding-bottom: calc(65px + env(safe-area-inset-bottom)); 
+    }
     .screen { padding: 15px; display: flex; flex-direction: column; flex: 1; text-align: right; }
     
     .screen-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; direction: rtl; }
@@ -43,7 +64,7 @@
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
-    /* סרגל מחוברים בלייב (סגנון פייסבוק) */
+    /* סרגל מחוברים בלייב */
     .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
     .avatar-circle { width: 42px; height: 42px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
@@ -69,7 +90,23 @@
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; max-width: 80%; align-self: flex-start; text-align: right; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; border: 1px solid #eee; max-width: 80%; align-self: flex-end; text-align: right; }
 
-    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 8px 0; z-index: 999; direction: rtl; }
+    /* ניווט תחתון מותאם ל-iOS Safe Area */
+    .bottom-nav { 
+      position: fixed; 
+      bottom: 0; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 100%; 
+      max-width: 500px; 
+      background: #fff; 
+      border-top: 1px solid #eee; 
+      display: flex; 
+      justify-content: space-around; 
+      padding-top: 8px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom)); 
+      z-index: 999; 
+      direction: rtl; 
+    }
     .nav-btn { background: none; color: #7f8c8d; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0; margin: 0; width: 25%; }
     .nav-btn.active { color: #27ae60; font-weight: bold; }
 
@@ -128,7 +165,7 @@
         👤 מחובר כ: <b id="authUserName">אורח</b>
       </div>
 
-      <!-- סרגל מחוברים בלייב (סגנון פייסבוק) -->
+      <!-- סרגל מחוברים בלייב -->
       <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px;">🟢 מחוברים עכשיו באפליקציה:</div>
       <div class="live-users-bar" id="liveUsersBar">
         <div style="font-size:11px; color:#888;">מחפש משתמשים...</div>
@@ -327,7 +364,7 @@
   <!-- Firebase v10 SDK via Modules (Firestore & Auth) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -350,6 +387,8 @@
     let currentUserDoc = null;
     let liveUnsubUsers = null;
     let liveUnsubChat = null;
+
+    getRedirectResult(auth).catch(() => {});
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -393,7 +432,18 @@
     window.loginWithGoogle = function() {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      signInWithPopup(auth, provider).then(() => { window.startApp(); }).catch(() => { signInWithRedirect(auth, provider); });
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+      if (isIOS) {
+        signInWithRedirect(auth, provider);
+      } else {
+        signInWithPopup(auth, provider).then(() => {
+          window.startApp();
+        }).catch(() => {
+          signInWithRedirect(auth, provider);
+        });
+      }
     };
 
     window.logoutUser = function() {
@@ -449,7 +499,7 @@
             banner.classList.remove('hidden');
 
             focusBtn.onclick = function() {
-              banner.classList.add('hidden'); // העלמת הבאנר בלחיצה
+              banner.classList.add('hidden');
               window.switchTab('mainScreen');
               if (window.map && alertData.lat && alertData.lng) {
                 window.map.flyTo([alertData.lat, alertData.lng], 16, { duration: 1.5 });
@@ -546,7 +596,6 @@
       }
     }
 
-    // רנדור סרגל מחוברים בלייב (פייסבוק סטייל)
     function renderLiveBar() {
       const bar = document.getElementById('liveUsersBar');
       if (!bar) return;
