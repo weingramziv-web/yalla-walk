@@ -43,6 +43,16 @@
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
+    /* נקודת מחובר עכשיו בלייב (כמו פייסבוק) */
+    .online-dot { width: 10px; height: 10px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-left: 5px; box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.4); animation: pulse-dot 1.5s infinite; }
+    .offline-dot { width: 10px; height: 10px; background-color: #95a5a6; border-radius: 50%; display: inline-block; margin-left: 5px; }
+
+    @keyframes pulse-dot {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+    }
+
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
     .partner-item.active-now { border-right-color: #e67e22; background: #fef9e7; }
@@ -99,8 +109,8 @@
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
       <div class="alert-banner hidden" id="liveAlertBanner">
-        <span>🔔 <b>דניאל</b> יצא לצעידה בסביבה שלך!</span>
-        <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="autoOpenPartnerChat(1)">הצטרף בצ'אט</button>
+        <span id="alertBannerText">🔔 צועד בסביבה יצא לדרך!</span>
+        <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="switchTab('mainScreen')">צפה במפה</button>
       </div>
 
       <div class="screen-header">
@@ -121,7 +131,7 @@
         <div class="filter-row">
           <div style="flex:1;">
             <label for="paceFilter">🏃‍♂️ קצב:</label>
-            <select id="paceFilter" onchange="renderPartners()">
+            <select id="paceFilter" onchange="renderLivePartners()">
               <option value="all">הכל</option>
               <option value="איטי">איטי</option>
               <option value="בינוני">בינוני</option>
@@ -130,7 +140,7 @@
           </div>
           <div style="flex:1;">
             <label for="dogFilter">🐶 חיות מחמד:</label>
-            <select id="dogFilter" onchange="renderPartners()">
+            <select id="dogFilter" onchange="renderLivePartners()">
               <option value="all">הכל</option>
               <option value="כן">מגיע עם כלב 🐶</option>
               <option value="לא">ללא כלב 🚫</option>
@@ -139,7 +149,7 @@
         </div>
 
         <label>📍 מרחק מרבי: <span id="distVal">5</span> ק"מ</label>
-        <input type="range" id="distFilter" min="1" max="10" value="5" oninput="updateDistVal(); renderPartners();">
+        <input type="range" id="distFilter" min="1" max="10" value="5" oninput="updateDistVal(); renderLivePartners();">
       </div>
 
       <div style="display:flex; gap:5px; margin-top:4px;">
@@ -149,7 +159,7 @@
 
       <div id="map"></div>
       
-      <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#2c3e50;">👇 לחץ על פרטנר להתחלת שיחה:</p>
+      <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#2c3e50;">👇 לחץ על פרטנר להתחלת שיחה בזמן אמת:</p>
       <div id="partnersList"></div>
     </div>
 
@@ -174,16 +184,14 @@
       <div id="favList"></div>
     </div>
 
-    <!-- מסך צ'אט אישי -->
+    <!-- מסך צ'אט אישי בזמן אמת -->
     <div class="screen hidden" id="chatScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1 id="chatTitle">💬 שיחה עם דניאל</h1>
+        <h1 id="chatTitle">💬 שיחה בזמן אמת</h1>
       </div>
 
-      <div class="chat-box" id="chatBox">
-        <div class="msg-partner">היי! ראיתי שאתה קרוב, יוצאים להליכה?</div>
-      </div>
+      <div class="chat-box" id="chatBox"></div>
       
       <div style="display:flex; gap:4px; margin-top:8px;">
         <input type="text" id="chatInput" placeholder="רשום הודעה (לחץ Enter לשליחה)..." style="margin:0;">
@@ -247,7 +255,7 @@
     <div class="modal hidden" id="ratingModal">
       <div class="modal-content" style="text-align:center;">
         <h2 style="color:#27ae60; margin-top:0;">🎉 הליכה הושלמה בהצלחה!</h2>
-        <p>איך הייתה ההליכה עם <b id="ratedPartnerName">דניאל</b>?</p>
+        <p>איך הייתה ההליכה עם <b id="ratedPartnerName">הפרטנר</b>?</p>
         
         <div class="rating-stars" id="starRating">
           <span onclick="setStars(1)">★</span>
@@ -303,10 +311,11 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Firebase v10 SDK via Modules -->
+  <!-- Firebase v10 SDK via Modules (Firestore & Auth) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAx_rBL-U1XxL59cXW-wBO26aUXyfg-Lsw",
@@ -320,19 +329,42 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
+
     window.firebaseAuth = auth;
+    window.db = db;
+
+    let currentUserDoc = null;
+    let liveUnsubUsers = null;
+    let liveUnsubChat = null;
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        if (user.isAnonymous) {
-          document.getElementById('authUserName').innerText = "אורח (זמני)";
-        } else if (user.displayName) {
-          document.getElementById('authUserName').innerText = user.displayName;
-        } else if (user.email) {
-          document.getElementById('authUserName').innerText = user.email.split('@')[0];
-        }
+        let name = "אורח (זמני)";
+        if (user.displayName) name = user.displayName;
+        else if (user.email) name = user.email.split('@')[0];
+
+        document.getElementById('authUserName').innerText = name;
+
+        // עדכון/יצירת פרופיל משתמש בזמן אמת ב-Firestore
+        currentUserDoc = doc(db, "users", user.uid);
+        setDoc(currentUserDoc, {
+          uid: user.uid,
+          name: name,
+          gender: window.userGender || "גבר",
+          lat: window.userPos.lat,
+          lng: window.userPos.lng,
+          isOnline: true,
+          lastSeen: serverTimestamp(),
+          pace: "בינוני",
+          dog: "לא",
+          allowWhatsApp: true,
+          rating: "5.0 ⭐"
+        }, { merge: true });
+
+        // האזנה למשתמשים בלייב
+        listenToLiveUsers();
       } else {
-        // במידה והתנתקת - חזרה למסך הכניסה הראשי
         document.getElementById('welcomeScreen').classList.remove('hidden');
         document.getElementById('mainScreen').classList.add('hidden');
         document.getElementById('bottomNav').classList.add('hidden');
@@ -340,32 +372,67 @@
     });
 
     window.startAppAsGuest = function() {
-      signInAnonymously(auth).then(() => {
-        window.startApp();
-      }).catch((err) => {
-        window.startApp();
-      });
+      signInAnonymously(auth).then(() => { window.startApp(); }).catch(() => { window.startApp(); });
     };
 
     window.loginWithGoogle = function() {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-
-      signInWithPopup(auth, provider).then((result) => {
-        if (result.user) {
-          const name = result.user.displayName || result.user.email;
-          document.getElementById('authUserName').innerText = name;
-        }
-        window.startApp();
-      }).catch((err) => {
-        signInWithRedirect(auth, provider);
-      });
+      signInWithPopup(auth, provider).then(() => { window.startApp(); }).catch(() => { signInWithRedirect(auth, provider); });
     };
 
     window.logoutUser = function() {
-      signOut(auth).then(() => {
-        alert("👋 התנתקת בהצלחה. הועברת למסך הכניסה!");
-        location.reload();
+      if (currentUserDoc) {
+        setDoc(currentUserDoc, { isOnline: false }, { merge: true });
+      }
+      signOut(auth).then(() => { location.reload(); });
+    };
+
+    // האזנה למשתמשים אמיתיים בזמן אמת
+    function listenToLiveUsers() {
+      if (liveUnsubUsers) liveUnsubUsers();
+      
+      liveUnsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+        let liveUsersList = [];
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '')) {
+            liveUsersList.push(data);
+          }
+        });
+        window.liveUsers = liveUsersList;
+        if (window.renderLivePartners) window.renderLivePartners();
+      });
+    }
+
+    // שליחת הודעה בצ'אט בזמן אמת
+    window.sendLiveMessage = function(text, partnerUid) {
+      if (!auth.currentUser || !partnerUid) return;
+      const chatId = [auth.currentUser.uid, partnerUid].sort().join("_");
+      addDoc(collection(db, "chats", chatId, "messages"), {
+        senderUid: auth.currentUser.uid,
+        text: text,
+        timestamp: serverTimestamp()
+      });
+    };
+
+    // האזנה להודעות צ'אט בזמן אמת
+    window.listenToLiveChat = function(partnerUid) {
+      if (!auth.currentUser || !partnerUid) return;
+      if (liveUnsubChat) liveUnsubChat();
+
+      const chatId = [auth.currentUser.uid, partnerUid].sort().join("_");
+      const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
+
+      liveUnsubChat = onSnapshot(q, (snapshot) => {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = '';
+        snapshot.forEach((docSnap) => {
+          const msg = docSnap.data();
+          const isMe = msg.senderUid === auth.currentUser.uid;
+          chatBox.innerHTML += `<div class="${isMe ? 'msg-user' : 'msg-partner'}">${msg.text}</div>`;
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
       });
     };
   </script>
@@ -380,46 +447,24 @@
     let map = null, userMarker = null;
     let safeRoutesGroup = null;
     let showRoutes = false;
+    let liveUsers = [];
 
     let favoritesList = [];
 
-    let partners = [
-      { 
-        id: 1, name: "דניאל", gender: "גבר", location: "מוצקין", pace: "בינוני", dist: 1.2, time: "עכשיו", 
-        phone: "972501234567", allowWhatsApp: true, age: 28, dog: "כן", route: "פארק", pref: "פתוח לשיחה 🗣️", rating: "4.9 ⭐",
-        reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מדויק בזמנים ואדיב מאוד'"],
-        lat: 32.838, lng: 35.078, activeNow: true 
-      },
-      { 
-        id: 2, name: "מיכל", gender: "אישה", location: "קריות", pace: "מהיר", dist: 3.8, time: "הערב", 
-        phone: "972501234568", allowWhatsApp: false, age: 34, dog: "לא", route: "כביש/מדרכה", pref: "אוהבת פודקאסטים 🎧", rating: "5.0 ⭐",
-        reviews: ["'קצב מהיר ומאתגר, מומלצת מאוד!'"],
-        lat: 32.832, lng: 35.075, activeNow: false 
-      }
-    ];
-
-    let groupWalks = [
-      { id: 1, title: "הליכת שקיעה קבוצתית 🌅", time: "היום ב-19:00 בפארק מוצקין", members: 4 }
-    ];
-
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
+      window.userGender = userGender;
+
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.remove('hidden');
       document.getElementById('bottomNav').classList.remove('hidden');
       
       updateVerificationUI();
-      renderPartners();
+      renderLivePartners();
       renderGroups();
       renderFavorites();
 
-      setTimeout(() => {
-        document.getElementById('liveAlertBanner').classList.remove('hidden');
-      }, 2000);
-
-      setTimeout(() => {
-        initMap();
-      }, 100);
+      setTimeout(() => { initMap(); }, 100);
     }
 
     function initMap() {
@@ -439,11 +484,89 @@
         const line3 = L.polyline([[32.839, 35.073], [32.843, 35.075], [32.845, 35.079]], { color: '#27ae60', weight: 5, opacity: 0.8 }).bindPopup("🛣️ מסלול היקפי מאובטח");
 
         safeRoutesGroup = L.featureGroup([line1, line2, line3]);
-
         map.invalidateSize();
       } catch (e) {
-        console.log("Map init safe-mode:", e);
+        console.log("Map init:", e);
       }
+    }
+
+    function renderLivePartners() {
+      const listContainer = document.getElementById('partnersList');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
+
+      // משתמשים בדיפולט במידה ואין עוד משתמש מחובר במקביל
+      let displayList = (liveUsers && liveUsers.length > 0) ? liveUsers : [
+        { uid: "p1", name: "דניאל", gender: "גבר", pace: "בינוני", dog: "כן", isOnline: true, lat: 32.838, lng: 35.078, rating: "4.9 ⭐" },
+        { uid: "p2", name: "מיכל", gender: "אישה", pace: "מהיר", dog: "לא", isOnline: false, lat: 32.832, lng: 35.075, rating: "5.0 ⭐" }
+      ];
+
+      displayList.forEach(partner => {
+        const isOppositeGender = partner.gender !== userGender;
+        const isLocked = isOppositeGender && verifiedWalks < 3;
+
+        if (map && partner.marker) map.removeLayer(partner.marker);
+        if (map && partner.lat && partner.lng) {
+          partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
+            .bindPopup(`<b>${partner.name}</b> ${partner.isOnline ? '🟢' : ''}<br>קצב: ${partner.pace || 'בינוני'}`);
+        }
+
+        const item = document.createElement('div');
+        item.className = `partner-item ${isLocked ? 'locked' : ''}`;
+        item.innerHTML = `
+          <div style="flex:1;">
+            <b>${partner.name}</b> <span class="${partner.isOnline ? 'online-dot' : 'offline-dot'}"></span> ${partner.isOnline ? '<b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b>' : ''} ${isLocked ? '🔒' : ''}<br>
+            <span style="color:#666;">קצב: ${partner.pace || 'בינוני'} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
+          </div>
+          <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openProfileObj('${partner.uid}')">פרופיל</button>
+        `;
+        item.onclick = () => selectPartnerAndOpenChat(partner, isLocked);
+        listContainer.appendChild(item);
+      });
+    }
+
+    function selectPartnerAndOpenChat(partner, isLocked) {
+      if (isLocked) { alert("🔒 גישה מוגבלת: נדרשות 3 הליכות מאומתות עם בני אותו המין."); return; }
+      selectedPartner = partner;
+      if (map && partner.lat && partner.lng) {
+        map.flyTo([partner.lat, partner.lng], 15);
+      }
+      autoOpenPartnerChat(partner);
+    }
+
+    function autoOpenPartnerChat(partner) {
+      selectedPartner = partner;
+      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
+      
+      const btnWa = document.getElementById('btnChatWhatsApp');
+      const waNotice = document.getElementById('waPrivacyNotice');
+      
+      if (partner.allowWhatsApp !== false) {
+        btnWa.classList.remove('hidden');
+        waNotice.classList.add('hidden');
+      } else {
+        btnWa.classList.add('hidden');
+        waNotice.classList.remove('hidden');
+      }
+
+      switchTab('chatScreen');
+      if (window.listenToLiveChat && partner.uid) {
+        window.listenToLiveChat(partner.uid);
+      }
+    }
+
+    function sendMsg() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text || !selectedPartner) return;
+
+      if (window.sendLiveMessage && selectedPartner.uid) {
+        window.sendLiveMessage(text, selectedPartner.uid);
+      } else {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML += `<div class="msg-user">${text}</div>`;
+      }
+      input.value = '';
     }
 
     function toggleRoutes() {
@@ -462,13 +585,12 @@
         navigator.geolocation.getCurrentPosition((pos) => {
           userPos.lat = pos.coords.latitude;
           userPos.lng = pos.coords.longitude;
+          window.userPos = userPos;
           if (map) {
             map.flyTo([userPos.lat, userPos.lng], 15);
             if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
           }
           alert("📍 מיקומך עודכן בהצלחה במפה!");
-        }, () => {
-          alert("📍 לא ניתן להשיג את המיקום. וודא שה-GPS מופעל בדפדפן.");
         });
       }
     }
@@ -488,105 +610,6 @@
       }
     }
 
-    function renderPartners() {
-      const listContainer = document.getElementById('partnersList');
-      if (!listContainer) return;
-      listContainer.innerHTML = '';
-
-      const paceFilterVal = document.getElementById('paceFilter').value;
-      const dogFilterVal = document.getElementById('dogFilter').value;
-      const maxDistVal = parseFloat(document.getElementById('distFilter').value);
-
-      partners.forEach(partner => {
-        if (paceFilterVal !== 'all' && partner.pace !== paceFilterVal) return;
-        if (dogFilterVal !== 'all' && partner.dog !== dogFilterVal) return;
-        if (partner.dist > maxDistVal) return;
-
-        const isOppositeGender = partner.gender !== userGender;
-        const isLocked = isOppositeGender && verifiedWalks < 3;
-
-        if (map && partner.marker) map.removeLayer(partner.marker);
-
-        if (map) {
-          partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name}</b> (${partner.gender}) ${partner.dog === 'כן' ? '🐶' : ''}<br>קצב: ${partner.pace}${isLocked ? '<br><b style="color:red;">🔒 נדרש אימות</b>' : ''}`);
-        }
-
-        const item = document.createElement('div');
-        item.className = `partner-item ${isLocked ? 'locked' : ''} ${partner.activeNow ? 'active-now' : ''}`;
-        item.innerHTML = `
-          <div style="flex:1;">
-            <b>${partner.name}</b> (${partner.gender}, ${partner.dist} ק"מ) ${partner.dog === 'כן' ? '🐶' : ''} ${isLocked ? '🔒' : ''} <span style="color:#f39c12; font-size:11px;">${partner.rating}</span><br>
-            <span style="color:#666;">קצב: ${partner.pace} ${partner.activeNow ? '• <b style="color:#e67e22;">🚶‍♂️ בצד צעידה עכשיו!</b>' : ''}</span>
-          </div>
-          <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openProfile(${partner.id})">פרופיל</button>
-        `;
-        item.onclick = () => selectPartnerAndOpenChat(partner, isLocked);
-        listContainer.appendChild(item);
-      });
-    }
-
-    function selectPartnerAndOpenChat(partner, isLocked) {
-      if (isLocked) { alert("🔒 גישה מוגבלת: נדרשות 3 הליכות מאומתות עם בני אותו המין."); return; }
-      selectedPartner = partner;
-      if (map) {
-        map.flyTo([partner.lat, partner.lng], 15, { duration: 1 });
-      }
-      autoOpenPartnerChat(partner.id);
-    }
-
-    function autoOpenPartnerChat(partnerId) {
-      const partner = partners.find(p => p.id === partnerId);
-      if (!partner) return;
-      selectedPartner = partner;
-
-      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
-      
-      const btnWa = document.getElementById('btnChatWhatsApp');
-      const waNotice = document.getElementById('waPrivacyNotice');
-      
-      if (partner.allowWhatsApp) {
-        btnWa.classList.remove('hidden');
-        waNotice.classList.add('hidden');
-      } else {
-        btnWa.classList.add('hidden');
-        waNotice.classList.remove('hidden');
-      }
-
-      switchTab('chatScreen');
-    }
-
-    function openChatFromModal() {
-      closeModal();
-      if (selectedPartner) {
-        const isOppositeGender = selectedPartner.gender !== userGender;
-        const isLocked = isOppositeGender && verifiedWalks < 3;
-        selectPartnerAndOpenChat(selectedPartner, isLocked);
-      }
-    }
-
-    function openWhatsApp() {
-      if (!selectedPartner || !selectedPartner.allowWhatsApp) {
-        alert("🔒 המשתמש מעדיף לתקשר בצ'אט הפנימי בלבד.");
-        return;
-      }
-      const text = encodeURIComponent(`היי ${selectedPartner.name}, ראיתי ב-Yalla Walk שאת/ה בסביבה, מעוניין/ת לצאת להליכה?`);
-      window.open(`https://wa.me/${selectedPartner.phone}?text=${text}`, '_blank');
-    }
-
-    function toggleCurrentPartnerFav() {
-      if (!selectedPartner) return;
-      const idx = favoritesList.findIndex(f => f.id === selectedPartner.id);
-      if (idx > -1) {
-        favoritesList.splice(idx, 1);
-        alert(`❌ ${selectedPartner.name} הוסר/ה מרשימת המועדפים.`);
-      } else {
-        favoritesList.push(selectedPartner);
-        alert(`⭐ ${selectedPartner.name} נוספ/ה בהצלחה לפייבוריטים!`);
-      }
-      renderFavorites();
-    }
-
     function renderFavorites() {
       const container = document.getElementById('favList');
       if (!container) return;
@@ -599,122 +622,45 @@
 
       favoritesList.forEach(fav => {
         container.innerHTML += `
-          <div class="partner-item" onclick="autoOpenPartnerChat(${fav.id})">
+          <div class="partner-item" onclick="autoOpenPartnerChat(${JSON.stringify(fav)})">
             <div>
               <b>⭐ ${fav.name}</b> (${fav.gender})<br>
-              <span style="color:#666;">אזור: ${fav.location} | קצב: ${fav.pace}</span>
+              <span style="color:#666;">קצב: ${fav.pace || 'בינוני'}</span>
             </div>
-            <button style="width:auto; padding:6px;" onclick="event.stopPropagation(); autoOpenPartnerChat(${fav.id})">💬 צ'אט</button>
+            <button style="width:auto; padding:6px;">💬 צ'אט</button>
           </div>
         `;
       });
     }
 
-    function renderGroups() {
-      const container = document.getElementById('groupsList');
-      if (!container) return;
-      container.innerHTML = '';
-
-      groupWalks.forEach(g => {
-        container.innerHTML += `
-          <div class="group-item">
-            <b>${g.title}</b><br>
-            <span style="color:#555;">📍 ${g.time} | 👥 ${g.members} משתתפים צועדים</span>
-            <button class="btn-group" style="padding:6px; font-size:12px; margin-top:6px;" onclick="joinGroup('${g.title}')">הצטרף לקבוצה</button>
-          </div>
-        `;
-      });
-    }
-
-    function joinGroup(title) {
-      alert(`🎉 הצטרפת בהצלחה לקבוצה: ${title}!`);
-    }
-
-    function openCreateGroupModal() {
-      document.getElementById('createGroupModal').classList.remove('hidden');
-    }
-
-    function closeGroupModal() {
-      document.getElementById('createGroupModal').classList.add('hidden');
-    }
-
-    function createNewGroup() {
-      const title = document.getElementById('newGroupTitle').value.trim();
-      const time = document.getElementById('newGroupTime').value.trim();
-      if (!title || !time) { alert("נא למלא את כל השדות!"); return; }
-
-      groupWalks.push({ id: Date.now(), title: title, time: time, members: 1 });
-      renderGroups();
-      closeGroupModal();
-      document.getElementById('newGroupTitle').value = '';
-      document.getElementById('newGroupTime').value = '';
-      alert("👥 הקבוצה פורסמה בהצלחה!");
-    }
-
-    function toggleMyWaPrivacy() {
-      const isChecked = document.getElementById('myWaToggle').checked;
-      alert(isChecked ? "🔓 אפשרת למשתמשים לפנות אליך ב-WhatsApp" : "🔒 הגדרת שמשתמשים יוכלו לפנות אליך בצ'אט הפנימי בלבד");
-    }
-
-    function finishWalk() {
-      document.getElementById('chatScreen').classList.add('hidden');
-      document.getElementById('ratedPartnerName').innerText = selectedPartner ? selectedPartner.name : 'דניאל';
-      document.getElementById('ratingModal').classList.remove('hidden');
-      setStars(5);
-    }
-
-    function setStars(num) {
-      selectedRating = num;
-      const stars = document.querySelectorAll('#starRating span');
-      stars.forEach((s, idx) => {
-        if (idx < num) s.classList.add('active');
-        else s.classList.remove('active');
-      });
-    }
-
-    function submitRating() {
-      const reviewInput = document.getElementById('reviewText').value.trim();
-      if (reviewInput && selectedPartner) {
-        selectedPartner.reviews.push(`'${reviewInput}'`);
+    function toggleCurrentPartnerFav() {
+      if (!selectedPartner) return;
+      const idx = favoritesList.findIndex(f => f.uid === selectedPartner.uid);
+      if (idx > -1) {
+        favoritesList.splice(idx, 1);
+        alert(`❌ ${selectedPartner.name} הוסר/ה מרשימת המועדפים.`);
+      } else {
+        favoritesList.push(selectedPartner);
+        alert(`⭐ ${selectedPartner.name} נוספ/ה בהצלחה לפייבוריטים!`);
       }
-
-      document.getElementById('ratingModal').classList.add('hidden');
-      document.getElementById('reviewText').value = '';
-      verifiedWalks++;
-      totalKm += 1.2;
-      document.getElementById('userKm').innerText = `${totalKm.toFixed(1)} ק"מ`;
-      updateVerificationUI();
-      renderPartners();
-      switchTab('mainScreen');
-      alert("🏆 תודה! הדירוג והמשוב החיובי נשמרו בהצלחה.");
+      renderFavorites();
     }
 
-    function sendMsg() {
-      const input = document.getElementById('chatInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const chatBox = document.getElementById('chatBox');
-      chatBox.innerHTML += `<div class="msg-user">${text}</div>`;
-      input.value = '';
-      chatBox.scrollTop = chatBox.scrollHeight;
-
-      setTimeout(() => {
-        let reply = "מעולה! ניפגש בנקודת המפגש. לחץ על 'צעדנו יחד' בסיום 🔥";
-        const clean = text.toLowerCase();
-
-        if (clean.includes("רגע") || clean.includes("חכה") || clean.includes("דקה") || clean.includes("אולי")) {
-          reply = "אין בעיה, קח את הזמן! תעדכן אותי כשתהיה מוכן 👍";
-        } else if (clean.includes("לא") || clean.includes("ביטול") || clean.includes("עסוק") || clean.includes("במקום")) {
-          reply = "חבל! אולי בפעם אחרת, תהיה איתי בקשר מתי שתוכל 🙂";
-        } else if (clean.includes("כן") || clean.includes("סבבה") || clean.includes("בטח") || clean.includes("סגור") || clean.includes("יאללה")) {
-          reply = "סגור, אני יוצא לדרך לכיוון פארק מוצקין! ניפגש עוד מעט 🔥";
-        }
-
-        chatBox.innerHTML += `<div class="msg-partner">${reply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 800);
+    function openProfileObj(uid) {
+      let partner = (liveUsers || []).find(p => p.uid === uid) || { name: "דניאל", gender: "גבר", pace: "בינוני", rating: "4.9 ⭐" };
+      selectedPartner = partner;
+      
+      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
+      document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating || '5.0 ⭐'}`;
+      document.getElementById('modalDetails').innerHTML = `🏃‍♂️ קצב: ${partner.pace || 'בינוני'}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}`;
+      document.getElementById('modalReviews').innerHTML = "<div>• 'כיף לצעוד יחד, קצב מעולה!'</div>";
+      document.getElementById('profileModal').classList.remove('hidden');
     }
+
+    function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
+    function openChatFromModal() { closeModal(); if (selectedPartner) autoOpenPartnerChat(selectedPartner); }
+    function openWhatsApp() { if (selectedPartner) window.open(`https://wa.me/?text=היי`, '_blank'); }
+    function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
 
     function switchTab(screenId) {
       document.getElementById('welcomeScreen').classList.add('hidden');
@@ -740,32 +686,10 @@
       if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
     }
 
-    function openProfile(id) {
-      const partner = partners.find(p => p.id === id);
-      if (!partner) return;
-      selectedPartner = partner;
-      
-      const isOppositeGender = partner.gender !== userGender;
-      const isLocked = isOppositeGender && verifiedWalks < 3;
-      const modalChatBtn = document.getElementById('modalChatBtn');
-      
-      if (isLocked) {
-        modalChatBtn.innerText = "🔒 נדרש אימות ליצירת קשר";
-        modalChatBtn.style.background = "#e74c3c";
-      } else {
-        modalChatBtn.innerText = "💬 צור קשר בצ'אט";
-        modalChatBtn.style.background = "#27ae60";
-      }
-
-      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
-      document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating}`;
-      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location}<br>🏃‍♂️ קצב: ${partner.pace}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}<br>📲 WhatsApp: ${partner.allowWhatsApp ? 'מאושר' : 'חסום'}<br>🎧 העדפה: ${partner.pref}`;
-      document.getElementById('modalReviews').innerHTML = partner.reviews.map(r => `<div>• ${r}</div>`).join('');
-      document.getElementById('profileModal').classList.remove('hidden');
-    }
-
-    function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
-    function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
+    function renderGroups() {}
+    function finishWalk() { document.getElementById('ratingModal').classList.remove('hidden'); }
+    function setStars(num) {}
+    function submitRating() { document.getElementById('ratingModal').classList.add('hidden'); switchTab('mainScreen'); }
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
