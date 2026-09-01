@@ -22,6 +22,11 @@
       text-align: right; 
     }
     
+    body.high-contrast { background: #000 !important; color: #fff !important; }
+    body.high-contrast .app-container { background: #121212 !important; color: #fff !important; }
+    body.high-contrast button { background: #ffff00 !important; color: #000 !important; font-weight: bold !important; }
+    body.large-font { font-size: 115% !important; }
+
     .app-container { 
       width: 100%; 
       max-width: 500px; 
@@ -44,6 +49,7 @@
     
     input, select, textarea { width: 100%; padding: 10px; margin: 4px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 13px; text-align: right; direction: rtl; }
     button { width: 100%; padding: 10px; background: #27ae60; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 6px; text-align: center; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
     button:active { opacity: 0.9; }
     .btn-google { background: #4285F4; color: #fff; margin-top: 8px; }
     .btn-secondary { background: #7f8c8d; }
@@ -65,12 +71,13 @@
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 8px; border-radius: 8px; font-size: 11px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
 
-    /* דשבורד חברתי שכונתי */
+    /* לחצן נגישות צף */
+    .accessibility-btn { position: fixed; top: 10px; left: 10px; z-index: 9999; background: #2980b9; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
     .community-dashboard { background: linear-gradient(135deg, #e8f5e9, #ffffff); border: 1px solid #c8e6c9; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
     .dashboard-stat-text { font-size: 13px; color: #2c3e50; font-weight: bold; line-height: 1.4; }
     .dashboard-highlight { color: #27ae60; font-size: 16px; font-weight: 800; }
 
-    /* סרגל מחוברים בלייב */
     .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
     .avatar-circle { width: 44px; height: 44px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); overflow: hidden; }
@@ -119,25 +126,27 @@
 </head>
 <body>
 
+  <!-- כפתור נגישות צף -->
+  <button class="accessibility-btn" title="תפריט נגישות" onclick="openAccessibilityModal()">♿</button>
+
   <div class="app-container">
 
     <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
-      <div style="text-align: center; margin-top: 15px;">
+      <div style="text-align: center; margin-top: 10px;">
         <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ OK, Let's Go!</h1>
         <p style="font-size: 13px; font-weight: bold; color: #2c3e50; text-align: center;">הקהילה הבטוחה והבריאה של הצעידה בסביבה</p>
       </div>
 
-      <div style="background: #eef9f1; padding: 12px; border-radius: 12px; margin: 12px 0; text-align: right; font-size: 12px;">
-        <p>🛡️ <b>אזור בטוח ומפוקח:</b><br>
-        • הפרדה מוחלטת והגנה מלאה לקטינים (מתחת לגיל 18).<br>
-        • דירוגים חיוביים בלבד – ללא שיימינג וללא תגובות שליליות.<br>
-        • הגנה מבריונות ודיווח דיסקרטי המטופל תוך 72 שעות.<br>
-        • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ, לא מול המסך!</p>
+      <div style="background: #eef9f1; padding: 10px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 11px;">
+        <p style="margin:0;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
+        • מערך אימות 3 הליכות להגנה מלאה מציד/התחזות.<br>
+        • דירוגים חיוביים בלבד – אפס סובלנות לבריונות.<br>
+        • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ!</p>
       </div>
 
       <div style="margin-top: auto;">
-        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#c0392b;">* שם פרטי (חובה לכניסה כאורח):</label>
+        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#c0392b;">* שם פרטי:</label>
         <input type="text" id="guestNameInput" placeholder="רשום את שמך הפרטי...">
 
         <div style="display:flex; gap:8px; margin-top:4px;">
@@ -148,17 +157,18 @@
               <option value="אישה">אישה</option>
             </select>
           </div>
-          <div style="flex:1;">
-            <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">קבוצת גיל:</label>
-            <select id="userAgeGroupInput">
-              <option value="adult">בגיר (18+)</option>
-              <option value="minor">קטין (מתחת ל-18)</option>
-            </select>
-          </div>
         </div>
 
-        <button onclick="startAppAsGuest()" style="margin-top: 10px; font-size: 15px;">כניסה מהירה כאורח 🚀</button>
-        <button onclick="loginWithGoogle()" class="btn-google">🌐 התחברות מאובטחת עם Google</button>
+        <!-- אישור תקנון חובה משפטי -->
+        <div style="background:#fff8e1; border:1px solid #ffe082; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
+          <input type="checkbox" id="termsCheckbox" style="width:auto; vertical-align:middle;" onchange="toggleAuthButtons()">
+          <label for="termsCheckbox" style="vertical-align:middle;">
+            קראתי ואני מסכים/ה ל<a href="javascript:void(0)" onclick="openTermsModal()" style="color:#2980b9; font-weight:bold;">תקנון האפליקציה, תנאי השימוש והצהרת הגיל (18+)</a>.
+          </label>
+        </div>
+
+        <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
+        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח מוגבל 🚀</button>
       </div>
     </div>
 
@@ -196,7 +206,7 @@
         ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
       </div>
 
-      <button class="btn-sos" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
+      <button class="btn-sos" id="btnBroadcastWalk" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
 
       <div class="filter-box" style="margin-top:8px;">
         <div class="filter-row">
@@ -310,6 +320,34 @@
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחזר למסך הכניסה</button>
     </div>
 
+    <!-- מודאל תקנון ותנאי שימוש -->
+    <div class="modal hidden" id="termsModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#27ae60;">📜 תקנון ותנאי שימוש - OK, Let's Go!</h3>
+        <div style="font-size:11px; color:#444; max-height:220px; overflow-y:auto; line-height:1.5; border:1px solid #eee; padding:8px; border-radius:6px;">
+          <b>1. הצהרת גיל ובטיחות:</b> האפליקציה מיועדת לשימוש בגירים מגיל 18 ומעלה בלבד. חל איסור מוחלט על קטינים לעשות שימוש במערכת למפגשים.<br>
+          <b>2. אחריות המשתמש:</b> האפליקציה מהווה פלטפורמה טכנולוגית בלבד. מפעיל האפליקציה אינו אחראי למפגשים פיזיים, לנזק גוף, רכוש או להתנהגות משתמשים בשטח.<br>
+          <b>3. משמעת וקהילה:</b> חל איסור על בריונות, הטרדות או שפה פוגענית. דיווחים מטופלים בדיסקרטיות מלאה תוך 72 שעות.<br>
+          <b>4. פרטיות:</b> המיקום במפה מטושטש לבטיחות. נתונים במצב אורח אינם נשמרים.
+        </div>
+        <button onclick="acceptTermsFromModal()" style="margin-top:10px;">אני מאשר/ת את התקנון</button>
+      </div>
+    </div>
+
+    <!-- מודאל נגישות -->
+    <div class="modal hidden" id="accessibilityModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#2980b9;">♿ תפריט והצהרת נגישות</h3>
+        <p style="font-size:11px; color:#555;">אנו פועלים להנגשת האפליקציה לכלל האוכלוסייה בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות.</p>
+        <button onclick="toggleHighContrast()" style="background:#34495e;">🌓 הפעל/בטל ניגודיות גבוהה</button>
+        <button onclick="toggleLargeFont()" style="background:#16a085; margin-top:4px;">🔍 הגדל/הקטן גופן</button>
+        <hr style="border:none; border-top:1px solid #eee; margin:10px 0;">
+        <b style="font-size:11px;">📞 רכז נגישות ופניות:</b>
+        <p style="font-size:10px; color:#666; margin-top:2px;">לפניות ודיווח על תקלות נגישות ניתן ליצור קשר במייל: accessibility@okletsgo.app</p>
+        <button onclick="closeAccessibilityModal()" class="btn-secondary" style="margin-top:6px;">סגור</button>
+      </div>
+    </div>
+
     <!-- פופ-אפ יצירת קבוצת הליכה חדשה -->
     <div class="modal hidden" id="createGroupModal">
       <div class="modal-content">
@@ -414,6 +452,7 @@
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
         sessionStorage.setItem('userLoggedIn', 'true');
+        sessionStorage.setItem('isGoogleVerified', 'true');
         handleUserLogin(result.user);
       }
     }).catch(() => {});
@@ -432,14 +471,15 @@
     function handleUserLogin(user) {
       let savedName = sessionStorage.getItem('customGuestName');
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
-      let ageGroup = document.getElementById('userAgeGroupInput') ? document.getElementById('userAgeGroupInput').value : 'adult';
+      let isGoogleAuth = sessionStorage.getItem('isGoogleVerified') === 'true';
 
       let finalName = savedName || inputName || user.displayName || (user.email ? user.email.split('@')[0] : '');
 
       if (!finalName) return;
 
-      window.userAgeGroup = ageGroup;
-      document.getElementById('authUserName').innerText = finalName;
+      window.isGuestMode = !isGoogleAuth;
+      document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח מוגבל)' : '');
+      
       if (document.getElementById('profileAvatarChar')) {
         document.getElementById('profileAvatarChar').innerText = finalName.charAt(0).toUpperCase();
       }
@@ -449,7 +489,7 @@
         uid: user.uid,
         name: finalName,
         gender: window.userGender || "גבר",
-        ageGroup: ageGroup,
+        isGuest: window.isGuestMode,
         lat: window.userPos ? window.userPos.lat : 32.835,
         lng: window.userPos ? window.userPos.lng : 35.076,
         isOnline: true,
@@ -466,6 +506,10 @@
     }
 
     window.startAppAsGuest = function() {
+      if (!document.getElementById('termsCheckbox').checked) {
+        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
+        return;
+      }
       const nameVal = document.getElementById('guestNameInput').value.trim();
       if (!nameVal) {
         alert("⚠️ חובה לרשום את שמך הפרטי לפני הכניסה כאורח!");
@@ -475,7 +519,8 @@
       
       sessionStorage.setItem('customGuestName', nameVal);
       sessionStorage.setItem('userLoggedIn', 'true');
-      document.getElementById('authUserName').innerText = nameVal;
+      sessionStorage.setItem('isGoogleVerified', 'false');
+      document.getElementById('authUserName').innerText = nameVal + ' (אורח מוגבל)';
       window.userLoggingOut = false;
       
       signInAnonymously(auth).then((res) => { 
@@ -486,7 +531,12 @@
     };
 
     window.loginWithGoogle = function() {
+      if (!document.getElementById('termsCheckbox').checked) {
+        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
+        return;
+      }
       sessionStorage.setItem('userLoggedIn', 'true');
+      sessionStorage.setItem('isGoogleVerified', 'true');
       window.userLoggingOut = false;
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
@@ -496,6 +546,7 @@
     window.logoutUser = function() {
       sessionStorage.removeItem('userLoggedIn');
       sessionStorage.removeItem('customGuestName');
+      sessionStorage.removeItem('isGoogleVerified');
       window.userLoggingOut = true;
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true });
@@ -508,11 +559,10 @@
       
       liveUnsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
         let liveUsersList = [];
-        const myAgeGroup = window.userAgeGroup || 'adult';
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '') && (data.ageGroup || 'adult') === myAgeGroup) {
+          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '') && !data.isGuest) {
             liveUsersList.push(data);
           }
         });
@@ -523,13 +573,17 @@
     }
 
     window.broadcastMyWalk = function() {
+      if (window.isGuestMode) {
+        alert("🔒 כניסה במצב אורח מוגבלת: שידור התרעת צעידה בסביבה מיועד למשתמשים מאומתים בלבד. התחבר עם Google!");
+        return;
+      }
+
       const activeUser = auth.currentUser;
       const userName = document.getElementById('authUserName').innerText;
 
       addDoc(collection(db, "walk_alerts"), {
-        senderUid: activeUser ? activeUser.uid : 'guest_' + Date.now(),
+        senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
         senderName: userName,
-        ageGroup: window.userAgeGroup || 'adult',
         lat: window.userPos ? window.userPos.lat : 32.835,
         lng: window.userPos ? window.userPos.lng : 35.076,
         timestamp: serverTimestamp()
@@ -545,14 +599,13 @@
       onSnapshot(q, (snapshot) => {
         snapshot.forEach(docSnap => {
           const alertData = docSnap.data();
-          const myAgeGroup = window.userAgeGroup || 'adult';
 
           if (alertData.timestamp && alertData.timestamp.toDate) {
             const alertTime = alertData.timestamp.toDate().getTime();
             const currentTime = new Date().getTime();
             const diffMinutes = (currentTime - alertTime) / (1000 * 60);
 
-            if (diffMinutes <= 15 && auth.currentUser && alertData.senderUid !== auth.currentUser.uid && (alertData.ageGroup || 'adult') === myAgeGroup) {
+            if (diffMinutes <= 15 && auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
               const banner = document.getElementById('liveAlertBanner');
               const textSpan = document.getElementById('alertBannerText');
               const focusBtn = document.getElementById('btnAlertFocus');
@@ -573,8 +626,12 @@
       });
     }
 
-    // יצירה והאזנה לקבוצות הליכה בלייב
     window.createNewGroup = function() {
+      if (window.isGuestMode) {
+        alert("🔒 כניסה במצב אורח מוגבלת: פתיחת קבוצת הליכה חדשה מיועדת למשתמשים מאומתים בלבד.");
+        return;
+      }
+
       const title = document.getElementById('newGroupTitle').value.trim();
       const time = document.getElementById('newGroupTime').value.trim();
 
@@ -587,7 +644,6 @@
         title: title,
         time: time,
         creatorName: document.getElementById('authUserName').innerText,
-        ageGroup: window.userAgeGroup || 'adult',
         timestamp: serverTimestamp()
       }).then(() => {
         alert("👥 הקבוצה פורסמה בהצלחה בלייב!");
@@ -606,15 +662,13 @@
 
         snapshot.forEach(docSnap => {
           const g = docSnap.data();
-          if ((g.ageGroup || 'adult') === (window.userAgeGroup || 'adult')) {
-            container.innerHTML += `
-              <div class="group-item">
-                <b>👥 ${g.title}</b><br>
-                <span>📍 מפגש: ${g.time}</span><br>
-                <span style="color:#7f8c8d; font-size:10px;">נוצר ע"י: ${g.creatorName}</span>
-              </div>
-            `;
-          }
+          container.innerHTML += `
+            <div class="group-item">
+              <b>👥 ${g.title}</b><br>
+              <span>📍 מפגש: ${g.time}</span><br>
+              <span style="color:#7f8c8d; font-size:10px;">נוצר ע"י: ${g.creatorName}</span>
+            </div>
+          `;
         });
       });
     }
@@ -678,6 +732,24 @@
     let remainingSeconds = 120 * 60;
     let usageTimerInterval = null;
 
+    function toggleAuthButtons() {
+      const isChecked = document.getElementById('termsCheckbox').checked;
+      document.getElementById('btnGoogleAuth').disabled = !isChecked;
+      document.getElementById('btnGuestAuth').disabled = !isChecked;
+    }
+
+    function openTermsModal() { document.getElementById('termsModal').classList.remove('hidden'); }
+    function acceptTermsFromModal() { 
+      document.getElementById('termsCheckbox').checked = true; 
+      toggleAuthButtons();
+      document.getElementById('termsModal').classList.add('hidden'); 
+    }
+
+    function openAccessibilityModal() { document.getElementById('accessibilityModal').classList.remove('hidden'); }
+    function closeAccessibilityModal() { document.getElementById('accessibilityModal').classList.add('hidden'); }
+    function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
+    function toggleLargeFont() { document.body.classList.toggle('large-font'); }
+
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
       window.userGender = userGender;
@@ -695,7 +767,6 @@
       setTimeout(() => { initMap(); }, 100);
     }
 
-    // שעון עצר דינמי לבריאות דיגיטלית (2 שעות ביום)
     function startUsageTimer() {
       if (usageTimerInterval) clearInterval(usageTimerInterval);
       usageTimerInterval = setInterval(() => {
@@ -841,7 +912,6 @@
       }
     }
 
-    // ניהול מועדפים
     function renderFavorites() {
       const container = document.getElementById('favList');
       if (!container) return;
@@ -948,6 +1018,13 @@
     window.openCreateGroupModal = openCreateGroupModal;
     window.closeGroupModal = closeGroupModal;
     window.toggleCurrentPartnerFavFromModal = toggleCurrentPartnerFavFromModal;
+    window.toggleAuthButtons = toggleAuthButtons;
+    window.openTermsModal = openTermsModal;
+    window.acceptTermsFromModal = acceptTermsFromModal;
+    window.openAccessibilityModal = openAccessibilityModal;
+    window.closeAccessibilityModal = closeAccessibilityModal;
+    window.toggleHighContrast = toggleHighContrast;
+    window.toggleLargeFont = toggleLargeFont;
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
