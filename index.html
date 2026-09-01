@@ -162,7 +162,7 @@
       </div>
 
       <div class="user-auth-badge" id="userAuthBadge">
-        👤 מחובר כ: <b id="authUserName">אורח</b>
+        👤 מחובר כ: <b id="authUserName">...</b>
       </div>
 
       <!-- סרגל מחוברים בלייב -->
@@ -407,27 +407,22 @@
     });
 
     function handleUserLogin(user) {
-      let customGuestName = sessionStorage.getItem('customGuestName') || (document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '');
-      let name = "";
+      let savedName = sessionStorage.getItem('customGuestName');
+      let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
       
-      if (customGuestName) {
-        name = customGuestName;
-      } else if (user.displayName) {
-        name = user.displayName;
-      } else if (user.email) {
-        name = user.email.split('@')[0];
+      let finalName = savedName || inputName || user.displayName || (user.email ? user.email.split('@')[0] : '');
+
+      if (!finalName) {
+        return; // אם אין שם — לא ממשיכים להכנס למסך הראשי
       }
 
-      if (!name) {
-        return; 
-      }
-
-      document.getElementById('authUserName').innerText = name;
+      // סנכרון מיידי לתצוגה הראשי
+      document.getElementById('authUserName').innerText = finalName;
 
       currentUserDoc = doc(db, "users", user.uid);
       setDoc(currentUserDoc, {
         uid: user.uid,
-        name: name,
+        name: finalName,
         gender: window.userGender || "גבר",
         lat: window.userPos ? window.userPos.lat : 32.835,
         lng: window.userPos ? window.userPos.lng : 35.076,
