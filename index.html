@@ -43,7 +43,6 @@
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
-    /* נקודת מחובר עכשיו בלייב (כמו פייסבוק) */
     .online-dot { width: 10px; height: 10px; background-color: #2ecc71; border-radius: 50%; display: inline-block; margin-left: 5px; box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.4); animation: pulse-dot 1.5s infinite; }
     .offline-dot { width: 10px; height: 10px; background-color: #95a5a6; border-radius: 50%; display: inline-block; margin-left: 5px; }
 
@@ -109,7 +108,7 @@
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
       <div class="alert-banner hidden" id="liveAlertBanner">
-        <span id="alertBannerText">🔔 צועד בסביבה יצא לדרך!</span>
+        <span id="alertBannerText">🔔 צועד חדש בסביבה יצא לדרך!</span>
         <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="switchTab('mainScreen')">צפה במפה</button>
       </div>
 
@@ -311,7 +310,7 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Firebase v10 SDK via Modules (Firestore & Auth) -->
+  <!-- Firebase v10 SDK via Modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -338,6 +337,7 @@
     let liveUnsubUsers = null;
     let liveUnsubChat = null;
 
+    // הרשמה אוטומטית אמינה בלייב
     onAuthStateChanged(auth, (user) => {
       if (user) {
         let name = "אורח (זמני)";
@@ -346,24 +346,25 @@
 
         document.getElementById('authUserName').innerText = name;
 
-        // עדכון/יצירת פרופיל משתמש בזמן אמת ב-Firestore
         currentUserDoc = doc(db, "users", user.uid);
         setDoc(currentUserDoc, {
           uid: user.uid,
           name: name,
           gender: window.userGender || "גבר",
-          lat: window.userPos.lat,
-          lng: window.userPos.lng,
+          lat: window.userPos ? window.userPos.lat : 32.835,
+          lng: window.userPos ? window.userPos.lng : 35.076,
           isOnline: true,
           lastSeen: serverTimestamp(),
           pace: "בינוני",
           dog: "לא",
           allowWhatsApp: true,
           rating: "5.0 ⭐"
-        }, { merge: true });
-
-        // האזנה למשתמשים בלייב
-        listenToLiveUsers();
+        }, { merge: true }).then(() => {
+          listenToLiveUsers();
+          if (document.getElementById('mainScreen').classList.contains('hidden')) {
+            window.startApp();
+          }
+        });
       } else {
         document.getElementById('welcomeScreen').classList.remove('hidden');
         document.getElementById('mainScreen').classList.add('hidden');
@@ -388,7 +389,6 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // האזנה למשתמשים אמיתיים בזמן אמת
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -405,7 +405,6 @@
       });
     }
 
-    // שליחת הודעה בצ'אט בזמן אמת
     window.sendLiveMessage = function(text, partnerUid) {
       if (!auth.currentUser || !partnerUid) return;
       const chatId = [auth.currentUser.uid, partnerUid].sort().join("_");
@@ -416,7 +415,6 @@
       });
     };
 
-    // האזנה להודעות צ'אט בזמן אמת
     window.listenToLiveChat = function(partnerUid) {
       if (!auth.currentUser || !partnerUid) return;
       if (liveUnsubChat) liveUnsubChat();
@@ -450,6 +448,19 @@
     let liveUsers = [];
 
     let favoritesList = [];
+
+    const defaultPartnersList = [
+      { 
+        uid: "p1", name: "דניאל", gender: "גבר", pace: "בינוני", dog: "כן", isOnline: true, 
+        lat: 32.838, lng: 35.078, rating: "4.9 ⭐", allowWhatsApp: true, location: "מוצקין", pref: "פתוח לשיחה 🗣️",
+        reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מדויק בזמנים ואדיב מאוד'"]
+      },
+      { 
+        uid: "p2", name: "מיכל", gender: "אישה", pace: "מהיר", dog: "לא", isOnline: false, 
+        lat: 32.832, lng: 35.075, rating: "5.0 ⭐", allowWhatsApp: false, location: "קריות", pref: "אוהבת פודקאסטים 🎧",
+        reviews: ["'קצב מהיר ומאתגר, מומלצת מאוד!'"]
+      }
+    ];
 
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
@@ -495,11 +506,7 @@
       if (!listContainer) return;
       listContainer.innerHTML = '';
 
-      // משתמשים בדיפולט במידה ואין עוד משתמש מחובר במקביל
-      let displayList = (liveUsers && liveUsers.length > 0) ? liveUsers : [
-        { uid: "p1", name: "דניאל", gender: "גבר", pace: "בינוני", dog: "כן", isOnline: true, lat: 32.838, lng: 35.078, rating: "4.9 ⭐" },
-        { uid: "p2", name: "מיכל", gender: "אישה", pace: "מהיר", dog: "לא", isOnline: false, lat: 32.832, lng: 35.075, rating: "5.0 ⭐" }
-      ];
+      let displayList = (liveUsers && liveUsers.length > 0) ? liveUsers : defaultPartnersList;
 
       displayList.forEach(partner => {
         const isOppositeGender = partner.gender !== userGender;
@@ -586,6 +593,12 @@
           userPos.lat = pos.coords.latitude;
           userPos.lng = pos.coords.longitude;
           window.userPos = userPos;
+          
+          if (window.db && window.firebaseAuth && window.firebaseAuth.currentUser) {
+            const userDoc = doc(window.db, "users", window.firebaseAuth.currentUser.uid);
+            setDoc(userDoc, { lat: userPos.lat, lng: userPos.lng }, { merge: true });
+          }
+
           if (map) {
             map.flyTo([userPos.lat, userPos.lng], 15);
             if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
@@ -647,13 +660,18 @@
     }
 
     function openProfileObj(uid) {
-      let partner = (liveUsers || []).find(p => p.uid === uid) || { name: "דניאל", gender: "גבר", pace: "בינוני", rating: "4.9 ⭐" };
+      let partner = (liveUsers || []).find(p => p.uid === uid) || defaultPartnersList.find(p => p.uid === uid) || defaultPartnersList[0];
       selectedPartner = partner;
       
       document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
       document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating || '5.0 ⭐'}`;
-      document.getElementById('modalDetails').innerHTML = `🏃‍♂️ קצב: ${partner.pace || 'בינוני'}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}`;
-      document.getElementById('modalReviews').innerHTML = "<div>• 'כיף לצעוד יחד, קצב מעולה!'</div>";
+      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location || 'הקריות'}<br>🏃‍♂️ קצב: ${partner.pace || 'בינוני'}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}<br>📲 WhatsApp: ${partner.allowWhatsApp !== false ? 'מאושר' : 'חסום'}<br>🎧 העדפה: ${partner.pref || 'פתוח לשיחה 🗣️'}`;
+      
+      let reviewsHtml = (partner.reviews && partner.reviews.length > 0) 
+        ? partner.reviews.map(r => `<div>• ${r}</div>`).join('')
+        : "<div>• 'קצב מעולה ואישיות נעימה להליכה!'</div>";
+        
+      document.getElementById('modalReviews').innerHTML = reviewsHtml;
       document.getElementById('profileModal').classList.remove('hidden');
     }
 
