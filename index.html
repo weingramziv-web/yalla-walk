@@ -162,7 +162,7 @@
       </div>
 
       <div class="user-auth-badge" id="userAuthBadge">
-        👤 מחובר כ: <b id="authUserName">...</b>
+        👤 מחובר כ: <b id="authUserName">אורח</b>
       </div>
 
       <!-- סרגל מחוברים בלייב -->
@@ -413,10 +413,10 @@
       let finalName = savedName || inputName || user.displayName || (user.email ? user.email.split('@')[0] : '');
 
       if (!finalName) {
-        return; // אם אין שם — לא ממשיכים להכנס למסך הראשי
+        return;
       }
 
-      // סנכרון מיידי לתצוגה הראשי
+      // עדכון מיידי של השם במסך ב-0 מילי-שניות
       document.getElementById('authUserName').innerText = finalName;
 
       currentUserDoc = doc(db, "users", user.uid);
@@ -435,8 +435,10 @@
       }, { merge: true }).then(() => {
         listenToLiveUsers();
         listenToWalkAlerts();
-        window.startApp();
       });
+
+      // העברת מסך מידית
+      window.startApp();
     }
 
     window.startAppAsGuest = function() {
@@ -447,8 +449,10 @@
         return;
       }
       
+      // שמירת השם ועדכון הכותרת באופן מיידי עוד לפני הקריאה לשרת
       sessionStorage.setItem('customGuestName', nameVal);
       sessionStorage.setItem('userLoggedIn', 'true');
+      document.getElementById('authUserName').innerText = nameVal;
       window.userLoggingOut = false;
       
       signInAnonymously(auth).then((res) => { 
