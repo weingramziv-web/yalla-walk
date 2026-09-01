@@ -22,10 +22,26 @@
       text-align: right; 
     }
     
+    /* מנגנון הנגישות - ניגודיות גבוהה והגדלת גופן הרמטית */
     body.high-contrast { background: #000 !important; color: #fff !important; }
     body.high-contrast .app-container { background: #121212 !important; color: #fff !important; }
     body.high-contrast button { background: #ffff00 !important; color: #000 !important; font-weight: bold !important; }
-    body.large-font { font-size: 115% !important; }
+    body.high-contrast input, body.high-contrast select, body.high-contrast textarea { background: #222 !important; color: #fff !important; border-color: #ffff00 !important; }
+
+    /* דריסה גלובלית להגדלת כל הפונקציות והאלמנטים באפליקציה */
+    body.large-font, 
+    body.large-font p, 
+    body.large-font h1, 
+    body.large-font button, 
+    body.large-font input, 
+    body.large-font select, 
+    body.large-font span, 
+    body.large-font div, 
+    body.large-font label, 
+    body.large-font b { 
+      font-size: 125% !important; 
+      line-height: 1.5 !important;
+    }
 
     .app-container { 
       width: 100%; 
@@ -73,6 +89,9 @@
 
     /* לחצן נגישות צף */
     .accessibility-btn { position: fixed; top: 10px; left: 10px; z-index: 9999; background: #2980b9; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+    .feature-comparison-box { background: #f8f9fa; border: 1px solid #e9ecef; padding: 10px; border-radius: 10px; font-size: 11px; margin: 10px 0; line-height: 1.4; }
+    .legal-disclaimer { font-size: 10px; color: #7f8c8d; text-align: center; margin-top: 6px; line-height: 1.2; }
 
     .community-dashboard { background: linear-gradient(135deg, #e8f5e9, #ffffff); border: 1px solid #c8e6c9; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
     .dashboard-stat-text { font-size: 13px; color: #2c3e50; font-weight: bold; line-height: 1.4; }
@@ -145,6 +164,13 @@
         • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ!</p>
       </div>
 
+      <!-- הסבר על הבדל בין Google לאורח -->
+      <div class="feature-comparison-box">
+        <b>💡 איזה מסלול כניסה עדיף לך?</b><br>
+        • <b>התחברות עם Google (מומלץ):</b> היסטוריית קילומטרים נשמרת, אפשרות לפתוח קבוצות הליכה ושמירת מועדפים קבועה.<br>
+        • <b>כניסה כאורח (מצב מוגבל):</b> ללא שמירת היסטוריה, אי אפשר לפתוח קבוצות חדשות, והנתונים נמחקים בסגירת הדפדפן.
+      </div>
+
       <div style="margin-top: auto;">
         <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#c0392b;">* שם פרטי:</label>
         <input type="text" id="guestNameInput" placeholder="רשום את שמך הפרטי...">
@@ -169,6 +195,10 @@
 
         <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
         <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח מוגבל 🚀</button>
+
+        <div class="legal-disclaimer">
+          בלחיצה על התחברות, הנך מצהיר/ה כי גילך מעל 18 וכי הנך מסכים/ה לתקנון הקהילה ובטיחות המשתמשים.
+        </div>
       </div>
     </div>
 
@@ -748,7 +778,15 @@
     function openAccessibilityModal() { document.getElementById('accessibilityModal').classList.remove('hidden'); }
     function closeAccessibilityModal() { document.getElementById('accessibilityModal').classList.add('hidden'); }
     function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
-    function toggleLargeFont() { document.body.classList.toggle('large-font'); }
+    
+    function toggleLargeFont() { 
+      document.body.classList.toggle('large-font'); 
+      if (document.body.classList.contains('large-font')) {
+        alert("🔍 גופן האפליקציה הוגדל בהצלחה!");
+      } else {
+        alert("🔍 גופן האפליקציה הוחזר לגודל המקורי.");
+      }
+    }
 
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
