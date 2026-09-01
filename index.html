@@ -107,9 +107,10 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
+      <!-- באנר התראות לייב -->
       <div class="alert-banner hidden" id="liveAlertBanner">
         <span id="alertBannerText">🔔 צועד חדש בסביבה יצא לדרך!</span>
-        <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="switchTab('mainScreen')">צפה במפה</button>
+        <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" id="btnAlertFocus">צפה במפה</button>
       </div>
 
       <div class="screen-header">
@@ -310,11 +311,11 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Firebase v10 SDK via Modules -->
+  <!-- Firebase v10 SDK via Modules (Firestore & Auth) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAx_rBL-U1XxL59cXW-wBO26aUXyfg-Lsw",
@@ -337,7 +338,6 @@
     let liveUnsubUsers = null;
     let liveUnsubChat = null;
 
-    // הרשמה אוטומטית אמינה בלייב
     onAuthStateChanged(auth, (user) => {
       if (user) {
         let name = "אורח (זמני)";
@@ -361,6 +361,7 @@
           rating: "5.0 ⭐"
         }, { merge: true }).then(() => {
           listenToLiveUsers();
+          listenToWalkAlerts();
           if (document.getElementById('mainScreen').classList.contains('hidden')) {
             window.startApp();
           }
@@ -402,6 +403,47 @@
         });
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
+      });
+    }
+
+    // שידור התרעת צעידה בזמן אמת ב-Firestore
+    window.broadcastMyWalk = function() {
+      if (!auth.currentUser) return;
+      const userName = document.getElementById('authUserName').innerText;
+      
+      addDoc(collection(db, "walk_alerts"), {
+        senderUid: auth.currentUser.uid,
+        senderName: userName,
+        lat: window.userPos ? window.userPos.lat : 32.835,
+        lng: window.userPos ? window.userPos.lng : 35.076,
+        timestamp: serverTimestamp()
+      }).then(() => {
+        alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
+      });
+    };
+
+    // האזנה להתרעות צעידה בלייב שנשלחו ע"י משתמשים אחרים
+    function listenToWalkAlerts() {
+      const q = query(collection(db, "walk_alerts"), orderBy("timestamp", "desc"), limit(1));
+      onSnapshot(q, (snapshot) => {
+        snapshot.forEach(docSnap => {
+          const alertData = docSnap.data();
+          if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
+            const banner = document.getElementById('liveAlertBanner');
+            const textSpan = document.getElementById('alertBannerText');
+            const focusBtn = document.getElementById('btnAlertFocus');
+
+            textSpan.innerHTML = `🔔 <b>${alertData.senderName}</b> יצא/ה לצעידה בסביבה!`;
+            banner.classList.remove('hidden');
+
+            focusBtn.onclick = function() {
+              window.switchTab('mainScreen');
+              if (window.map && alertData.lat && alertData.lng) {
+                window.map.flyTo([alertData.lat, alertData.lng], 16, { duration: 1.5 });
+              }
+            };
+          }
+        });
       });
     }
 
@@ -449,19 +491,6 @@
 
     let favoritesList = [];
 
-    const defaultPartnersList = [
-      { 
-        uid: "p1", name: "דניאל", gender: "גבר", pace: "בינוני", dog: "כן", isOnline: true, 
-        lat: 32.838, lng: 35.078, rating: "4.9 ⭐", allowWhatsApp: true, location: "מוצקין", pref: "פתוח לשיחה 🗣️",
-        reviews: ["'כיף לצעוד איתו, קצב מעולה!'", "'מדויק בזמנים ואדיב מאוד'"]
-      },
-      { 
-        uid: "p2", name: "מיכל", gender: "אישה", pace: "מהיר", dog: "לא", isOnline: false, 
-        lat: 32.832, lng: 35.075, rating: "5.0 ⭐", allowWhatsApp: false, location: "קריות", pref: "אוהבת פודקאסטים 🎧",
-        reviews: ["'קצב מהיר ומאתגר, מומלצת מאוד!'"]
-      }
-    ];
-
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
       window.userGender = userGender;
@@ -485,6 +514,8 @@
         if (!mapContainer) return;
 
         map = L.map('map').setView([userPos.lat, userPos.lng], 13);
+        window.map = map;
+        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         
         userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 8, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.9 })
@@ -506,9 +537,12 @@
       if (!listContainer) return;
       listContainer.innerHTML = '';
 
-      let displayList = (liveUsers && liveUsers.length > 0) ? liveUsers : defaultPartnersList;
+      if (!liveUsers || liveUsers.length === 0) {
+        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בזמן אמת...</p>`;
+        return;
+      }
 
-      displayList.forEach(partner => {
+      liveUsers.forEach(partner => {
         const isOppositeGender = partner.gender !== userGender;
         const isLocked = isOppositeGender && verifiedWalks < 3;
 
@@ -608,11 +642,6 @@
       }
     }
 
-    function broadcastMyWalk() {
-      alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
-      document.getElementById('liveAlertBanner').classList.remove('hidden');
-    }
-
     function updateVerificationUI() {
       const text = document.getElementById('verifyText');
       if (verifiedWalks >= 3) {
@@ -660,12 +689,13 @@
     }
 
     function openProfileObj(uid) {
-      let partner = (liveUsers || []).find(p => p.uid === uid) || defaultPartnersList.find(p => p.uid === uid) || defaultPartnersList[0];
+      let partner = (liveUsers || []).find(p => p.uid === uid);
+      if (!partner) return;
       selectedPartner = partner;
       
       document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
       document.getElementById('modalRating').innerText = `דירוג חיובי: ${partner.rating || '5.0 ⭐'}`;
-      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location || 'הקריות'}<br>🏃‍♂️ קצב: ${partner.pace || 'בינוני'}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}<br>📲 WhatsApp: ${partner.allowWhatsApp !== false ? 'מאושר' : 'חסום'}<br>🎧 העדפה: ${partner.pref || 'פתוח לשיחה 🗣️'}`;
+      document.getElementById('modalDetails').innerHTML = `📍 אזור: ${partner.location || 'בסביבה'}<br>🏃‍♂️ קצב: ${partner.pace || 'בינוני'}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}<br>📲 WhatsApp: ${partner.allowWhatsApp !== false ? 'מאושר' : 'חסום'}<br>🎧 העדפה: ${partner.pref || 'פתוח לשיחה 🗣️'}`;
       
       let reviewsHtml = (partner.reviews && partner.reviews.length > 0) 
         ? partner.reviews.map(r => `<div>• ${r}</div>`).join('')
@@ -703,6 +733,8 @@
       if (screenId === 'favScreen') document.getElementById('navFav').classList.add('active');
       if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
     }
+
+    window.switchTab = switchTab;
 
     function renderGroups() {}
     function finishWalk() { document.getElementById('ratingModal').classList.remove('hidden'); }
