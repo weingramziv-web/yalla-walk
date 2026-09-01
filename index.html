@@ -472,8 +472,6 @@
 
     let currentUserDoc = null;
     let liveUnsubUsers = null;
-    let liveUnsubChat = null;
-    let liveUnsubGroups = null;
 
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
@@ -499,12 +497,10 @@
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
       let isGoogleAuth = sessionStorage.getItem('isGoogleVerified') === 'true';
 
-      let finalName = savedName || inputName || user.displayName || (user.email ? user.email.split('@')[0] : '');
-
-      if (!finalName) return;
+      let finalName = savedName || inputName || user.displayName || (user.email ? user.email.split('@')[0] : 'צועד');
 
       window.isGuestMode = !isGoogleAuth;
-      document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח לבדיקה)' : '');
+      document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח)' : '');
       
       if (document.getElementById('profileAvatarChar')) {
         document.getElementById('profileAvatarChar').innerText = finalName.charAt(0).toUpperCase();
@@ -512,11 +508,10 @@
 
       currentUserDoc = doc(db, "users", user.uid);
       
-      // הוספת תזוזה קלה (Jitter) במיקום למניעת חפיפת נעצים במכשירים מאותו הבית
       const baseLat = window.userPos ? window.userPos.lat : 32.835;
       const baseLng = window.userPos ? window.userPos.lng : 35.076;
-      const jitterLat = baseLat + (Math.random() - 0.5) * 0.002;
-      const jitterLng = baseLng + (Math.random() - 0.5) * 0.002;
+      const jitterLat = baseLat + (Math.random() - 0.5) * 0.003;
+      const jitterLng = baseLng + (Math.random() - 0.5) * 0.003;
 
       setDoc(currentUserDoc, {
         uid: user.uid,
@@ -532,7 +527,6 @@
       }, { merge: true }).then(() => {
         listenToLiveUsers();
         listenToWalkAlerts();
-        listenToLiveGroups();
       });
 
       const savedScreen = sessionStorage.getItem('activeScreenTab') || 'mainScreen';
@@ -554,7 +548,6 @@
       sessionStorage.setItem('customGuestName', nameVal);
       sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'false');
-      document.getElementById('authUserName').innerText = nameVal + ' (אורח לבדיקה)';
       window.userLoggingOut = false;
       
       signInAnonymously(auth).then((res) => { 
@@ -589,6 +582,7 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
+    // מאזין Real-Time חסין שגיאות שמנרמל נתונים
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -597,10 +591,23 @@
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (data.uid !== (auth.currentUser ? auth.currentUser.uid : '')) {
-            liveUsersList.push(data);
+          const currentUid = auth.currentUser ? auth.currentUser.uid : '';
+
+          if (data && data.uid && data.uid !== currentUid) {
+            // נרמול שדות חסרים למניעת קריסת לולאה
+            liveUsersList.push({
+              uid: data.uid,
+              name: data.name || 'צועד בסביבה',
+              gender: data.gender || 'גבר',
+              lat: typeof data.lat === 'number' ? data.lat : 32.835,
+              lng: typeof data.lng === 'number' ? data.lng : 35.076,
+              isOnline: data.isOnline !== false,
+              pace: data.pace || 'בינוני',
+              dog: data.dog || 'לא'
+            });
           }
         });
+
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
@@ -614,13 +621,11 @@
       addDoc(collection(db, "walk_alerts"), {
         senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
         senderName: userName,
-        lat: window.userPos ? window.userPos.lat : 32.835,
-        lng: window.userPos ? window.userPos.lng : 35.076,
         timestamp: serverTimestamp()
       }).then(() => {
         alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
       }).catch(() => {
-        alert("📡 יצאת לצעידה! נשלחה התרעה בלייב בסביבה.");
+        alert("📡 יצאת לצעידה!");
       });
     };
 
@@ -629,118 +634,29 @@
       onSnapshot(q, (snapshot) => {
         snapshot.forEach(docSnap => {
           const alertData = docSnap.data();
-
-          if (alertData.timestamp && alertData.timestamp.toDate) {
-            const alertTime = alertData.timestamp.toDate().getTime();
-            const currentTime = new Date().getTime();
-            const diffMinutes = (currentTime - alertTime) / (1000 * 60);
-
-            if (diffMinutes <= 15 && auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
-              const banner = document.getElementById('liveAlertBanner');
-              const textSpan = document.getElementById('alertBannerText');
-              const focusBtn = document.getElementById('btnAlertFocus');
-
-              textSpan.innerHTML = `🔔 <b>${alertData.senderName}</b> יצא/ה לצעידה בסביבה!`;
-              banner.classList.remove('hidden');
-
-              focusBtn.onclick = function() {
-                banner.classList.add('hidden');
-                window.switchTab('mainScreen');
-                if (window.map && alertData.lat && alertData.lng) {
-                  window.map.flyTo([alertData.lat, alertData.lng], 16, { duration: 1.5 });
-                }
-              };
-            }
+          if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
+            const banner = document.getElementById('liveAlertBanner');
+            const textSpan = document.getElementById('alertBannerText');
+            textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
+            banner.classList.remove('hidden');
           }
-        });
-      });
-    }
-
-    window.createNewGroup = function() {
-      const title = document.getElementById('newGroupTitle').value.trim();
-      const time = document.getElementById('newGroupTime').value.trim();
-
-      if (!title || !time) {
-        alert("⚠️ אנא רשום שם קבוצה וזמן/מקום המפגש!");
-        return;
-      }
-
-      addDoc(collection(db, "walk_groups"), {
-        title: title,
-        time: time,
-        creatorName: document.getElementById('authUserName').innerText,
-        timestamp: serverTimestamp()
-      }).then(() => {
-        alert("👥 הקבוצה פורסמה בהצלחה בלייב!");
-        closeGroupModal();
-      });
-    };
-
-    function listenToLiveGroups() {
-      if (liveUnsubGroups) liveUnsubGroups();
-
-      const q = query(collection(db, "walk_groups"), orderBy("timestamp", "desc"), limit(10));
-      liveUnsubGroups = onSnapshot(q, (snapshot) => {
-        const container = document.getElementById('groupsList');
-        if (!container) return;
-        container.innerHTML = '';
-
-        snapshot.forEach(docSnap => {
-          const g = docSnap.data();
-          container.innerHTML += `
-            <div class="group-item">
-              <b>👥 ${g.title}</b><br>
-              <span>📍 מפגש: ${g.time}</span><br>
-              <span style="color:#7f8c8d; font-size:10px;">נוצר ע"י: ${g.creatorName}</span>
-            </div>
-          `;
         });
       });
     }
 
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
-      if (!reason) {
-        alert("אנא רשום בקצרה את סיבת הדיווח.");
-        return;
-      }
+      if (!reason) { alert("אנא רשום בקצרה את סיבת הדיווח."); return; }
 
       addDoc(collection(db, "reports"), {
         reporterUid: auth.currentUser ? auth.currentUser.uid : 'guest',
         reporterName: document.getElementById('authUserName').innerText,
-        reportedPartner: window.selectedPartner ? window.selectedPartner.name : 'unknown',
         reason: reason,
         timestamp: serverTimestamp()
       }).then(() => {
-        alert("✅ הדיווח התקבל בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר אישי במייל או בטלפון תוך 72 שעות לבירור המקרה.");
-        closeReportModal();
-      }).catch(() => {
-        alert("✅ הדיווח התקבל בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר תוך 72 שעות.");
+        alert("✅ הדיווח התקבל בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר אישי תוך 72 שעות.");
         closeReportModal();
       });
-    };
-
-    window.uploadWalkPhoto = function(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const chatBox = document.getElementById('chatBox');
-          chatBox.innerHTML += `<div class="msg-user">📸 <div class="feed-photo-item"><img src="${e.target.result}"></div></div>`;
-          chatBox.scrollTop = chatBox.scrollHeight;
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    };
-
-    window.uploadProfilePhoto = function(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('profileAvatarCircle').innerHTML = `<img src="${e.target.result}">`;
-          alert("📸 תמונת הפרופיל עודכנה בהצלחה!");
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
     };
   </script>
 
@@ -776,11 +692,8 @@
     
     function toggleLargeFont() { 
       const isLarge = document.body.classList.toggle('large-font'); 
-      if (isLarge) {
-        alert("🔍 גופן האפליקציה הוגדל בהצלחה!");
-      } else {
-        alert("🔍 גופן האפליקציה הוחזר לגודל המקורי.");
-      }
+      if (isLarge) { alert("🔍 גופן האפליקציה הוגדל!"); } 
+      else { alert("🔍 גופן האפליקציה הוחזר לגודל המקורי."); }
     }
 
     function startApp(targetScreen) {
@@ -793,7 +706,6 @@
       updateVerificationUI();
       renderLivePartners();
       renderLiveBar();
-      renderFavorites();
       startUsageTimer();
 
       setTimeout(() => { initMap(); }, 100);
@@ -806,11 +718,7 @@
           remainingSeconds--;
           const mins = Math.floor(remainingSeconds / 60);
           const secs = remainingSeconds % 60;
-          const displayStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-          document.getElementById('usageTimerDisplay').innerText = `⏱️ טיימר יומיומי: ${displayStr}`;
-        } else {
-          clearInterval(usageTimerInterval);
-          alert("⌛ הגעת למגבלת השעתיים היומית ברוטו! המטרה של OK, Let's Go! היא לצאת לצעוד בחוץ – נתראה מחר!");
+          document.getElementById('usageTimerDisplay').innerText = `⏱️ טיימר יומיומי: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
       }, 1000);
     }
@@ -830,9 +738,7 @@
           .addTo(map).bindPopup("<b>אזור המיקום שלך</b>");
 
         map.invalidateSize();
-      } catch (e) {
-        console.log("Map init:", e);
-      }
+      } catch (e) { console.log(e); }
     }
 
     function locateUser() {
@@ -851,41 +757,9 @@
             map.flyTo([userPos.lat, userPos.lng], 15);
             if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
           }
-          alert("📍 מיקומך עודכן בהצלחה במפה!");
-          renderLivePartners();
-          renderLiveBar();
-        }, () => {
-          alert("📍 השירות מתמקד במיקום הבסיסי כעת במפה.");
+          alert("📍 מיקומך עודכן במפה!");
         });
-      } else {
-        alert("📍 המכשיר שלך לא תומך ברכיב GPS.");
       }
-    }
-
-    function toggleRoutes() {
-      showRoutes = !showRoutes;
-      if (showRoutes && map) {
-        if (!safeRoutesGroup) {
-          const line1 = L.polyline([[userPos.lat, userPos.lng], [userPos.lat + 0.005, userPos.lng + 0.005]], { color: '#2980b9', weight: 5 }).bindPopup("🛣️ מסלול פארק מואר");
-          const line2 = L.polyline([[userPos.lat, userPos.lng], [userPos.lat - 0.004, userPos.lng + 0.003]], { color: '#8e44ad', weight: 5 }).bindPopup("🛣️ מסלול טיילת מרכזית");
-          safeRoutesGroup = L.featureGroup([line1, line2]);
-        }
-        safeRoutesGroup.addTo(map);
-        alert("🛣️ מוצגים 2 מסלולי הליכה מוארים ובטוחים בסביבתך!");
-      } else if (map && safeRoutesGroup) {
-        map.removeLayer(safeRoutesGroup);
-      }
-    }
-
-    function getKmDistance(lat1, lon1, lat2, lng2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lng2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
     }
 
     function renderLiveBar() {
@@ -896,7 +770,7 @@
 
       if (!liveUsers || liveUsers.length === 0) {
         if (header) header.innerText = "🟢 מחוברים בסביבה:";
-        bar.innerHTML = `<div style="font-size:11px; color:#888;">אין צועדים נוספים כרגע במערכת</div>`;
+        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים נוספים בסביבה...</div>`;
         return;
       }
 
@@ -906,19 +780,16 @@
 
       liveUsers.forEach(u => {
         const firstLetter = u.name ? u.name.charAt(0).toUpperCase() : '?';
-        const isOppositeGender = u.gender !== userGender;
-        const isLocked = isOppositeGender && verifiedWalks < 3;
-
         const avatar = document.createElement('div');
         avatar.className = 'live-user-avatar';
         avatar.innerHTML = `
           <div class="avatar-circle">
             ${firstLetter}
-            ${u.isOnline !== false ? '<div class="status-dot"></div>' : ''}
+            <div class="status-dot"></div>
           </div>
           <div class="avatar-name">${u.name}</div>
         `;
-        avatar.onclick = () => selectPartnerAndOpenChat(u, isLocked);
+        avatar.onclick = () => selectPartnerAndOpenChat(u, false);
         bar.appendChild(avatar);
       });
     }
@@ -934,47 +805,31 @@
       }
 
       liveUsers.forEach(partner => {
-        const isOppositeGender = partner.gender !== userGender;
-        const isLocked = isOppositeGender && verifiedWalks < 3;
-
         if (map && partner.marker) map.removeLayer(partner.marker);
         if (map && partner.lat && partner.lng) {
           partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name}</b> ${partner.isOnline !== false ? '🟢' : ''}<br>קצב: ${partner.pace || 'בינוני'}`);
+            .bindPopup(`<b>${partner.name}</b> 🟢<br>קצב: ${partner.pace}`);
         }
 
         const item = document.createElement('div');
-        item.className = `partner-item ${isLocked ? 'locked' : ''}`;
+        item.className = 'partner-item';
         item.innerHTML = `
           <div style="flex:1;">
-            <b>${partner.name}</b> <span class="${partner.isOnline !== false ? 'online-dot' : 'offline-dot'}"></span> ${partner.isOnline !== false ? '<b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b>' : ''} ${isLocked ? '🔒' : ''}<br>
-            <span style="color:#666;">קצב: ${partner.pace || 'בינוני'} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
+            <b>${partner.name}</b> <b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b><br>
+            <span style="color:#666;">קצב: ${partner.pace} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
           </div>
           <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openProfileObj('${partner.uid}')">פרופיל</button>
         `;
-        item.onclick = () => selectPartnerAndOpenChat(partner, isLocked);
+        item.onclick = () => selectPartnerAndOpenChat(partner, false);
         listContainer.appendChild(item);
       });
     }
 
     function selectPartnerAndOpenChat(partner, isLocked) {
-      if (isLocked) { alert("🔒 גישה מוגבלת: נדרשות 3 הליכות מאומתות עם בני אותו המין."); return; }
-      selectedPartner = partner;
-      window.selectedPartner = partner;
-      if (map && partner.lat && partner.lng) {
-        map.flyTo([partner.lat, partner.lng], 15);
-      }
-      autoOpenPartnerChat(partner);
-    }
-
-    function autoOpenPartnerChat(partner) {
       selectedPartner = partner;
       window.selectedPartner = partner;
       document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
       switchTab('chatScreen');
-      if (window.listenToLiveChat && partner.uid) {
-        window.listenToLiveChat(partner.uid);
-      }
     }
 
     function updateDistVal() {
@@ -982,81 +837,23 @@
       document.getElementById('distVal').innerText = val;
     }
 
-    function renderFavorites() {
-      const container = document.getElementById('favList');
-      if (!container) return;
-      container.innerHTML = '';
-
-      if (favoritesList.length === 0) {
-        container.innerHTML = `<p style="text-align:center; color:#7f8c8d; margin-top:20px;">טרם הוספת מועדפים. לחץ על ⭐ בשיחה או בפרופיל של פרטנר כדי לשמור אותו כאן!</p>`;
-        return;
-      }
-
-      favoritesList.forEach(fav => {
-        container.innerHTML += `
-          <div class="partner-item" onclick="autoOpenPartnerChat(${JSON.stringify(fav)})">
-            <div>
-              <b>⭐ ${fav.name}</b> (${fav.gender || 'פרטנר'})<br>
-              <span style="color:#666;">קצב: ${fav.pace || 'בינוני'}</span>
-            </div>
-            <button style="width:auto; padding:6px;">💬 צ'אט</button>
-          </div>
-        `;
-      });
-    }
-
-    function toggleCurrentPartnerFav() {
-      if (!selectedPartner) return;
-      const idx = favoritesList.findIndex(f => f.name === selectedPartner.name);
-      if (idx > -1) {
-        favoritesList.splice(idx, 1);
-        alert(`❌ ${selectedPartner.name} הוסר/ה מרשימת המועדפים.`);
-      } else {
-        favoritesList.push(selectedPartner);
-        alert(`⭐ ${selectedPartner.name} נוספ/ה בהצלחה לפייבוריטים!`);
-      }
-      renderFavorites();
-    }
-
-    function toggleCurrentPartnerFavFromModal() {
-      if (!selectedPartner) return;
-      toggleCurrentPartnerFav();
-      closeModal();
-    }
-
     function openProfileObj(uid) {
       let partner = (liveUsers || []).find(p => p.uid === uid);
       if (!partner) return;
       selectedPartner = partner;
-      window.selectedPartner = partner;
       
       document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
-      document.getElementById('modalDetails').innerHTML = `📍 אזור: בסביבה<br>🏃‍♂️ קצב: ${partner.pace || 'בינוני'}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}`;
+      document.getElementById('modalDetails').innerHTML = `📍 אזור: בסביבה<br>🏃‍♂️ קצב: ${partner.pace}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}`;
       document.getElementById('profileModal').classList.remove('hidden');
     }
 
     function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
-    function openChatFromModal() { closeModal(); if (selectedPartner) autoOpenPartnerChat(selectedPartner); }
-    function openCreateGroupModal() { document.getElementById('createGroupModal').classList.remove('hidden'); }
-    function closeGroupModal() { document.getElementById('createGroupModal').classList.add('hidden'); }
     function openReportModal() { document.getElementById('reportModal').classList.remove('hidden'); }
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
-    function finishWalk() { document.getElementById('ratingModal').classList.remove('hidden'); }
-    function toggleTagSelect(el) { el.style.background = el.style.background === 'rgb(39, 174, 96)' ? '#e8f5e9' : '#27ae60'; el.style.color = el.style.color === 'white' ? '#2e7d32' : 'white'; }
-    function submitPositiveTag() { alert("🌟 תגי ההערכה החיוביים נשלחו בהצלחה!"); document.getElementById('ratingModal').classList.add('hidden'); switchTab('mainScreen'); }
-
-    function triggerPhotoUpload() { document.getElementById('photoFileInput').click(); }
-    function triggerProfilePhotoUpload() { document.getElementById('profilePhotoInput').click(); }
-    function saveMyWalkStatus() { const val = document.getElementById('myWalkStatusInput').value.trim(); if (val) alert("✍️ הסטטוס היומי שלך עודכן בהצלחה!"); }
 
     function updateVerificationUI() {
       const text = document.getElementById('verifyText');
-      if (verifiedWalks >= 3) {
-        document.getElementById('verificationBadge').className = "verification-badge verified-badge";
-        document.getElementById('verificationBadge').innerHTML = "✅ <b>חשבון מאומת!</b> באפשרותך לצאת להליכות עם כל המשתמשים.";
-      } else {
-        text.innerText = `${verifiedWalks}/3 הליכות עם בני אותו המין (${userGender})`;
-      }
+      if (text) text.innerText = `0/3 הליכות עם בני אותו המין (${userGender})`;
     }
 
     function switchTab(screenId) {
@@ -1087,9 +884,6 @@
     window.startApp = startApp;
     window.switchTab = switchTab;
     window.renderLiveBar = renderLiveBar;
-    window.openCreateGroupModal = openCreateGroupModal;
-    window.closeGroupModal = closeGroupModal;
-    window.toggleCurrentPartnerFavFromModal = toggleCurrentPartnerFavFromModal;
     window.toggleAuthButtons = toggleAuthButtons;
     window.openTermsModal = openTermsModal;
     window.acceptTermsFromModal = acceptTermsFromModal;
@@ -1098,8 +892,10 @@
     window.toggleHighContrast = toggleHighContrast;
     window.toggleLargeFont = toggleLargeFont;
     window.locateUser = locateUser;
-    window.toggleRoutes = toggleRoutes;
     window.updateDistVal = updateDistVal;
+    window.closeModal = closeModal;
+    window.openReportModal = openReportModal;
+    window.closeReportModal = closeReportModal;
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
