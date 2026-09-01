@@ -64,6 +64,7 @@
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; text-align: center; }
 
+    /* סרגל מחוברים בלייב */
     .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
     .avatar-circle { width: 42px; height: 42px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
@@ -362,7 +363,7 @@
   <!-- Firebase v10 SDK via Modules (Firestore & Auth) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -386,19 +387,30 @@
     let liveUnsubUsers = null;
     let liveUnsubChat = null;
 
-    // ניתוק כפוי בטעינת העמוד הראשונית כדי תמיד להציג את מסך הכניסה
-    signOut(auth).catch(() => {});
-
+    // טיפול בתוצאת ההפניה של Google בלחיצה אחת
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
+        sessionStorage.setItem('userLoggedIn', 'true');
         handleUserLogin(result.user);
       }
     }).catch(() => {});
+
+    onAuthStateChanged(auth, (user) => {
+      const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true';
+      if (user && isLoggedIn && !window.userLoggingOut) {
+        handleUserLogin(user);
+      } else {
+        document.getElementById('welcomeScreen').classList.remove('hidden');
+        document.getElementById('mainScreen').classList.add('hidden');
+        document.getElementById('bottomNav').classList.add('hidden');
+      }
+    });
 
     function handleUserLogin(user) {
       let name = "אורח (זמני)";
       if (user.displayName) name = user.displayName;
       else if (user.email) name = user.email.split('@')[0];
+      else if (user.isAnonymous) name = "אורח_" + user.uid.substring(0, 4);
 
       document.getElementById('authUserName').innerText = name;
 
@@ -419,10 +431,12 @@
         listenToLiveUsers();
         listenToWalkAlerts();
         window.startApp();
-      });
+      }).catch(err => console.log("Login save error:", err));
     }
 
     window.startAppAsGuest = function() {
+      sessionStorage.setItem('userLoggedIn', 'true');
+      window.userLoggingOut = false;
       signInAnonymously(auth).then((res) => { 
         handleUserLogin(res.user); 
       }).catch(() => { 
@@ -430,24 +444,18 @@
       });
     };
 
+    // התחברות Google ישירה בלחיצה אחת
     window.loginWithGoogle = function() {
+      sessionStorage.setItem('userLoggedIn', 'true');
+      window.userLoggingOut = false;
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-      if (isIOS) {
-        signInWithRedirect(auth, provider);
-      } else {
-        signInWithPopup(auth, provider).then((res) => {
-          handleUserLogin(res.user);
-        }).catch(() => {
-          signInWithRedirect(auth, provider);
-        });
-      }
+      signInWithRedirect(auth, provider);
     };
 
     window.logoutUser = function() {
+      sessionStorage.removeItem('userLoggedIn');
+      window.userLoggingOut = true;
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true });
       }
