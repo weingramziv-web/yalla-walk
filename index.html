@@ -22,13 +22,11 @@
       text-align: right; 
     }
     
-    /* מנגנון הנגישות - ניגודיות גבוהה והגדלת גופן */
     body.high-contrast { background: #000 !important; color: #fff !important; }
     body.high-contrast .app-container { background: #121212 !important; color: #fff !important; }
     body.high-contrast button { background: #ffff00 !important; color: #000 !important; font-weight: bold !important; }
     body.high-contrast input, body.high-contrast select, body.high-contrast textarea { background: #222 !important; color: #fff !important; border-color: #ffff00 !important; }
 
-    /* הגדלה והקטנה של פונט ב-125% */
     body.large-font, 
     body.large-font p, 
     body.large-font h1, 
@@ -163,12 +161,6 @@
         • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ!</p>
       </div>
 
-      <div class="feature-comparison-box">
-        <b>💡 איזה מסלול כניסה עדיף לך?</b><br>
-        • <b>התחברות עם Google (מומלץ):</b> היסטוריית קילומטרים נשמרת, אפשרות לפתוח קבוצות הליכה ושמירת מועדפים קבועה.<br>
-        • <b>כניסה כאורח (מצב מוגבל):</b> ללא שמירת היסטוריה, אי אפשר לפתוח קבוצות חדשות, והנתונים נמחקים בסגירת הדפדפן.
-      </div>
-
       <div style="margin-top: auto;">
         <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#c0392b;">* שם פרטי:</label>
         <input type="text" id="guestNameInput" placeholder="רשום את שמך הפרטי...">
@@ -192,7 +184,7 @@
         </div>
 
         <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
-        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח מוגבל 🚀</button>
+        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח לבדיקה 🚀</button>
 
         <div class="legal-disclaimer">
           בלחיצה על התחברות, הנך מצהיר/ה כי גילך מעל 18 וכי הנך מסכים/ה לתקנון הקהילה ובטיחות המשתמשים.
@@ -257,8 +249,8 @@
           </div>
         </div>
 
-        <label>📍 מרחק מרבי: <span id="distVal">5</span> ק"מ</label>
-        <input type="range" id="distFilter" min="1" max="10" value="5" oninput="updateDistVal(); renderLivePartners();">
+        <label>📍 מרחק מרבי: <span id="distVal">10</span> ק"מ</label>
+        <input type="range" id="distFilter" min="1" max="50" value="10" oninput="updateDistVal(); renderLivePartners(); renderLiveBar();">
       </div>
 
       <div style="display:flex; gap:5px; margin-top:4px;">
@@ -513,13 +505,17 @@
       }
 
       currentUserDoc = doc(db, "users", user.uid);
+      
+      const initLat = window.userPos ? window.userPos.lat : 32.835;
+      const initLng = window.userPos ? window.userPos.lng : 35.076;
+
       setDoc(currentUserDoc, {
         uid: user.uid,
         name: finalName,
         gender: window.userGender || "גבר",
         isGuest: window.isGuestMode,
-        lat: window.userPos ? window.userPos.lat : 32.835,
-        lng: window.userPos ? window.userPos.lng : 35.076,
+        lat: initLat,
+        lng: initLng,
         isOnline: true,
         lastSeen: serverTimestamp(),
         pace: "בינוני",
@@ -768,8 +764,8 @@
     function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
     
     function toggleLargeFont() { 
-      document.body.classList.toggle('large-font'); 
-      if (document.body.classList.contains('large-font')) {
+      const isLarge = document.body.classList.toggle('large-font'); 
+      if (isLarge) {
         alert("🔍 גופן האפליקציה הוגדל בהצלחה!");
       } else {
         alert("🔍 גופן האפליקציה הוחזר לגודל המקורי.");
@@ -820,11 +816,8 @@
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
         
-        const blurredLat = userPos.lat + (Math.random() - 0.5) * 0.003;
-        const blurredLng = userPos.lng + (Math.random() - 0.5) * 0.003;
-
-        userMarker = L.circleMarker([blurredLat, blurredLng], { radius: 9, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
-          .addTo(map).bindPopup("<b>אזור המיקום שלך (מטושטש לבטיחות)</b>");
+        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
+          .addTo(map).bindPopup("<b>אזור המיקום שלך</b>");
 
         map.invalidateSize();
       } catch (e) {
@@ -832,7 +825,6 @@
       }
     }
 
-    // פונקציית מיקוד GPS פתוחה לכל המשתמשים (כולל אורחים)
     function locateUser() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
@@ -850,15 +842,16 @@
             if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
           }
           alert("📍 מיקומך עודכן בהצלחה במפה!");
+          renderLivePartners();
+          renderLiveBar();
         }, () => {
-          alert("📍 השירות יתמקד במיקום הכללי כעת במפה.");
+          alert("📍 השירות מתמקד במיקום הבסיסי כעת במפה.");
         });
       } else {
         alert("📍 המכשיר שלך לא תומך ברכיב GPS.");
       }
     }
 
-    // פונקציית מסלולים בטוחים פתוחה לכל המשתמשים (כולל אורחים)
     function toggleRoutes() {
       showRoutes = !showRoutes;
       if (showRoutes && map) {
@@ -874,6 +867,7 @@
       }
     }
 
+    // נוסחת חישוב מרחק גיאוגרפית במדויק בקילומטרים
     function getKmDistance(lat1, lon1, lat2, lng2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -897,14 +891,21 @@
         return;
       }
 
+      let maxDist = parseFloat(document.getElementById('distFilter') ? document.getElementById('distFilter').value : 10);
+
       let nearbyUsers = liveUsers.filter(u => {
         if (!u.lat || !u.lng) return true;
         const dist = getKmDistance(userPos.lat, userPos.lng, u.lat, u.lng);
-        return dist <= 15;
+        return dist <= maxDist;
       });
 
       if (header) {
         header.innerText = `🟢 מחוברים בסביבה (${nearbyUsers.length}):`;
+      }
+
+      if (nearbyUsers.length === 0) {
+        bar.innerHTML = `<div style="font-size:11px; color:#888;">אין צועדים בטווח ${maxDist} ק"מ שנבחר</div>`;
+        return;
       }
 
       nearbyUsers.forEach(u => {
@@ -926,6 +927,7 @@
       });
     }
 
+    // רינדור רשימה ומפה מסוננים בצורה הרמטית לפי סרגל המרחק
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
@@ -936,7 +938,30 @@
         return;
       }
 
-      liveUsers.forEach(partner => {
+      let maxDist = parseFloat(document.getElementById('distFilter') ? document.getElementById('distFilter').value : 10);
+      let selectedPace = document.getElementById('paceFilter') ? document.getElementById('paceFilter').value : 'all';
+      let selectedDog = document.getElementById('dogFilter') ? document.getElementById('dogFilter').value : 'all';
+
+      let filteredUsers = liveUsers.filter(partner => {
+        // סינון לפי מרחק
+        if (partner.lat && partner.lng) {
+          const dist = getKmDistance(userPos.lat, userPos.lng, partner.lat, partner.lng);
+          if (dist > maxDist) return false;
+        }
+        // סינון לפי קצב
+        if (selectedPace !== 'all' && partner.pace && partner.pace !== selectedPace) return false;
+        // סינון לפי כלב
+        if (selectedDog !== 'all' && partner.dog && partner.dog !== selectedDog) return false;
+
+        return true;
+      });
+
+      if (filteredUsers.length === 0) {
+        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">אין צועדים התואמים את הסינון בטווח ${maxDist} ק"מ</p>`;
+        return;
+      }
+
+      filteredUsers.forEach(partner => {
         const isOppositeGender = partner.gender !== userGender;
         const isLocked = isOppositeGender && verifiedWalks < 3;
 
@@ -978,6 +1003,11 @@
       if (window.listenToLiveChat && partner.uid) {
         window.listenToLiveChat(partner.uid);
       }
+    }
+
+    function updateDistVal() {
+      const val = document.getElementById('distFilter').value;
+      document.getElementById('distVal').innerText = val;
     }
 
     function renderFavorites() {
@@ -1095,6 +1125,7 @@
     window.toggleLargeFont = toggleLargeFont;
     window.locateUser = locateUser;
     window.toggleRoutes = toggleRoutes;
+    window.updateDistVal = updateDistVal;
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
