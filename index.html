@@ -90,7 +90,6 @@
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; max-width: 80%; align-self: flex-start; text-align: right; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; border: 1px solid #eee; max-width: 80%; align-self: flex-end; text-align: right; }
 
-    /* ניווט תחתון מותאם ל-iOS Safe Area */
     .bottom-nav { 
       position: fixed; 
       bottom: 0; 
@@ -391,7 +390,7 @@
     getRedirectResult(auth).catch(() => {});
 
     onAuthStateChanged(auth, (user) => {
-      if (user) {
+      if (user && !window.userLoggingOut) {
         let name = "אורח (זמני)";
         if (user.displayName) name = user.displayName;
         else if (user.email) name = user.email.split('@')[0];
@@ -426,10 +425,12 @@
     });
 
     window.startAppAsGuest = function() {
+      window.userLoggingOut = false;
       signInAnonymously(auth).then(() => { window.startApp(); }).catch(() => { window.startApp(); });
     };
 
     window.loginWithGoogle = function() {
+      window.userLoggingOut = false;
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
 
@@ -447,6 +448,7 @@
     };
 
     window.logoutUser = function() {
+      window.userLoggingOut = true;
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true });
       }
@@ -485,26 +487,35 @@
       });
     };
 
+    // האזנה להתרעות עם סינון תפוגה (15 דקות מקסימום)
     function listenToWalkAlerts() {
       const q = query(collection(db, "walk_alerts"), orderBy("timestamp", "desc"), limit(1));
       onSnapshot(q, (snapshot) => {
         snapshot.forEach(docSnap => {
           const alertData = docSnap.data();
-          if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
-            const banner = document.getElementById('liveAlertBanner');
-            const textSpan = document.getElementById('alertBannerText');
-            const focusBtn = document.getElementById('btnAlertFocus');
+          
+          if (alertData.timestamp && alertData.timestamp.toDate) {
+            const alertTime = alertData.timestamp.toDate().getTime();
+            const currentTime = new Date().getTime();
+            const diffMinutes = (currentTime - alertTime) / (1000 * 60);
 
-            textSpan.innerHTML = `🔔 <b>${alertData.senderName}</b> יצא/ה לצעידה בסביבה!`;
-            banner.classList.remove('hidden');
+            // הצג התראה רק אם נשלחה ב-15 הדקות האחרונות
+            if (diffMinutes <= 15 && auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
+              const banner = document.getElementById('liveAlertBanner');
+              const textSpan = document.getElementById('alertBannerText');
+              const focusBtn = document.getElementById('btnAlertFocus');
 
-            focusBtn.onclick = function() {
-              banner.classList.add('hidden');
-              window.switchTab('mainScreen');
-              if (window.map && alertData.lat && alertData.lng) {
-                window.map.flyTo([alertData.lat, alertData.lng], 16, { duration: 1.5 });
-              }
-            };
+              textSpan.innerHTML = `🔔 <b>${alertData.senderName}</b> יצא/ה לצעידה בסביבה!`;
+              banner.classList.remove('hidden');
+
+              focusBtn.onclick = function() {
+                banner.classList.add('hidden');
+                window.switchTab('mainScreen');
+                if (window.map && alertData.lat && alertData.lng) {
+                  window.map.flyTo([alertData.lat, alertData.lng], 16, { duration: 1.5 });
+                }
+              };
+            }
           }
         });
       });
