@@ -63,9 +63,9 @@
 
     .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
     .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
-    .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 6px; border-radius: 6px; font-size: 11px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
+    .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 8px; border-radius: 8px; font-size: 11px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
 
-    /* דשבורד קהילתי מורחב */
+    /* דשבורד חברתי שכונתי */
     .community-dashboard { background: linear-gradient(135deg, #e8f5e9, #ffffff); border: 1px solid #c8e6c9; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
     .dashboard-stat-text { font-size: 13px; color: #2c3e50; font-weight: bold; line-height: 1.4; }
     .dashboard-highlight { color: #27ae60; font-size: 16px; font-weight: 800; }
@@ -81,6 +81,8 @@
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
     .partner-item.locked { border-right-color: #e74c3c; opacity: 0.8; }
     
+    .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
+
     .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
     .msg-user { background: #dcf8c6; padding: 8px 12px; border-radius: 12px; max-width: 80%; align-self: flex-start; text-align: right; }
     .msg-partner { background: #fff; padding: 8px 12px; border-radius: 12px; border: 1px solid #eee; max-width: 80%; align-self: flex-end; text-align: right; }
@@ -107,6 +109,9 @@
     .tag-chip { display: inline-block; background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; padding: 4px 8px; border-radius: 15px; font-size: 11px; margin: 2px; }
     .tag-chip.clickable { cursor: pointer; }
 
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; direction: rtl; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 85vh; overflow-y: auto; }
+    
     .alert-banner { background: #e74c3c; color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
     .feed-photo-item { border-radius: 8px; overflow: hidden; margin-top: 6px; border: 1px solid #eee; }
     .feed-photo-item img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
@@ -128,7 +133,7 @@
         • הפרדה מוחלטת והגנה מלאה לקטינים (מתחת לגיל 18).<br>
         • דירוגים חיוביים בלבד – ללא שיימינג וללא תגובות שליליות.<br>
         • הגנה מבריונות ודיווח דיסקרטי המטופל תוך 72 שעות.<br>
-        • מגבלת זמן של <b>2 שעות ביום</b> כדי שתוכל לצעוד בחוץ, לא להיצמד למסך!</p>
+        • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ, לא מול המסך!</p>
       </div>
 
       <div style="margin-top: auto;">
@@ -171,7 +176,7 @@
 
       <div class="user-auth-badge" id="userAuthBadge">
         <span>👤 מחובר כ: <b id="authUserName">אורח</b></span>
-        <span style="font-size:10px; color:#e67e22; font-weight:bold;" id="usageTimerDisplay">⏱️ זמינות: 120 דק'</span>
+        <span style="font-size:11px; color:#e67e22; font-weight:bold;" id="usageTimerDisplay">⏱️ טיימר יומיומי: 120:00</span>
       </div>
 
       <!-- דשבורד חברתי שכונתי -->
@@ -305,6 +310,17 @@
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחזר למסך הכניסה</button>
     </div>
 
+    <!-- פופ-אפ יצירת קבוצת הליכה חדשה -->
+    <div class="modal hidden" id="createGroupModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#2980b9;">➕ יצירת קבוצת הליכה חדשה</h3>
+        <input type="text" id="newGroupTitle" placeholder="שם הקבוצה (למשל: צועדי הפארק בערב)">
+        <input type="text" id="newGroupTime" placeholder="זמן ומקום המפגש (למשל: היום ב-19:30 בכניסה הראשית)">
+        <button onclick="createNewGroup()" class="btn-group">אישור ופרסום קבוצה</button>
+        <button onclick="closeGroupModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
+      </div>
+    </div>
+
     <!-- פופ-אפ דיווח דיסקרטי -->
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
@@ -328,6 +344,21 @@
           <span class="tag-chip clickable" onclick="toggleTagSelect(this)">🐶 חברותי לכלבים</span>
         </div>
         <button onclick="submitPositiveTag()">שלח תגי הערכה חיוביים</button>
+      </div>
+    </div>
+
+    <!-- פופ-אפ פרופיל מורחב -->
+    <div class="modal hidden" id="profileModal">
+      <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 id="modalName" style="margin:0; color:#27ae60;"></h2>
+          <button class="btn-back-header" onclick="closeModal()">➔ חזור</button>
+        </div>
+        <p id="modalDetails" style="margin-top:10px;"></p>
+        <div style="margin-top:12px; display:flex; gap:6px;">
+          <button id="modalChatBtn" onclick="openChatFromModal()" style="flex:1;">💬 צור קשר בצ'אט</button>
+          <button onclick="toggleCurrentPartnerFavFromModal()" class="btn-fav" style="width:auto;">⭐ הוסף לפייבוריטים</button>
+        </div>
       </div>
     </div>
 
@@ -378,6 +409,7 @@
     let currentUserDoc = null;
     let liveUnsubUsers = null;
     let liveUnsubChat = null;
+    let liveUnsubGroups = null;
 
     getRedirectResult(auth).then((result) => {
       if (result && result.user) {
@@ -427,6 +459,7 @@
       }, { merge: true }).then(() => {
         listenToLiveUsers();
         listenToWalkAlerts();
+        listenToLiveGroups();
       });
 
       window.startApp();
@@ -540,6 +573,52 @@
       });
     }
 
+    // יצירה והאזנה לקבוצות הליכה בלייב
+    window.createNewGroup = function() {
+      const title = document.getElementById('newGroupTitle').value.trim();
+      const time = document.getElementById('newGroupTime').value.trim();
+
+      if (!title || !time) {
+        alert("⚠️ אנא רשום שם קבוצה וזמן/מקום המפגש!");
+        return;
+      }
+
+      addDoc(collection(db, "walk_groups"), {
+        title: title,
+        time: time,
+        creatorName: document.getElementById('authUserName').innerText,
+        ageGroup: window.userAgeGroup || 'adult',
+        timestamp: serverTimestamp()
+      }).then(() => {
+        alert("👥 הקבוצה פורסמה בהצלחה בלייב!");
+        closeGroupModal();
+      });
+    };
+
+    function listenToLiveGroups() {
+      if (liveUnsubGroups) liveUnsubGroups();
+
+      const q = query(collection(db, "walk_groups"), orderBy("timestamp", "desc"), limit(10));
+      liveUnsubGroups = onSnapshot(q, (snapshot) => {
+        const container = document.getElementById('groupsList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        snapshot.forEach(docSnap => {
+          const g = docSnap.data();
+          if ((g.ageGroup || 'adult') === (window.userAgeGroup || 'adult')) {
+            container.innerHTML += `
+              <div class="group-item">
+                <b>👥 ${g.title}</b><br>
+                <span>📍 מפגש: ${g.time}</span><br>
+                <span style="color:#7f8c8d; font-size:10px;">נוצר ע"י: ${g.creatorName}</span>
+              </div>
+            `;
+          }
+        });
+      });
+    }
+
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
       if (!reason) {
@@ -595,6 +674,9 @@
     let safeRoutesGroup = null;
     let showRoutes = false;
     let liveUsers = [];
+    let favoritesList = [];
+    let remainingSeconds = 120 * 60;
+    let usageTimerInterval = null;
 
     function startApp() {
       userGender = document.getElementById('userGenderInput').value;
@@ -607,8 +689,27 @@
       updateVerificationUI();
       renderLivePartners();
       renderLiveBar();
+      renderFavorites();
+      startUsageTimer();
 
       setTimeout(() => { initMap(); }, 100);
+    }
+
+    // שעון עצר דינמי לבריאות דיגיטלית (2 שעות ביום)
+    function startUsageTimer() {
+      if (usageTimerInterval) clearInterval(usageTimerInterval);
+      usageTimerInterval = setInterval(() => {
+        if (remainingSeconds > 0) {
+          remainingSeconds--;
+          const mins = Math.floor(remainingSeconds / 60);
+          const secs = remainingSeconds % 60;
+          const displayStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+          document.getElementById('usageTimerDisplay').innerText = `⏱️ טיימר יומיומי: ${displayStr}`;
+        } else {
+          clearInterval(usageTimerInterval);
+          alert("⌛ הגעת למגבלת השעתיים היומית ברוטו! המטרה של OK, Let's Go! היא לצאת לצעוד בחוץ – נתראה מחר!");
+        }
+      }, 1000);
     }
 
     function initMap() {
@@ -740,14 +841,73 @@
       }
     }
 
-    function triggerPhotoUpload() { document.getElementById('photoFileInput').click(); }
-    function triggerProfilePhotoUpload() { document.getElementById('profilePhotoInput').click(); }
-    function saveMyWalkStatus() { const val = document.getElementById('myWalkStatusInput').value.trim(); if (val) alert("✍️ הסטטוס היומי שלך עודכן בהצלחה!"); }
+    // ניהול מועדפים
+    function renderFavorites() {
+      const container = document.getElementById('favList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (favoritesList.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#7f8c8d; margin-top:20px;">טרם הוספת מועדפים. לחץ על ⭐ בשיחה או בפרופיל של פרטנר כדי לשמור אותו כאן!</p>`;
+        return;
+      }
+
+      favoritesList.forEach(fav => {
+        container.innerHTML += `
+          <div class="partner-item" onclick="autoOpenPartnerChat(${JSON.stringify(fav)})">
+            <div>
+              <b>⭐ ${fav.name}</b> (${fav.gender || 'פרטנר'})<br>
+              <span style="color:#666;">קצב: ${fav.pace || 'בינוני'}</span>
+            </div>
+            <button style="width:auto; padding:6px;">💬 צ'אט</button>
+          </div>
+        `;
+      });
+    }
+
+    function toggleCurrentPartnerFav() {
+      if (!selectedPartner) return;
+      const idx = favoritesList.findIndex(f => f.name === selectedPartner.name);
+      if (idx > -1) {
+        favoritesList.splice(idx, 1);
+        alert(`❌ ${selectedPartner.name} הוסר/ה מרשימת המועדפים.`);
+      } else {
+        favoritesList.push(selectedPartner);
+        alert(`⭐ ${selectedPartner.name} נוספ/ה בהצלחה לפייבוריטים!`);
+      }
+      renderFavorites();
+    }
+
+    function toggleCurrentPartnerFavFromModal() {
+      if (!selectedPartner) return;
+      toggleCurrentPartnerFav();
+      closeModal();
+    }
+
+    function openProfileObj(uid) {
+      let partner = (liveUsers || []).find(p => p.uid === uid);
+      if (!partner) return;
+      selectedPartner = partner;
+      window.selectedPartner = partner;
+      
+      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
+      document.getElementById('modalDetails').innerHTML = `📍 אזור: בסביבה<br>🏃‍♂️ קצב: ${partner.pace || 'בינוני'}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}`;
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
+    function openChatFromModal() { closeModal(); if (selectedPartner) autoOpenPartnerChat(selectedPartner); }
+    function openCreateGroupModal() { document.getElementById('createGroupModal').classList.remove('hidden'); }
+    function closeGroupModal() { document.getElementById('createGroupModal').classList.add('hidden'); }
     function openReportModal() { document.getElementById('reportModal').classList.remove('hidden'); }
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
     function finishWalk() { document.getElementById('ratingModal').classList.remove('hidden'); }
     function toggleTagSelect(el) { el.style.background = el.style.background === 'rgb(39, 174, 96)' ? '#e8f5e9' : '#27ae60'; el.style.color = el.style.color === 'white' ? '#2e7d32' : 'white'; }
     function submitPositiveTag() { alert("🌟 תגי ההערכה החיוביים נשלחו בהצלחה!"); document.getElementById('ratingModal').classList.add('hidden'); switchTab('mainScreen'); }
+
+    function triggerPhotoUpload() { document.getElementById('photoFileInput').click(); }
+    function triggerProfilePhotoUpload() { document.getElementById('profilePhotoInput').click(); }
+    function saveMyWalkStatus() { const val = document.getElementById('myWalkStatusInput').value.trim(); if (val) alert("✍️ הסטטוס היומי שלך עודכן בהצלחה!"); }
 
     function updateVerificationUI() {
       const text = document.getElementById('verifyText');
@@ -785,6 +945,9 @@
 
     window.switchTab = switchTab;
     window.renderLiveBar = renderLiveBar;
+    window.openCreateGroupModal = openCreateGroupModal;
+    window.closeGroupModal = closeGroupModal;
+    window.toggleCurrentPartnerFavFromModal = toggleCurrentPartnerFavFromModal;
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
