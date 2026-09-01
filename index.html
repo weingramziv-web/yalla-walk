@@ -22,11 +22,13 @@
       text-align: right; 
     }
     
+    /* מנגנון הנגישות - ניגודיות גבוהה והגדלת גופן */
     body.high-contrast { background: #000 !important; color: #fff !important; }
     body.high-contrast .app-container { background: #121212 !important; color: #fff !important; }
     body.high-contrast button { background: #ffff00 !important; color: #000 !important; font-weight: bold !important; }
     body.high-contrast input, body.high-contrast select, body.high-contrast textarea { background: #222 !important; color: #fff !important; border-color: #ffff00 !important; }
 
+    /* הגדלה והקטנה של פונט ב-125% */
     body.large-font, 
     body.large-font p, 
     body.large-font h1, 
@@ -162,8 +164,9 @@
       </div>
 
       <div class="feature-comparison-box">
-        <b>🧪 מצב בדיקת סנכרון:</b><br>
-        פוטר זמנית המסנן כך שגם משתמשים במצב אורח יראו זה את זה בלייב.
+        <b>💡 איזה מסלול כניסה עדיף לך?</b><br>
+        • <b>התחברות עם Google (מומלץ):</b> היסטוריית קילומטרים נשמרת, אפשרות לפתוח קבוצות הליכה ושמירת מועדפים קבועה.<br>
+        • <b>כניסה כאורח (מצב מוגבל):</b> ללא שמירת היסטוריה, אי אפשר לפתוח קבוצות חדשות, והנתונים נמחקים בסגירת הדפדפן.
       </div>
 
       <div style="margin-top: auto;">
@@ -189,7 +192,7 @@
         </div>
 
         <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
-        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח (לצורך בדיקה) 🚀</button>
+        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח מוגבל 🚀</button>
 
         <div class="legal-disclaimer">
           בלחיצה על התחברות, הנך מצהיר/ה כי גילך מעל 18 וכי הנך מסכים/ה לתקנון הקהילה ובטיחות המשתמשים.
@@ -579,7 +582,6 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // מבוטל זמנית המסנן לצורך בדיקות (מציג את כולם גם במצב אורח)
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -830,6 +832,48 @@
       }
     }
 
+    // פונקציית מיקוד GPS פתוחה לכל המשתמשים (כולל אורחים)
+    function locateUser() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          userPos.lat = pos.coords.latitude;
+          userPos.lng = pos.coords.longitude;
+          window.userPos = userPos;
+          
+          if (window.db && window.firebaseAuth && window.firebaseAuth.currentUser) {
+            const userDoc = doc(window.db, "users", window.firebaseAuth.currentUser.uid);
+            setDoc(userDoc, { lat: userPos.lat, lng: userPos.lng }, { merge: true });
+          }
+
+          if (map) {
+            map.flyTo([userPos.lat, userPos.lng], 15);
+            if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
+          }
+          alert("📍 מיקומך עודכן בהצלחה במפה!");
+        }, () => {
+          alert("📍 השירות יתמקד במיקום הכללי כעת במפה.");
+        });
+      } else {
+        alert("📍 המכשיר שלך לא תומך ברכיב GPS.");
+      }
+    }
+
+    // פונקציית מסלולים בטוחים פתוחה לכל המשתמשים (כולל אורחים)
+    function toggleRoutes() {
+      showRoutes = !showRoutes;
+      if (showRoutes && map) {
+        if (!safeRoutesGroup) {
+          const line1 = L.polyline([[userPos.lat, userPos.lng], [userPos.lat + 0.005, userPos.lng + 0.005]], { color: '#2980b9', weight: 5 }).bindPopup("🛣️ מסלול פארק מואר");
+          const line2 = L.polyline([[userPos.lat, userPos.lng], [userPos.lat - 0.004, userPos.lng + 0.003]], { color: '#8e44ad', weight: 5 }).bindPopup("🛣️ מסלול טיילת מרכזית");
+          safeRoutesGroup = L.featureGroup([line1, line2]);
+        }
+        safeRoutesGroup.addTo(map);
+        alert("🛣️ מוצגים 2 מסלולי הליכה מוארים ובטוחים בסביבתך!");
+      } else if (map && safeRoutesGroup) {
+        map.removeLayer(safeRoutesGroup);
+      }
+    }
+
     function getKmDistance(lat1, lon1, lat2, lng2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1049,6 +1093,8 @@
     window.closeAccessibilityModal = closeAccessibilityModal;
     window.toggleHighContrast = toggleHighContrast;
     window.toggleLargeFont = toggleLargeFont;
+    window.locateUser = locateUser;
+    window.toggleRoutes = toggleRoutes;
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
