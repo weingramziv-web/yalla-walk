@@ -523,7 +523,6 @@
       signOut(auth).then(() => location.reload());
     };
 
-    // הזרמת כל המשתמשים ללא שום סינון שעלול להסתיר אותם
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -693,7 +692,6 @@
       });
     }
 
-    // הרינדור מציג את כל המשתמשים ללא שום תלות בסינון מרחק
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
