@@ -68,7 +68,6 @@
     .btn-google { background: #4285F4; color: #fff; margin-top: 8px; }
     .btn-spotify { background: #1DB954; color: #fff; margin-top: 6px; font-weight: bold; }
     .btn-secondary { background: #7f8c8d; }
-    .btn-whatsapp { background: #25D366; }
     .btn-fav { background: #f1c40f; color: #2c3e50; }
     .btn-sos { background: #e74c3c; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3); }
     .btn-report { background: #95a5a6; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; }
@@ -102,7 +101,6 @@
     .status-dot { width: 11px; height: 11px; background-color: #2ecc71; border-radius: 50%; position: absolute; bottom: 0; left: 0; border: 2px solid #fff; }
 
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
-    
     .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
 
     .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
@@ -208,8 +206,8 @@
         </div>
       </div>
 
-      <!-- כפתור ספוטיפיי להליכה -->
-      <button class="btn-spotify" onclick="openSpotifyModal()">🎧 נגן המוזיקה להליכה (Spotify)</button>
+      <!-- כפתור פתיחה ישירה של Spotify -->
+      <button class="btn-spotify" onclick="openSpotifyDirect()">🎧 פתח את Spotify (נגן מוזיקה/פודקאסטים)</button>
 
       <!-- סרגל מחוברים בלייב -->
       <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-top:8px; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
@@ -350,15 +348,6 @@
         <b style="font-size:11px;">📞 רכז נגישות ופניות:</b>
         <p style="font-size:10px; color:#666; margin-top:2px;">לפניות ודיווח על תקלות נגישות ניתן ליצור קשר במייל: accessibility@okletsgo.app</p>
         <button onclick="closeAccessibilityModal()" class="btn-secondary" style="margin-top:6px;">סגור</button>
-      </div>
-    </div>
-
-    <!-- מודאל ספוטיפיי - Track Embed יציב ורשמי -->
-    <div class="modal hidden" id="spotifyModal">
-      <div class="modal-content" style="text-align:center; padding:15px;">
-        <h3 style="margin-top:0; color:#1DB954;">🎧 נגן המוזיקה להליכה - Spotify</h3>
-        <iframe style="border-radius:12px; width:100%; height:152px;" src="https://open.spotify.com/embed/track/4cOdK2wGLETKBW3PvgPWqT?utm_source=generator" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-        <button onclick="closeSpotifyModal()" class="btn-secondary" style="margin-top:10px;">סגור נגן</button>
       </div>
     </div>
 
@@ -538,6 +527,7 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
+    // מאזין חופשי ללא סינון מגדר – מציג את כל המשתמשים הפעילים בזמן אמת!
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -645,8 +635,9 @@
       else { alert("🔍 גופן האפליקציה הוחזר לגודל המקורי."); }
     }
 
-    function openSpotifyModal() { document.getElementById('spotifyModal').classList.remove('hidden'); }
-    function closeSpotifyModal() { document.getElementById('spotifyModal').classList.add('hidden'); }
+    function openSpotifyDirect() {
+      window.open("https://open.spotify.com", "_blank");
+    }
 
     function dismissAlertBanner() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
 
@@ -850,8 +841,7 @@
     window.closeModal = closeModal;
     window.openReportModal = openReportModal;
     window.closeReportModal = closeReportModal;
-    window.openSpotifyModal = openSpotifyModal;
-    window.closeSpotifyModal = closeSpotifyModal;
+    window.openSpotifyDirect = openSpotifyDirect;
     window.dismissAlertBanner = dismissAlertBanner;
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
