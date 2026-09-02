@@ -423,6 +423,7 @@
     let liveUnsubUsers = null;
     let walkSeconds = 0;
     let fitnessInterval = null;
+    let heartbeatInterval = null;
 
     document.getElementById('welcomeScreen').classList.remove('hidden');
     document.getElementById('mainScreen').classList.add('hidden');
@@ -470,16 +471,28 @@
         pace: "בינוני",
         dog: "לא"
       }, { merge: true }).then(() => {
+        startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
         document.getElementById('bottomNav').classList.remove('hidden');
         window.startApp('mainScreen');
       }).catch(err => {
+        startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
         document.getElementById('bottomNav').classList.remove('hidden');
         window.startApp('mainScreen');
       });
+    }
+
+    // מנגנון Heartbeat - מעדכן פעילות כל 30 שניות
+    function startHeartbeat() {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      heartbeatInterval = setInterval(() => {
+        if (currentUserDoc) {
+          setDoc(currentUserDoc, { lastSeen: Date.now(), isOnline: true }, { merge: true });
+        }
+      }, 30000);
     }
 
     function startFitnessTracking() {
@@ -519,6 +532,7 @@
     };
 
     window.logoutUser = function() {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
       if (currentUserDoc) setDoc(currentUserDoc, { isOnline: false }, { merge: true });
       signOut(auth).then(() => location.reload());
     };
@@ -529,20 +543,25 @@
       liveUnsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
         let liveUsersList = [];
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
+        const now = Date.now();
+        const activeThreshold = 2 * 60 * 1000; // סינון: רק מי שהיה פעיל ב-2 הדקות האחרונות
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (data && docSnap.id !== myUid) {
-            liveUsersList.push({
-              uid: docSnap.id,
-              name: data.name || 'צועד בסביבה',
-              age: data.age || '30',
-              gender: data.gender || 'גבר',
-              lat: typeof data.lat === 'number' ? data.lat : 32.835,
-              lng: typeof data.lng === 'number' ? data.lng : 35.076,
-              pace: data.pace || 'בינוני',
-              dog: data.dog || 'לא'
-            });
+            const isRecentlyActive = data.lastSeen && (now - data.lastSeen < activeThreshold);
+            if (isRecentlyActive && data.isOnline !== false) {
+              liveUsersList.push({
+                uid: docSnap.id,
+                name: data.name || 'צועד בסביבה',
+                age: data.age || '30',
+                gender: data.gender || 'גבר',
+                lat: typeof data.lat === 'number' ? data.lat : 32.835,
+                lng: typeof data.lng === 'number' ? data.lng : 35.076,
+                pace: data.pace || 'בינוני',
+                dog: data.dog || 'לא'
+              });
+            }
           }
         });
 
