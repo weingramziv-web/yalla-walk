@@ -157,6 +157,10 @@
 
         <div style="display:flex; gap:8px; margin-top:4px;">
           <div style="flex:1;">
+            <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">גיל:</label>
+            <input type="number" id="userAgeInput" placeholder="גיל (למשל: 35)" min="18" max="99" value="30">
+          </div>
+          <div style="flex:1;">
             <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">מין:</label>
             <select id="userGenderInput">
               <option value="גבר">גבר</option>
@@ -424,11 +428,13 @@
       let isGoogleAuth = sessionStorage.getItem('isGoogleVerified') === 'true';
       let savedName = sessionStorage.getItem('customGuestName');
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
+      let savedAge = sessionStorage.getItem('customGuestAge') || (document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value : '30');
 
       let googleName = user.displayName || (user.email ? user.email.split('@')[0] : '');
       let finalName = isGoogleAuth ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
 
       sessionStorage.setItem('customGuestName', finalName);
+      sessionStorage.setItem('customGuestAge', savedAge);
       sessionStorage.setItem('userLoggedIn', 'true');
 
       window.isGuestMode = !isGoogleAuth;
@@ -448,6 +454,7 @@
       setDoc(currentUserDoc, {
         uid: user.uid,
         name: finalName,
+        age: savedAge,
         gender: window.userGender || "גבר",
         isGuest: window.isGuestMode,
         lat: jitterLat,
@@ -471,6 +478,7 @@
         return;
       }
       const nameVal = document.getElementById('guestNameInput').value.trim();
+      const ageVal = document.getElementById('userAgeInput').value.trim();
       if (!nameVal) {
         alert("⚠️ חובה לרשום את שמך הפרטי לפני הכניסה כאורח!");
         document.getElementById('guestNameInput').focus();
@@ -478,6 +486,7 @@
       }
       
       sessionStorage.setItem('customGuestName', nameVal);
+      sessionStorage.setItem('customGuestAge', ageVal || '30');
       sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'false');
       window.userLoggingOut = false;
@@ -501,6 +510,8 @@
         return;
       }
       
+      const ageVal = document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value.trim() : '30';
+      sessionStorage.setItem('customGuestAge', ageVal);
       sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'true');
       window.userLoggingOut = false;
@@ -518,6 +529,7 @@
     window.logoutUser = function() {
       sessionStorage.removeItem('userLoggedIn');
       sessionStorage.removeItem('customGuestName');
+      sessionStorage.removeItem('customGuestAge');
       sessionStorage.removeItem('isGoogleVerified');
       sessionStorage.removeItem('activeScreenTab');
       window.userLoggingOut = true;
@@ -527,7 +539,7 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // מאזין חופשי ללא סינון מגדר – מציג את כל המשתמשים הפעילים בזמן אמת!
+    // מאזין Real-Time הרמטי - מציג 100% מכל המשתמשים הפעילים בזמן אמת ללא סינון מרחק
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -542,6 +554,7 @@
             liveUsersList.push({
               uid: data.uid,
               name: data.name || 'צועד בסביבה',
+              age: data.age || '30',
               gender: data.gender || 'גבר',
               lat: typeof data.lat === 'number' ? data.lat : 32.835,
               lng: typeof data.lng === 'number' ? data.lng : 35.076,
@@ -732,7 +745,7 @@
             ${firstLetter}
             <div class="status-dot"></div>
           </div>
-          <div class="avatar-name">${u.name}</div>
+          <div class="avatar-name">${u.name} (${u.age || '30'})</div>
         `;
         avatar.onclick = () => selectPartnerAndOpenChat(u, false);
         bar.appendChild(avatar);
@@ -753,14 +766,14 @@
         if (map && partner.marker) map.removeLayer(partner.marker);
         if (map && partner.lat && partner.lng) {
           partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name}</b> 🟢<br>קצב: ${partner.pace}`);
+            .bindPopup(`<b>${partner.name} (${partner.age || '30'})</b> 🟢<br>קצב: ${partner.pace}`);
         }
 
         const item = document.createElement('div');
         item.className = 'partner-item';
         item.innerHTML = `
           <div style="flex:1;">
-            <b>${partner.name}</b> <b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b><br>
+            <b>${partner.name} (${partner.gender}, גיל ${partner.age || '30'})</b> <b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b><br>
             <span style="color:#666;">קצב: ${partner.pace} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
           </div>
           <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openProfileObj('${partner.uid}')">פרופיל</button>
@@ -787,7 +800,7 @@
       if (!partner) return;
       selectedPartner = partner;
       
-      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender})`;
+      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender}, גיל ${partner.age || '30'})`;
       document.getElementById('modalDetails').innerHTML = `📍 אזור: בסביבה<br>🏃‍♂️ קצב: ${partner.pace}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}`;
       document.getElementById('profileModal').classList.remove('hidden');
     }
