@@ -66,6 +66,7 @@
     button:disabled { opacity: 0.4; cursor: not-allowed; }
     button:active { opacity: 0.9; }
     .btn-google { background: #4285F4; color: #fff; margin-top: 8px; }
+    .btn-spotify { background: #1DB954; color: #fff; margin-top: 6px; }
     .btn-secondary { background: #7f8c8d; }
     .btn-whatsapp { background: #25D366; }
     .btn-fav { background: #f1c40f; color: #2c3e50; }
@@ -136,8 +137,6 @@
     .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 85vh; overflow-y: auto; }
     
     .alert-banner { background: #e74c3c; color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
-    .feed-photo-item { border-radius: 8px; overflow: hidden; margin-top: 6px; border: 1px solid #eee; }
-    .feed-photo-item img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
   </style>
 </head>
 <body>
@@ -216,8 +215,11 @@
         </div>
       </div>
 
+      <!-- כפתור ספוטיפיי להליכה -->
+      <button class="btn-spotify" onclick="openSpotifyModal()">🎧 נגן המוזיקה להליכה (Spotify)</button>
+
       <!-- סרגל מחוברים בלייב -->
-      <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
+      <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-top:8px; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
       <div class="live-users-bar" id="liveUsersBar">
         <div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>
       </div>
@@ -300,10 +302,8 @@
 
       <div style="display:flex; gap:6px; margin-top:6px;">
         <button class="btn-fav" style="flex:1;" onclick="toggleCurrentPartnerFav()">⭐ הוסף לפייבוריטים</button>
-        <button style="background:#27ae60; flex:1;" onclick="triggerPhotoUpload()">📸 שתף תמונת הליכה</button>
         <button style="background:#e67e22; flex:1;" onclick="finishWalk()">🏃‍♂️ צעדנו יחד! (תג חיובי)</button>
       </div>
-      <input type="file" id="photoFileInput" accept="image/*" class="hidden" onchange="uploadWalkPhoto(this)">
       <button class="btn-report" onclick="openReportModal()">🚨 דיווח דיסקרטי על התנהגות לא הולמת</button>
     </div>
 
@@ -318,14 +318,6 @@
         <div class="avatar-circle" style="width:70px; height:70px; margin:0 auto; font-size:24px;" id="profileAvatarCircle">
           <span id="profileAvatarChar">?</span>
         </div>
-        <button style="width:auto; font-size:11px; padding:4px 10px; margin-top:6px;" onclick="triggerProfilePhotoUpload()">📷 עדכן תמונת פרופיל</button>
-        <input type="file" id="profilePhotoInput" accept="image/*" class="hidden" onchange="uploadProfilePhoto(this)">
-      </div>
-
-      <div class="community-dashboard">
-        <label style="font-weight:bold; color:#2c3e50;">✍️ הסטטוס היומי שלך להליכה:</label>
-        <input type="text" id="myWalkStatusInput" placeholder="למשל: צועד בכיף עם פודקאסט 🎧" style="margin-top:4px;">
-        <button style="padding:6px; font-size:11px; background:#27ae60;" onclick="saveMyWalkStatus()">עדכן סטטוס לחברים</button>
       </div>
 
       <div class="community-dashboard">
@@ -368,6 +360,15 @@
       </div>
     </div>
 
+    <!-- מודאל ספוטיפיי -->
+    <div class="modal hidden" id="spotifyModal">
+      <div class="modal-content" style="text-align:center;">
+        <h3 style="margin-top:0; color:#1DB954;">🎧 נגן המוזיקה והפודקאסטים להליכה</h3>
+        <iframe style="border-radius:12px;" src="https://open.spotify.com/embed/playlist/37i9dQZF1DXadO12131331?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <button onclick="closeSpotifyModal()" class="btn-secondary" style="margin-top:10px;">סגור נגן</button>
+      </div>
+    </div>
+
     <!-- פופ-אפ דיווח דיסקרטי -->
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
@@ -376,20 +377,6 @@
         <textarea id="reportReasonInput" placeholder="פרט בקצרה את הסיבה לדיווח..." rows="3"></textarea>
         <button onclick="submitDiscreteReport()" style="background:#e74c3c;">שלח דיווח דיסקרטי</button>
         <button onclick="closeReportModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
-      </div>
-    </div>
-
-    <!-- פופ-אפ פרופיל מורחב -->
-    <div class="modal hidden" id="profileModal">
-      <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <h2 id="modalName" style="margin:0; color:#27ae60;"></h2>
-          <button class="btn-back-header" onclick="closeModal()">➔ חזור</button>
-        </div>
-        <p id="modalDetails" style="margin-top:10px;"></p>
-        <div style="margin-top:12px; display:flex; gap:6px;">
-          <button id="modalChatBtn" onclick="openChatFromModal()" style="flex:1;">💬 צור קשר בצ'אט</button>
-        </div>
       </div>
     </div>
 
@@ -444,15 +431,17 @@
       if (result && result.user) {
         sessionStorage.setItem('userLoggedIn', 'true');
         sessionStorage.setItem('isGoogleVerified', 'true');
+        sessionStorage.setItem('isAppAuthenticated', 'true');
         handleUserLogin(result.user);
       }
     }).catch(() => {});
 
+    // שמירת מצב ההתחברות גם בעת רפרש
     onAuthStateChanged(auth, (user) => {
-      const isLoggedIn = sessionStorage.getItem('userLoggedIn') === 'true';
-      if (user && isLoggedIn && !window.userLoggingOut) {
+      const isAppAuth = sessionStorage.getItem('isAppAuthenticated') === 'true';
+      if (user && isAppAuth && !window.userLoggingOut) {
         handleUserLogin(user);
-      } else {
+      } else if (!isAppAuth) {
         document.getElementById('welcomeScreen').classList.remove('hidden');
         document.getElementById('mainScreen').classList.add('hidden');
         document.getElementById('bottomNav').classList.add('hidden');
@@ -467,6 +456,7 @@
       let finalName = savedName || inputName || user.displayName || (user.email ? user.email.split('@')[0] : 'צועד');
 
       sessionStorage.setItem('customGuestName', finalName);
+      sessionStorage.setItem('isAppAuthenticated', 'true');
 
       window.isGuestMode = !isGoogleAuth;
       document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח)' : '');
@@ -517,6 +507,7 @@
       sessionStorage.setItem('customGuestName', nameVal);
       sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'false');
+      sessionStorage.setItem('isAppAuthenticated', 'true');
       window.userLoggingOut = false;
       
       signInAnonymously(auth).then((res) => { 
@@ -533,6 +524,7 @@
       }
       sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'true');
+      sessionStorage.setItem('isAppAuthenticated', 'true');
       window.userLoggingOut = false;
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
@@ -544,6 +536,7 @@
       sessionStorage.removeItem('customGuestName');
       sessionStorage.removeItem('isGoogleVerified');
       sessionStorage.removeItem('activeScreenTab');
+      sessionStorage.removeItem('isAppAuthenticated');
       window.userLoggingOut = true;
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true });
@@ -551,7 +544,6 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // מאזין Real-Time חופשי שמציג את כל המשתמשים כולל אורחים
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -592,8 +584,6 @@
         timestamp: serverTimestamp()
       }).then(() => {
         alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
-      }).catch(() => {
-        alert("📡 יצאת לצעידה!");
       });
     };
 
@@ -660,6 +650,9 @@
       if (isLarge) { alert("🔍 גופן האפליקציה הוגדל!"); } 
       else { alert("🔍 גופן האפליקציה הוחזר לגודל המקורי."); }
     }
+
+    function openSpotifyModal() { document.getElementById('spotifyModal').classList.remove('hidden'); }
+    function closeSpotifyModal() { document.getElementById('spotifyModal').classList.add('hidden'); }
 
     function startApp(targetScreen) {
       userGender = document.getElementById('userGenderInput').value;
@@ -861,6 +854,8 @@
     window.closeModal = closeModal;
     window.openReportModal = openReportModal;
     window.closeReportModal = closeReportModal;
+    window.openSpotifyModal = openSpotifyModal;
+    window.closeSpotifyModal = closeSpotifyModal;
 
     document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
   </script>
