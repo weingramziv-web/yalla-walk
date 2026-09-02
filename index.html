@@ -353,11 +353,11 @@
       </div>
     </div>
 
-    <!-- מודאל ספוטיפיי רשמי ועובד ב-100% -->
+    <!-- מודאל ספוטיפיי - נגן Track רשמי ועובד 100% -->
     <div class="modal hidden" id="spotifyModal">
       <div class="modal-content" style="text-align:center; padding:15px;">
         <h3 style="margin-top:0; color:#1DB954;">🎧 נגן המוזיקה להליכה - Spotify</h3>
-        <iframe style="border-radius:12px; width:100%; height:152px;" src="https://open.spotify.com/embed/album/1DFR223m2x3K3Anwh3mR9M?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <iframe style="border-radius:12px; width:100%; height:152px;" src="https://open.spotify.com/embed/track/4cOdK2wGLETKBW3PvgPWqT?utm_source=generator" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         <button onclick="closeSpotifyModal()" class="btn-secondary" style="margin-top:10px;">סגור נגן</button>
       </div>
     </div>
@@ -470,12 +470,14 @@
       }, { merge: true }).then(() => {
         listenToLiveUsers();
         listenToWalkAlerts();
+        
+        // מעבר מסכים מיידי מובטח ללא צורך ברענון
+        const savedScreen = sessionStorage.getItem('activeScreenTab') || 'mainScreen';
+        window.startApp(savedScreen);
       });
-
-      const savedScreen = sessionStorage.getItem('activeScreenTab') || 'mainScreen';
-      window.startApp(savedScreen);
     }
 
+    // כניסת אורח רציפה במקום אחד
     window.startAppAsGuest = function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
@@ -495,8 +497,8 @@
       
       signInAnonymously(auth).then((res) => { 
         handleUserLogin(res.user); 
-      }).catch(() => { 
-        window.startApp('mainScreen'); 
+      }).catch((err) => { 
+        console.log("Guest Auth Error:", err);
       });
     };
 
