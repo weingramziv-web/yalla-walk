@@ -546,11 +546,13 @@
           }
         });
 
+        alert("תשובת Firebase: נמצאו " + snapshot.docs.length + " משתמשים במסד הנתונים. מתוכם מציג: " + liveUsersList.length);
+
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
       }, (err) => {
-        console.error("Firestore live error:", err);
+        alert("שגיאת התחברות ל-Firebase: " + err.message);
       });
     }
 
