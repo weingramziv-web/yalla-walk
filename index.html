@@ -523,7 +523,6 @@
       signOut(auth).then(() => location.reload());
     };
 
-    // תיקון קריטי: הזרמת כל המשתמשים באוסף users ללא סינון
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -665,7 +664,6 @@
       }
     }
 
-    // רענון סרגל המחוברים העליון
     function renderLiveBar() {
       const bar = document.getElementById('liveUsersBar');
       const header = document.getElementById('liveUsersHeader');
@@ -694,7 +692,6 @@
       });
     }
 
-    // רענון רשימת הפרטנרים למטה
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
