@@ -391,7 +391,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGAQZznuLoKmq_q1qXgEsWpJZhKXCaVcg",
@@ -413,15 +413,11 @@
     let currentUserDoc = null;
     let liveUnsubUsers = null;
 
+    // הצגת מסך הרישום והכניסה הראשון בכל פתיחה של האפליקציה
     onAuthStateChanged(auth, (user) => {
-      const isLogged = sessionStorage.getItem('userLoggedIn') === 'true';
-      if (user && isLogged && !window.userLoggingOut) {
-        handleUserLogin(user);
-      } else if (!isLogged) {
-        document.getElementById('welcomeScreen').classList.remove('hidden');
-        document.getElementById('mainScreen').classList.add('hidden');
-        document.getElementById('bottomNav').classList.add('hidden');
-      }
+      document.getElementById('welcomeScreen').classList.remove('hidden');
+      document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('bottomNav').classList.add('hidden');
     });
 
     function handleUserLogin(user) {
@@ -466,9 +462,7 @@
       }, { merge: true }).then(() => {
         listenToLiveUsers();
         listenToWalkAlerts();
-        
-        const savedScreen = sessionStorage.getItem('activeScreenTab') || 'mainScreen';
-        window.startApp(savedScreen);
+        window.startApp('mainScreen');
       }).catch(err => {
         console.error("Error setting user doc:", err);
         listenToLiveUsers();
@@ -555,7 +549,6 @@
           const data = docSnap.data();
           const currentUid = auth.currentUser ? auth.currentUser.uid : '';
 
-          // מציג כל משתמש שנמצא במסד הנתונים שאינו המשתמש הנוכחי
           if (data && docSnap.id !== currentUid) {
             liveUsersList.push({
               uid: docSnap.id,
@@ -667,7 +660,7 @@
       userGender = document.getElementById('userGenderInput').value;
       window.userGender = userGender;
 
-      const screenToOpen = targetScreen || sessionStorage.getItem('activeScreenTab') || 'mainScreen';
+      const screenToOpen = targetScreen || 'mainScreen';
       switchTab(screenToOpen);
 
       updateVerificationUI();
@@ -832,7 +825,6 @@
       document.getElementById('chatScreen').classList.add('hidden');
       
       document.getElementById(screenId).classList.remove('hidden');
-      sessionStorage.setItem('activeScreenTab', screenId);
 
       document.getElementById('navMap').classList.remove('active');
       document.getElementById('navGroups').classList.remove('active');
