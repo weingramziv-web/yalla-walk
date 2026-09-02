@@ -353,7 +353,7 @@
       </div>
     </div>
 
-    <!-- מודאל ספוטיפיי - נגן Track רשמי ויציב 100% ללא שגיאות -->
+    <!-- מודאל ספוטיפיי - Track Embed יציב ורשמי -->
     <div class="modal hidden" id="spotifyModal">
       <div class="modal-content" style="text-align:center; padding:15px;">
         <h3 style="margin-top:0; color:#1DB954;">🎧 נגן המוזיקה להליכה - Spotify</h3>
@@ -476,7 +476,6 @@
       });
     }
 
-    // כניסת אורח רציפה ומיידית
     window.startAppAsGuest = function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
@@ -489,7 +488,6 @@
         return;
       }
       
-      // עדכון מיידי בממשק והזנת השם בזיכרון המקומי למניעת השהייה
       sessionStorage.setItem('customGuestName', nameVal);
       sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'false');
@@ -649,6 +647,7 @@
 
     function openSpotifyModal() { document.getElementById('spotifyModal').classList.remove('hidden'); }
     function closeSpotifyModal() { document.getElementById('spotifyModal').classList.add('hidden'); }
+
     function dismissAlertBanner() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
 
     function startApp(targetScreen) {
