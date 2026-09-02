@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Yalla Walk</title>
+  <title>OK, Let's Go!</title>
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -146,7 +146,7 @@
     <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 10px;">
-        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ Yalla Walk</h1>
+        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ OK, Let's Go!</h1>
         <p style="font-size: 13px; font-weight: bold; color: #2c3e50; text-align: center;">הקהילה הבטוחה והבריאה של הצעידה בסביבה</p>
       </div>
 
@@ -201,7 +201,7 @@
       </div>
 
       <div class="screen-header">
-        <h1>🗺️ Yalla Walk</h1>
+        <h1>🗺️ OK, Let's Go!</h1>
       </div>
 
       <div class="user-auth-badge" id="userAuthBadge">
@@ -286,7 +286,16 @@
       </div>
       <p>הצטרף לקבוצת הליכה בסביבה או פתח קבוצה חדשה!</p>
       <button class="btn-group" onclick="alert('פתיחת קבוצה חדשה בקרוב!')">➕ פתח קבוצת הליכה חדשה</button>
-      <div id="groupsList" style="margin-top:10px;"></div>
+      <div id="groupsList" style="margin-top:10px;">
+        <div class="group-item">
+          <b>👟 קבוצת הליכת בוקר שכונתית</b><br>
+          <span style="color:#555;">ימים א'-ה' בשעה 07:00 | נפגשים בפארק המרכזי</span>
+        </div>
+        <div class="group-item">
+          <b>🐶 צועדים עם כלבים</b><br>
+          <span style="color:#555;">ימים ב' ו-ה' בשעה 19:00 | מסלול גינת הכלבים</span>
+        </div>
+      </div>
     </div>
 
     <!-- מסך מועדפים -->
@@ -296,7 +305,9 @@
         <h1>⭐ המועדפים שלי</h1>
       </div>
       <p>פרטנרים וקבוצות ששמרת לגישה מהירה:</p>
-      <div id="favList"></div>
+      <div id="favList">
+        <p style="text-align:center; color:#888; font-size:12px;">עדיין לא הוספת מועדפים. לחץ על ⭐ בכרטיס המשתמש להוספה.</p>
+      </div>
     </div>
 
     <!-- מסך צ'אט אישי בזמן אמת -->
@@ -306,7 +317,9 @@
         <h1 id="chatTitle">💬 שיחה בזמן אמת</h1>
       </div>
 
-      <div class="chat-box" id="chatBox"></div>
+      <div class="chat-box" id="chatBox">
+        <div style="color:#888; font-size:11px; text-align:center;">תחילת שיחה מאובטחת</div>
+      </div>
       
       <div style="display:flex; gap:4px; margin-top:8px;">
         <input type="text" id="chatInput" placeholder="רשום הודעה (לחץ Enter לשליחה)..." style="margin:0;">
@@ -347,12 +360,12 @@
     <!-- מודאל תקנון ותנאי שימוש -->
     <div class="modal hidden" id="termsModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#27ae60;">📜 תקנון ותנאי שימוש - Yalla Walk</h3>
+        <h3 style="margin-top:0; color:#27ae60;">📜 תקנון ותנאי שימוש - OK, Let's Go!</h3>
         <div style="font-size:11px; color:#444; max-height:220px; overflow-y:auto; line-height:1.5; border:1px solid #eee; padding:8px; border-radius:6px;">
-          <b>1. הצהרת גיל ובטיחות:</b> האפליקציה מיועדת לשימוש בגירים מגיל 18 ומעלה בלבד. חל איסור מוחלט על קטינים לעשות שימוש במערכת למפגשים.<br>
-          <b>2. אחריות המשתמש:</b> האפליקציה מהווה פלטפורמה טכנולוגית בלבד. מפעיל האפליקציה אינו אחראי למפגשים פיזיים, לנזק גוף, רכוש או להתנהגות משתמשים בשטח.<br>
-          <b>3. משמעת וקהילה:</b> חל איסור על בריונות, הטרדות או שפה פוגענית. דיווחים מטופלים בדיסקרטיות מלאה תוך 72 שעות.<br>
-          <b>4. פרטיות:</b> המיקום במפה מטושטש לבטיחות. נתונים במצב אורח אינם נשמרים.
+          <b>1. הצהרת גיל ובטיחות:</b> האפליקציה מיועדת לשימוש בגירים מגיל 18 ומעלה בלבד.<br>
+          <b>2. אחריות המשתמש:</b> האפליקציה מהווה פלטפורמה טכנולוגית בלבד.<br>
+          <b>3. משמעת וקהילה:</b> חל איסור על בריונות, הטרדות או שפה פוגענית.<br>
+          <b>4. פרטיות:</b> המיקום במפה מטושטש לבטיחות.
         </div>
         <button onclick="acceptTermsFromModal()" style="margin-top:10px;">אני מאשר/ת את התקנון</button>
       </div>
@@ -429,7 +442,7 @@
     let walkSeconds = 0;
     let fitnessInterval = null;
 
-    // פתיחה קבועה במסך הרישום לביטול דילוגים אוטומטיים
+    // פתיחה קבועה במסך הרישום
     onAuthStateChanged(auth, (user) => {
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
@@ -438,8 +451,8 @@
 
     function handleUserLogin(user) {
       let isGoogleAuth = sessionStorage.getItem('isGoogleVerified') === 'true';
-      let savedName = sessionStorage.getItem('customGuestName');
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
+      let savedName = sessionStorage.getItem('customGuestName') || inputName;
       let savedAge = sessionStorage.getItem('customGuestAge') || (document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value : '30');
 
       let googleName = user.displayName || (user.email ? user.email.split('@')[0] : '');
@@ -447,7 +460,7 @@
 
       sessionStorage.setItem('customGuestName', finalName);
       sessionStorage.setItem('customGuestAge', savedAge);
-      sessionStorage.setItem('userLoggedIn', 'true');
+      window.currentUserCustomName = finalName;
 
       window.isGuestMode = !isGoogleAuth;
       document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח)' : '');
@@ -520,9 +533,7 @@
       
       sessionStorage.setItem('customGuestName', nameVal);
       sessionStorage.setItem('customGuestAge', ageVal || '30');
-      sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'false');
-      window.userLoggingOut = false;
 
       signInAnonymously(auth).then((res) => { 
         handleUserLogin(res.user); 
@@ -540,9 +551,7 @@
       
       const ageVal = document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value.trim() : '30';
       sessionStorage.setItem('customGuestAge', ageVal);
-      sessionStorage.setItem('userLoggedIn', 'true');
       sessionStorage.setItem('isGoogleVerified', 'true');
-      window.userLoggingOut = false;
 
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
@@ -555,19 +564,16 @@
     };
 
     window.logoutUser = function() {
-      sessionStorage.removeItem('userLoggedIn');
       sessionStorage.removeItem('customGuestName');
       sessionStorage.removeItem('customGuestAge');
       sessionStorage.removeItem('isGoogleVerified');
-      sessionStorage.removeItem('activeScreenTab');
-      window.userLoggingOut = true;
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true });
       }
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // מאזין Real-Time לקריאת כל הרשומות באוסף users
+    // מאזין Real-Time לקריאת כל המשתמשים
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -599,13 +605,15 @@
       });
     }
 
+    // תיקון באג השם בהתראה בלייב: שליחת השם המדויק שהוזן
     window.broadcastMyWalk = function() {
       const activeUser = auth.currentUser;
-      const userName = document.getElementById('authUserName').innerText;
+      const inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
+      const finalSenderName = window.currentUserCustomName || sessionStorage.getItem('customGuestName') || inputName || 'צועד בסביבה';
 
       addDoc(collection(db, "walk_alerts"), {
         senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
-        senderName: userName,
+        senderName: finalSenderName,
         timestamp: Date.now()
       }).then(() => {
         alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
@@ -634,11 +642,11 @@
 
       addDoc(collection(db, "reports"), {
         reporterUid: auth.currentUser ? auth.currentUser.uid : 'guest',
-        reporterName: document.getElementById('authUserName').innerText,
+        reporterName: window.currentUserCustomName || 'צועד',
         reason: reason,
         timestamp: Date.now()
       }).then(() => {
-        alert("✅ הדיווח התקבל בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר אישי תוך 72 שעות.");
+        alert("✅ הדיווח התקבל בדיסקרטיות מלאה.");
         closeReportModal();
       });
     };
@@ -669,12 +677,7 @@
     function openAccessibilityModal() { document.getElementById('accessibilityModal').classList.remove('hidden'); }
     function closeAccessibilityModal() { document.getElementById('accessibilityModal').classList.add('hidden'); }
     function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
-    
-    function toggleLargeFont() { 
-      const isLarge = document.body.classList.toggle('large-font'); 
-      if (isLarge) { alert("🔍 גופן האפליקציה הוגדל!"); } 
-      else { alert("🔍 גופן האפליקציה הוחזר לגודל המקורי."); }
-    }
+    function toggleLargeFont() { document.body.classList.toggle('large-font'); }
 
     function openSpotifyDirect() { window.open("https://open.spotify.com", "_blank"); }
     function dismissAlertBanner() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
@@ -753,7 +756,7 @@
 
       if (!liveUsers || liveUsers.length === 0) {
         if (header) header.innerText = "🟢 מחוברים בסביבה:";
-        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים נוספים בסביבה...</div>`;
+        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>`;
         return;
       }
 
@@ -772,7 +775,7 @@
           </div>
           <div class="avatar-name">${u.name} (${u.age || '30'})</div>
         `;
-        avatar.onclick = () => selectPartnerAndOpenChat(u, false);
+        avatar.onclick = () => selectPartnerAndOpenChat(u);
         bar.appendChild(avatar);
       });
     }
@@ -803,7 +806,7 @@
           </div>
           <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); selectPartnerAndOpenChat(window.liveUsers.find(p=>p.uid==='${partner.uid}'))">פרופיל</button>
         `;
-        item.onclick = () => selectPartnerAndOpenChat(partner, false);
+        item.onclick = () => selectPartnerAndOpenChat(partner);
         listContainer.appendChild(item);
       });
     }
