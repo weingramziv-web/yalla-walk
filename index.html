@@ -376,7 +376,7 @@
       </div>
     </div>
 
-    <!-- ניווט תחתון - 4 הטאבים המלאים -->
+    <!-- ניווט תחתון -->
     <div class="bottom-nav hidden" id="bottomNav">
       <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
         <span style="font-size:18px;">🗺️</span> ראשי
@@ -523,14 +523,17 @@
       signOut(auth).then(() => location.reload());
     };
 
+    // תיקון קריטי: הזרמת כל המשתמשים באוסף users ללא סינון
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
       liveUnsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
         let liveUsersList = [];
+        const myUid = auth.currentUser ? auth.currentUser.uid : '';
+
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          if (data) {
+          if (data && docSnap.id !== myUid) {
             liveUsersList.push({
               uid: docSnap.id,
               name: data.name || 'צועד בסביבה',
@@ -662,14 +665,21 @@
       }
     }
 
+    // רענון סרגל המחוברים העליון
     function renderLiveBar() {
       const bar = document.getElementById('liveUsersBar');
+      const header = document.getElementById('liveUsersHeader');
       if (!bar) return;
       bar.innerHTML = '';
 
       if (!liveUsers || liveUsers.length === 0) {
-        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>`;
+        if (header) header.innerText = "🟢 מחוברים בסביבה:";
+        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים נוספים בסביבה...</div>`;
         return;
+      }
+
+      if (header) {
+        header.innerText = `🟢 מחוברים בסביבה (${liveUsers.length}):`;
       }
 
       liveUsers.forEach(u => {
@@ -679,33 +689,46 @@
           <div class="avatar-circle">${u.name ? u.name.charAt(0).toUpperCase() : '?'}<div class="status-dot"></div></div>
           <div class="avatar-name">${u.name}</div>
         `;
-        avatar.onclick = () => switchTab('chatScreen');
+        avatar.onclick = () => openChatWithUser(u);
         bar.appendChild(avatar);
       });
     }
 
+    // רענון רשימת הפרטנרים למטה
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
       listContainer.innerHTML = '';
 
       if (!liveUsers || liveUsers.length === 0) {
-        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">אין צועדים נוספים כרגע...</p>`;
+        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בזמן אמת...</p>`;
         return;
       }
 
       liveUsers.forEach(partner => {
+        if (map && partner.lat && partner.lng) {
+          L.marker([partner.lat, partner.lng]).addTo(map)
+            .bindPopup(`<b>${partner.name} (${partner.age || '30'})</b> 🟢<br>קצב: ${partner.pace}`);
+        }
+
         const item = document.createElement('div');
         item.className = 'partner-item';
         item.innerHTML = `
           <div style="flex:1;">
             <b>${partner.name} (${partner.gender}, גיל ${partner.age || '30'})</b> <b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b><br>
-            <span style="color:#666;">קצב: ${partner.pace}</span>
+            <span style="color:#666;">קצב: ${partner.pace} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
           </div>
+          <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openChatWithUser(window.liveUsers.find(p=>p.uid==='${partner.uid}'))">שיחה/פרופיל</button>
         `;
-        item.onclick = () => switchTab('chatScreen');
+        item.onclick = () => openChatWithUser(partner);
         listContainer.appendChild(item);
       });
+    }
+
+    function openChatWithUser(partner) {
+      if (!partner) return;
+      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
+      switchTab('chatScreen');
     }
 
     function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
@@ -740,6 +763,7 @@
     window.switchTab = switchTab;
     window.renderLiveBar = renderLiveBar;
     window.renderLivePartners = renderLivePartners;
+    window.openChatWithUser = openChatWithUser;
     window.toggleAuthButtons = toggleAuthButtons;
     window.openTermsModal = openTermsModal;
     window.acceptTermsFromModal = acceptTermsFromModal;
