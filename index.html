@@ -161,12 +161,6 @@
         • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ!</p>
       </div>
 
-      <div class="feature-comparison-box">
-        <b>💡 איזה מסלול כניסה עדיף לך?</b><br>
-        • <b>התחברות עם Google (מומלץ):</b> היסטוריית קילומטרים נשמרת, אפשרות לפתוח קבוצות הליכה ושמירת מועדפים קבועה.<br>
-        • <b>כניסה כאורח (מצב מוגבל):</b> ללא שמירת היסטוריה, אי אפשר לפתוח קבוצות חדשות, והנתונים נמחקים בסגירת הדפדפן.
-      </div>
-
       <div style="margin-top: auto;">
         <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#c0392b;">* שם פרטי:</label>
         <input type="text" id="guestNameInput" placeholder="רשום את שמך הפרטי...">
@@ -190,7 +184,7 @@
         </div>
 
         <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
-        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח מוגבל 🚀</button>
+        <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח 🚀</button>
 
         <div class="legal-disclaimer">
           בלחיצה על התחברות, הנך מצהיר/ה כי גילך מעל 18 וכי הנך מסכים/ה לתקנון הקהילה ובטיחות המשתמשים.
@@ -374,17 +368,6 @@
       </div>
     </div>
 
-    <!-- פופ-אפ יצירת קבוצת הליכה חדשה -->
-    <div class="modal hidden" id="createGroupModal">
-      <div class="modal-content">
-        <h3 style="margin-top:0; color:#2980b9;">➕ יצירת קבוצת הליכה חדשה</h3>
-        <input type="text" id="newGroupTitle" placeholder="שם הקבוצה (למשל: צועדי הפארק בערב)">
-        <input type="text" id="newGroupTime" placeholder="זמן ומקום המפגש (למשל: היום ב-19:30 בכניסה הראשית)">
-        <button onclick="createNewGroup()" class="btn-group">אישור ופרסום קבוצה</button>
-        <button onclick="closeGroupModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
-      </div>
-    </div>
-
     <!-- פופ-אפ דיווח דיסקרטי -->
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
@@ -393,21 +376,6 @@
         <textarea id="reportReasonInput" placeholder="פרט בקצרה את הסיבה לדיווח..." rows="3"></textarea>
         <button onclick="submitDiscreteReport()" style="background:#e74c3c;">שלח דיווח דיסקרטי</button>
         <button onclick="closeReportModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
-      </div>
-    </div>
-
-    <!-- פופ-אפ תג חיובי בלבד -->
-    <div class="modal hidden" id="ratingModal">
-      <div class="modal-content" style="text-align:center;">
-        <h2 style="color:#27ae60; margin-top:0;">🎉 הליכה הושלמה בהצלחה!</h2>
-        <p>בחר תגי הערכה חיוביים להעניק לפרטנר:</p>
-        <div style="margin:10px 0;">
-          <span class="tag-chip clickable" onclick="toggleTagSelect(this)">🏃‍♂️ קצב מעולה!</span>
-          <span class="tag-chip clickable" onclick="toggleTagSelect(this)">🗣️ שיחה זורמת</span>
-          <span class="tag-chip clickable" onclick="toggleTagSelect(this)">⏰ דייקן/ית</span>
-          <span class="tag-chip clickable" onclick="toggleTagSelect(this)">🐶 חברותי לכלבים</span>
-        </div>
-        <button onclick="submitPositiveTag()">שלח תגי הערכה חיוביים</button>
       </div>
     </div>
 
@@ -421,7 +389,6 @@
         <p id="modalDetails" style="margin-top:10px;"></p>
         <div style="margin-top:12px; display:flex; gap:6px;">
           <button id="modalChatBtn" onclick="openChatFromModal()" style="flex:1;">💬 צור קשר בצ'אט</button>
-          <button onclick="toggleCurrentPartnerFavFromModal()" class="btn-fav" style="width:auto;">⭐ הוסף לפייבוריטים</button>
         </div>
       </div>
     </div>
@@ -447,7 +414,7 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Firebase v10 SDK via Modules -->
+  <!-- Firebase v10 SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -498,6 +465,8 @@
       let isGoogleAuth = sessionStorage.getItem('isGoogleVerified') === 'true';
 
       let finalName = savedName || inputName || user.displayName || (user.email ? user.email.split('@')[0] : 'צועד');
+
+      sessionStorage.setItem('customGuestName', finalName);
 
       window.isGuestMode = !isGoogleAuth;
       document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח)' : '');
@@ -582,7 +551,7 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // מאזין Real-Time חסין שגיאות שמנרמל נתונים
+    // מאזין Real-Time חופשי שמציג את כל המשתמשים כולל אורחים
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -594,7 +563,6 @@
           const currentUid = auth.currentUser ? auth.currentUser.uid : '';
 
           if (data && data.uid && data.uid !== currentUid) {
-            // נרמול שדות חסרים למניעת קריסת לולאה
             liveUsersList.push({
               uid: data.uid,
               name: data.name || 'צועד בסביבה',
@@ -666,10 +634,7 @@
     let userPos = { lat: 32.835, lng: 35.076 };
     let selectedPartner = null;
     let map = null, userMarker = null;
-    let safeRoutesGroup = null;
-    let showRoutes = false;
     let liveUsers = [];
-    let favoritesList = [];
     let remainingSeconds = 120 * 60;
     let usageTimerInterval = null;
 
