@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>OK, Let's Go!</title>
+  <title>Yalla Walk</title>
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -82,7 +82,6 @@
     .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; direction: rtl; }
 
     .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
-    .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 8px; border-radius: 8px; font-size: 11px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
 
     .accessibility-btn { position: fixed; top: 10px; left: 10px; z-index: 9999; background: #2980b9; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -93,15 +92,18 @@
     .dashboard-stat-text { font-size: 13px; color: #2c3e50; font-weight: bold; line-height: 1.4; }
     .dashboard-highlight { color: #27ae60; font-size: 16px; font-weight: 800; }
 
+    .stats-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-around; text-align: center; }
+    .stat-box { display: flex; flex-direction: column; }
+    .stat-num { font-size: 18px; font-weight: bold; color: #15803d; }
+    .stat-lbl { font-size: 10px; color: #166534; }
+
     .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
     .avatar-circle { width: 44px; height: 44px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); overflow: hidden; }
-    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
     .avatar-name { font-size: 10px; color: #333; margin-top: 4px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 55px; text-align: center; }
     .status-dot { width: 11px; height: 11px; background-color: #2ecc71; border-radius: 50%; position: absolute; bottom: 0; left: 0; border: 2px solid #fff; }
 
     .partner-item { background: #f9f9f9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 4px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
-    .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
 
     .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
 
@@ -132,7 +134,6 @@
 </head>
 <body>
 
-  <!-- כפתור נגישות צף -->
   <button class="accessibility-btn" title="תפריט נגישות" onclick="openAccessibilityModal()">♿</button>
 
   <div class="app-container">
@@ -140,15 +141,15 @@
     <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 10px;">
-        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ OK, Let's Go!</h1>
+        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ Yalla Walk</h1>
         <p style="font-size: 13px; font-weight: bold; color: #2c3e50; text-align: center;">הקהילה הבטוחה והבריאה של הצעידה בסביבה</p>
       </div>
 
       <div style="background: #eef9f1; padding: 10px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 11px;">
         <p style="margin:0;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
         • מערך אימות 3 הליכות להגנה מלאה מציד/התחזות.<br>
-        • דירוגים חיוביים בלבד – אפס סובלנות לבריונות.<br>
-        • שעון עצר של <b>2 שעות ביום</b> – צאו לצעוד בחוץ!</p>
+        • מעקב קילומטרים וקלוריות בלייב למתחברים ב-Google.<br>
+        • שעון עצר יומיומי לצעידה בחוץ!</p>
       </div>
 
       <div style="margin-top: auto;">
@@ -169,7 +170,6 @@
           </div>
         </div>
 
-        <!-- אישור תקנון חובה משפטי -->
         <div style="background:#fff8e1; border:1px solid #ffe082; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
           <input type="checkbox" id="termsCheckbox" style="width:auto; vertical-align:middle;" onchange="toggleAuthButtons()">
           <label for="termsCheckbox" style="vertical-align:middle;">
@@ -179,191 +179,48 @@
 
         <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
         <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח 🚀</button>
-
-        <div class="legal-disclaimer">
-          בלחיצה על התחברות, הנך מצהיר/ה כי גילך מעל 18 וכי הנך מסכים/ה לתקנון הקהילה ובטיחות המשתמשים.
-        </div>
       </div>
     </div>
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <!-- באנר התראות לייב -->
       <div class="alert-banner hidden" id="liveAlertBanner">
         <span id="alertBannerText">🔔 צועד חדש בסביבה יצא לדרך!</span>
         <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="dismissAlertBanner()">❌ סגור</button>
       </div>
 
       <div class="screen-header">
-        <h1>🗺️ OK, Let's Go!</h1>
+        <h1>🗺️ Yalla Walk</h1>
       </div>
 
       <div class="user-auth-badge" id="userAuthBadge">
         <span>👤 מחובר כ: <b id="authUserName">אורח</b></span>
-        <span style="font-size:11px; color:#e67e22; font-weight:bold;" id="usageTimerDisplay">⏱️ טיימר יומיומי: 120:00</span>
+        <span style="font-size:11px; color:#e67e22; font-weight:bold;" id="usageTimerDisplay">⏱️ 120:00</span>
       </div>
 
-      <!-- דשבורד חברתי שכונתי -->
-      <div class="community-dashboard">
-        <div class="dashboard-stat-text">
-          🔥 באזור המגורים שלך <span class="dashboard-highlight">84%</span> מהצועדים הרשומים כבר צעדו <span class="dashboard-highlight">3,420 ק"מ</span> השבוע!
+      <!-- פיצ'ר ק"מ וקלוריות בלעדי לחיבור Google -->
+      <div class="stats-card hidden" id="googleStatsCard">
+        <div class="stat-box">
+          <span class="stat-num" id="kmDisplay">0.00</span>
+          <span class="stat-lbl">קילומטרים צעדת</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-num" id="calDisplay">0</span>
+          <span class="stat-lbl">קלוריות שרפת🔥</span>
         </div>
       </div>
 
-      <!-- כפתור פתיחה ישירה של Spotify -->
-      <button class="btn-spotify" onclick="openSpotifyDirect()">🎧 פתח את Spotify (נגן מוזיקה/פודקאסטים)</button>
+      <button class="btn-spotify" onclick="openSpotifyDirect()">🎧 פתח את Spotify</button>
 
-      <!-- סרגל מחוברים בלייב -->
       <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-top:8px; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
       <div class="live-users-bar" id="liveUsersBar">
         <div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>
       </div>
 
-      <div class="verification-badge" id="verificationBadge">
-        ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
-      </div>
-
       <button class="btn-sos" id="btnBroadcastWalk" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
 
-      <div class="filter-box" style="margin-top:8px;">
-        <div class="filter-row">
-          <div style="flex:1;">
-            <label for="paceFilter">🏃‍♂️ קצב:</label>
-            <select id="paceFilter" onchange="renderLivePartners()">
-              <option value="all">הכל</option>
-              <option value="איטי">איטי</option>
-              <option value="בינוני">בינוני</option>
-              <option value="מהיר">מהיר</option>
-            </select>
-          </div>
-          <div style="flex:1;">
-            <label for="dogFilter">🐶 חיות מחמד:</label>
-            <select id="dogFilter" onchange="renderLivePartners()">
-              <option value="all">הכל</option>
-              <option value="כן">מגיע עם כלב 🐶</option>
-              <option value="לא">ללא כלב 🚫</option>
-            </select>
-          </div>
-        </div>
-
-        <label>📍 מרחק מרבי: <span id="distVal">10</span> ק"מ</label>
-        <input type="range" id="distFilter" min="1" max="50" value="10" oninput="updateDistVal(); renderLivePartners(); renderLiveBar();">
-      </div>
-
-      <div style="display:flex; gap:5px; margin-top:4px;">
-        <button class="btn-secondary" style="padding: 6px; font-size: 11px;" onclick="locateUser()">📍 אתר אותי במפה</button>
-        <button class="btn-secondary" style="padding: 6px; font-size: 11px; background:#8e44ad;" onclick="toggleRoutes()">🛣️ מסלולים בטוחים</button>
-      </div>
-
       <div id="map"></div>
-      
-      <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#2c3e50;">👇 לחץ על פרטנר להתחלת שיחה בזמן אמת:</p>
       <div id="partnersList"></div>
-    </div>
-
-    <!-- מסך הליכות קבוצתיות -->
-    <div class="screen hidden" id="groupsScreen">
-      <div class="screen-header">
-        <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1>👥 הליכות קבוצתיות</h1>
-      </div>
-      <p>הצטרף לקבוצת הליכה בסביבה או פתח קבוצה חדשה!</p>
-      <button class="btn-group" onclick="openCreateGroupModal()">➕ פתח קבוצת הליכה חדשה</button>
-      <div id="groupsList" style="margin-top:10px;"></div>
-    </div>
-
-    <!-- מסך מועדפים -->
-    <div class="screen hidden" id="favScreen">
-      <div class="screen-header">
-        <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1>⭐ המועדפים שלי</h1>
-      </div>
-      <p>פרטנרים וקבוצות ששמרת לגישה מהירה:</p>
-      <div id="favList"></div>
-    </div>
-
-    <!-- מסך צ'אט אישי בזמן אמת -->
-    <div class="screen hidden" id="chatScreen">
-      <div class="screen-header">
-        <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1 id="chatTitle">💬 שיחה בזמן אמת</h1>
-      </div>
-
-      <div class="chat-box" id="chatBox"></div>
-      
-      <div style="display:flex; gap:4px; margin-top:8px;">
-        <input type="text" id="chatInput" placeholder="רשום הודעה (לחץ Enter לשליחה)..." style="margin:0;">
-      </div>
-
-      <div style="display:flex; gap:6px; margin-top:6px;">
-        <button class="btn-fav" style="flex:1;" onclick="toggleCurrentPartnerFav()">⭐ הוסף לפייבוריטים</button>
-        <button style="background:#e67e22; flex:1;" onclick="finishWalk()">🏃‍♂️ צעדנו יחד! (תג חיובי)</button>
-      </div>
-      <button class="btn-report" onclick="openReportModal()">🚨 דיווח דיסקרטי על התנהגות לא הולמת</button>
-    </div>
-
-    <!-- מסך אזור אישי -->
-    <div class="screen hidden" id="profileScreen">
-      <div class="screen-header">
-        <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1>📊 האזור האישי שלי</h1>
-      </div>
-
-      <div style="text-align:center; margin-bottom:10px;">
-        <div class="avatar-circle" style="width:70px; height:70px; margin:0 auto; font-size:24px;" id="profileAvatarCircle">
-          <span id="profileAvatarChar">?</span>
-        </div>
-      </div>
-
-      <div class="community-dashboard">
-        <b>🌟 תגי הערכה חיוביים שקיבלת:</b>
-        <div style="margin-top:6px;">
-          <span class="tag-chip">🏃‍♂️ קצב מעולה (4)</span>
-          <span class="tag-chip">🗣️ שיחה נעימה (6)</span>
-          <span class="tag-chip">⏰ דייקן (5)</span>
-        </div>
-      </div>
-
-      <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחזר למסך הכניסה</button>
-    </div>
-
-    <!-- מודאל תקנון ותנאי שימוש -->
-    <div class="modal hidden" id="termsModal">
-      <div class="modal-content">
-        <h3 style="margin-top:0; color:#27ae60;">📜 תקנון ותנאי שימוש - OK, Let's Go!</h3>
-        <div style="font-size:11px; color:#444; max-height:220px; overflow-y:auto; line-height:1.5; border:1px solid #eee; padding:8px; border-radius:6px;">
-          <b>1. הצהרת גיל ובטיחות:</b> האפליקציה מיועדת לשימוש בגירים מגיל 18 ומעלה בלבד. חל איסור מוחלט על קטינים לעשות שימוש במערכת למפגשים.<br>
-          <b>2. אחריות המשתמש:</b> האפליקציה מהווה פלטפורמה טכנולוגית בלבד. מפעיל האפליקציה אינו אחראי למפגשים פיזיים, לנזק גוף, רכוש או להתנהגות משתמשים בשטח.<br>
-          <b>3. משמעת וקהילה:</b> חל איסור על בריונות, הטרדות או שפה פוגענית. דיווחים מטופלים בדיסקרטיות מלאה תוך 72 שעות.<br>
-          <b>4. פרטיות:</b> המיקום במפה מטושטש לבטיחות. נתונים במצב אורח אינם נשמרים.
-        </div>
-        <button onclick="acceptTermsFromModal()" style="margin-top:10px;">אני מאשר/ת את התקנון</button>
-      </div>
-    </div>
-
-    <!-- מודאל נגישות -->
-    <div class="modal hidden" id="accessibilityModal">
-      <div class="modal-content">
-        <h3 style="margin-top:0; color:#2980b9;">♿ תפריט והצהרת נגישות</h3>
-        <p style="font-size:11px; color:#555;">אנו פועלים להנגשת האפליקציה לכלל האוכלוסייה בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות.</p>
-        <button onclick="toggleHighContrast()" style="background:#34495e;">🌓 הפעל/בטל ניגודיות גבוהה</button>
-        <button onclick="toggleLargeFont()" style="background:#16a085; margin-top:4px;">🔍 הגדל/הקטן גופן</button>
-        <hr style="border:none; border-top:1px solid #eee; margin:10px 0;">
-        <b style="font-size:11px;">📞 רכז נגישות ופניות:</b>
-        <p style="font-size:10px; color:#666; margin-top:2px;">לפניות ודיווח על תקלות נגישות ניתן ליצור קשר במייל: accessibility@okletsgo.app</p>
-        <button onclick="closeAccessibilityModal()" class="btn-secondary" style="margin-top:6px;">סגור</button>
-      </div>
-    </div>
-
-    <!-- פופ-אפ דיווח דיסקרטי -->
-    <div class="modal hidden" id="reportModal">
-      <div class="modal-content">
-        <h3 style="margin-top:0; color:#e74c3c;">🚨 דיווח דיסקרטי למנהל המערכת</h3>
-        <p style="font-size:11px; color:#555;">הדיווח נשלח בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר אישי במייל/בטלפון תוך <b>72 שעות</b> לבירור הנושא.</p>
-        <textarea id="reportReasonInput" placeholder="פרט בקצרה את הסיבה לדיווח..." rows="3"></textarea>
-        <button onclick="submitDiscreteReport()" style="background:#e74c3c;">שלח דיווח דיסקרטי</button>
-        <button onclick="closeReportModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
-      </div>
     </div>
 
     <!-- ניווט תחתון -->
@@ -371,28 +228,22 @@
       <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
         <span style="font-size:18px;">🗺️</span> ראשי
       </button>
-      <button class="nav-btn" id="navGroups" onclick="switchTab('groupsScreen')">
-        <span style="font-size:18px;">👥</span> קבוצות
-      </button>
-      <button class="nav-btn" id="navFav" onclick="switchTab('favScreen')">
-        <span style="font-size:18px;">⭐</span> מועדפים
-      </button>
-      <button class="nav-btn" id="navProfile" onclick="switchTab('profileScreen')">
-        <span style="font-size:18px;">📊</span> פרופיל
+      <button class="nav-btn" id="navProfile" onclick="logoutUser()">
+        <span style="font-size:18px;">🚪</span> התנתק
       </button>
     </div>
 
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Firebase v10 SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // מפתחות Firebase של yalla-walk-private
     const firebaseConfig = {
       apiKey: "AIzaSyAGAQZznuLoKmq_q1qXgEsWpJZhKXCaVcg",
       authDomain: "yalla-walk-private.firebaseapp.com",
@@ -412,139 +263,83 @@
 
     let currentUserDoc = null;
     let liveUnsubUsers = null;
+    let walkSeconds = 0;
+    let fitnessInterval = null;
 
-    // הצגת מסך הרישום והכניסה הראשון בכל פתיחה של האפליקציה
-    onAuthStateChanged(auth, (user) => {
-      document.getElementById('welcomeScreen').classList.remove('hidden');
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('bottomNav').classList.add('hidden');
-    });
+    // ביטול כניסה אוטומטית - פתיחה תמיד במסך הרישום הראשון
+    document.getElementById('welcomeScreen').classList.remove('hidden');
+    document.getElementById('mainScreen').classList.add('hidden');
+    document.getElementById('bottomNav').classList.add('hidden');
 
-    function handleUserLogin(user) {
-      let isGoogleAuth = sessionStorage.getItem('isGoogleVerified') === 'true';
+    function handleUserLogin(user, isGoogle) {
       let savedName = sessionStorage.getItem('customGuestName');
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
-      let savedAge = sessionStorage.getItem('customGuestAge') || (document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value : '30');
 
       let googleName = user.displayName || (user.email ? user.email.split('@')[0] : '');
-      let finalName = isGoogleAuth ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
+      let finalName = isGoogle ? (googleName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
 
-      sessionStorage.setItem('customGuestName', finalName);
-      sessionStorage.setItem('customGuestAge', savedAge);
-      sessionStorage.setItem('userLoggedIn', 'true');
-
-      window.isGuestMode = !isGoogleAuth;
-      document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח)' : '');
+      document.getElementById('authUserName').innerText = finalName + (!isGoogle ? ' (אורח)' : '');
       
-      if (document.getElementById('profileAvatarChar')) {
-        document.getElementById('profileAvatarChar').innerText = finalName.charAt(0).toUpperCase();
+      if (isGoogle) {
+        document.getElementById('googleStatsCard').classList.remove('hidden');
+        startFitnessTracking();
+      } else {
+        document.getElementById('googleStatsCard').classList.add('hidden');
       }
 
       currentUserDoc = doc(db, "users", user.uid);
       
-      const baseLat = window.userPos ? window.userPos.lat : 32.835;
-      const baseLng = window.userPos ? window.userPos.lng : 35.076;
-      const jitterLat = baseLat + (Math.random() - 0.5) * 0.003;
-      const jitterLng = baseLng + (Math.random() - 0.5) * 0.003;
-
       setDoc(currentUserDoc, {
         uid: user.uid,
         name: finalName,
-        age: savedAge,
-        gender: window.userGender || "גבר",
-        isGuest: window.isGuestMode,
-        lat: jitterLat,
-        lng: jitterLng,
         isOnline: true,
-        lastSeen: Date.now(),
-        pace: "בינוני",
-        dog: "לא"
+        lastSeen: Date.now()
       }, { merge: true }).then(() => {
         listenToLiveUsers();
-        listenToWalkAlerts();
         window.startApp('mainScreen');
       }).catch(err => {
-        console.error("Error setting user doc:", err);
+        console.log("Login save note:", err);
         listenToLiveUsers();
-        listenToWalkAlerts();
         window.startApp('mainScreen');
       });
     }
 
-    window.startAppAsGuest = function() {
-      if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
-        return;
-      }
-      const nameVal = document.getElementById('guestNameInput').value.trim();
-      const ageVal = document.getElementById('userAgeInput').value.trim();
-      if (!nameVal) {
-        alert("⚠️ חובה לרשום את שמך הפרטי לפני הכניסה כאורח!");
-        document.getElementById('guestNameInput').focus();
-        return;
-      }
-      
-      sessionStorage.setItem('customGuestName', nameVal);
-      sessionStorage.setItem('customGuestAge', ageVal || '30');
-      sessionStorage.setItem('userLoggedIn', 'true');
-      sessionStorage.setItem('isGoogleVerified', 'false');
-      window.userLoggingOut = false;
+    function startFitnessTracking() {
+      if (fitnessInterval) clearInterval(fitnessInterval);
+      fitnessInterval = setInterval(() => {
+        walkSeconds++;
+        const km = (walkSeconds * (5 / 3600)).toFixed(2);
+        const cal = Math.floor(walkSeconds * (280 / 3600));
+        document.getElementById('kmDisplay').innerText = km;
+        document.getElementById('calDisplay').innerText = cal;
+      }, 1000);
+    }
 
-      document.getElementById('authUserName').innerText = nameVal + ' (אורח)';
-      if (document.getElementById('profileAvatarChar')) {
-        document.getElementById('profileAvatarChar').innerText = nameVal.charAt(0).toUpperCase();
-      }
-      
-      signInAnonymously(auth).then((res) => { 
-        handleUserLogin(res.user); 
-      }).catch((err) => { 
-        console.log("Guest Auth Error:", err);
-        window.startApp('mainScreen'); 
+    window.startAppAsGuest = function() {
+      signInAnonymously(auth).then((res) => handleUserLogin(res.user, false)).catch(err => {
+        alert("שגיאה בכניסה כאורח: " + err.message);
       });
     };
 
     window.loginWithGoogle = function() {
-      if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
-        return;
-      }
-      
-      const ageVal = document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value.trim() : '30';
-      sessionStorage.setItem('customGuestAge', ageVal);
-      sessionStorage.setItem('userLoggedIn', 'true');
-      sessionStorage.setItem('isGoogleVerified', 'true');
-      window.userLoggingOut = false;
-
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-
-      signInWithPopup(auth, provider).then((result) => {
-        handleUserLogin(result.user);
-      }).catch((err) => {
-        console.log("Google Auth Error:", err);
+      signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true)).catch(err => {
+        console.error("Google Auth error:", err);
+        alert("שגיאה בהתחברות Google: " + err.message);
       });
     };
 
     window.logoutUser = function() {
-      sessionStorage.removeItem('userLoggedIn');
-      sessionStorage.removeItem('customGuestName');
-      sessionStorage.removeItem('customGuestAge');
-      sessionStorage.removeItem('isGoogleVerified');
-      sessionStorage.removeItem('activeScreenTab');
-      window.userLoggingOut = true;
-      if (currentUserDoc) {
-        setDoc(currentUserDoc, { isOnline: false }, { merge: true });
-      }
-      signOut(auth).then(() => { location.reload(); });
+      if (currentUserDoc) setDoc(currentUserDoc, { isOnline: false }, { merge: true });
+      signOut(auth).then(() => location.reload());
     };
 
-    // מאזין Real-Time הרמטי - מציג את כל המשתמשים באוסף
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
       liveUnsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
         let liveUsersList = [];
-
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           const currentUid = auth.currentUser ? auth.currentUser.uid : '';
@@ -552,14 +347,7 @@
           if (data && docSnap.id !== currentUid) {
             liveUsersList.push({
               uid: docSnap.id,
-              name: data.name || 'צועד בסביבה',
-              age: data.age || '30',
-              gender: data.gender || 'גבר',
-              lat: typeof data.lat === 'number' ? data.lat : 32.835,
-              lng: typeof data.lng === 'number' ? data.lng : 35.076,
-              isOnline: true,
-              pace: data.pace || 'בינוני',
-              dog: data.dog || 'לא'
+              name: data.name || 'צועד בסביבה'
             });
           }
         });
@@ -567,65 +355,20 @@
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
-      }, (error) => {
-        console.error("Error listening to users:", error);
       });
     }
 
     window.broadcastMyWalk = function() {
-      const activeUser = auth.currentUser;
-      const userName = document.getElementById('authUserName').innerText;
-
       addDoc(collection(db, "walk_alerts"), {
-        senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
-        senderName: userName,
+        senderUid: auth.currentUser ? auth.currentUser.uid : 'user_' + Date.now(),
+        senderName: document.getElementById('authUserName').innerText,
         timestamp: Date.now()
-      }).then(() => {
-        alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
-      });
-    };
-
-    function listenToWalkAlerts() {
-      onSnapshot(collection(db, "walk_alerts"), (snapshot) => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added") {
-            const alertData = change.doc.data();
-            if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
-              const banner = document.getElementById('liveAlertBanner');
-              const textSpan = document.getElementById('alertBannerText');
-              textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
-              banner.classList.remove('hidden');
-            }
-          }
-        });
-      });
-    }
-
-    window.submitDiscreteReport = function() {
-      const reason = document.getElementById('reportReasonInput').value.trim();
-      if (!reason) { alert("אנא רשום בקצרה את סיבת הדיווח."); return; }
-
-      addDoc(collection(db, "reports"), {
-        reporterUid: auth.currentUser ? auth.currentUser.uid : 'guest',
-        reporterName: document.getElementById('authUserName').innerText,
-        reason: reason,
-        timestamp: Date.now()
-      }).then(() => {
-        alert("✅ הדיווח התקבל בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר אישי תוך 72 שעות.");
-        closeReportModal();
-      });
+      }).then(() => alert("📡 נשלחה התרעה בלייב!"));
     };
   </script>
 
   <script>
-    let userGender = "גבר";
-    let verifiedWalks = 0;
-    let userPos = { lat: 32.835, lng: 35.076 };
-    let selectedPartner = null;
-    let map = null, userMarker = null;
     let liveUsers = [];
-    let remainingSeconds = 120 * 60;
-    let usageTimerInterval = null;
 
     function toggleAuthButtons() {
       const isChecked = document.getElementById('termsCheckbox').checked;
@@ -633,123 +376,31 @@
       document.getElementById('btnGuestAuth').disabled = !isChecked;
     }
 
-    function openTermsModal() { document.getElementById('termsModal').classList.remove('hidden'); }
-    function acceptTermsFromModal() { 
-      document.getElementById('termsCheckbox').checked = true; 
-      toggleAuthButtons();
-      document.getElementById('termsModal').classList.add('hidden'); 
-    }
-
-    function openAccessibilityModal() { document.getElementById('accessibilityModal').classList.remove('hidden'); }
-    function closeAccessibilityModal() { document.getElementById('accessibilityModal').classList.add('hidden'); }
-    function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
-    
-    function toggleLargeFont() { 
-      const isLarge = document.body.classList.toggle('large-font'); 
-      if (isLarge) { alert("🔍 גופן האפליקציה הוגדל!"); } 
-      else { alert("🔍 גופן האפליקציה הוחזר לגודל המקורי."); }
-    }
-
-    function openSpotifyDirect() {
-      window.open("https://open.spotify.com", "_blank");
-    }
-
-    function dismissAlertBanner() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
-
-    function startApp(targetScreen) {
-      userGender = document.getElementById('userGenderInput').value;
-      window.userGender = userGender;
-
-      const screenToOpen = targetScreen || 'mainScreen';
-      switchTab(screenToOpen);
-
-      updateVerificationUI();
-      renderLivePartners();
+    function startApp(screenId) {
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+      document.getElementById('bottomNav').classList.remove('hidden');
       renderLiveBar();
-      startUsageTimer();
-
-      setTimeout(() => { initMap(); }, 100);
-    }
-
-    function startUsageTimer() {
-      if (usageTimerInterval) clearInterval(usageTimerInterval);
-      usageTimerInterval = setInterval(() => {
-        if (remainingSeconds > 0) {
-          remainingSeconds--;
-          const mins = Math.floor(remainingSeconds / 60);
-          const secs = remainingSeconds % 60;
-          document.getElementById('usageTimerDisplay').innerText = `⏱️ טיימר יומיומי: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-      }, 1000);
-    }
-
-    function initMap() {
-      try {
-        if (map || typeof L === 'undefined') return;
-        const mapContainer = document.getElementById('map');
-        if (!mapContainer) return;
-
-        map = L.map('map').setView([userPos.lat, userPos.lng], 13);
-        window.map = map;
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        
-        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
-          .addTo(map).bindPopup("<b>אזור המיקום שלך</b>");
-
-        map.invalidateSize();
-      } catch (e) { console.log(e); }
-    }
-
-    function locateUser() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-          userPos.lat = pos.coords.latitude;
-          userPos.lng = pos.coords.longitude;
-          window.userPos = userPos;
-          
-          if (window.db && window.firebaseAuth && window.firebaseAuth.currentUser) {
-            const userDoc = doc(window.db, "users", window.firebaseAuth.currentUser.uid);
-            setDoc(userDoc, { lat: userPos.lat, lng: userPos.lng }, { merge: true });
-          }
-
-          if (map) {
-            map.flyTo([userPos.lat, userPos.lng], 15);
-            if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
-          }
-          alert("📍 מיקומך עודכן במפה!");
-        });
-      }
+      renderLivePartners();
     }
 
     function renderLiveBar() {
       const bar = document.getElementById('liveUsersBar');
-      const header = document.getElementById('liveUsersHeader');
       if (!bar) return;
       bar.innerHTML = '';
 
       if (!liveUsers || liveUsers.length === 0) {
-        if (header) header.innerText = "🟢 מחוברים בסביבה:";
         bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים נוספים בסביבה...</div>`;
         return;
       }
 
-      if (header) {
-        header.innerText = `🟢 מחוברים בסביבה (${liveUsers.length}):`;
-      }
-
       liveUsers.forEach(u => {
-        const firstLetter = u.name ? u.name.charAt(0).toUpperCase() : '?';
         const avatar = document.createElement('div');
         avatar.className = 'live-user-avatar';
         avatar.innerHTML = `
-          <div class="avatar-circle">
-            ${firstLetter}
-            <div class="status-dot"></div>
-          </div>
-          <div class="avatar-name">${u.name} (${u.age || '30'})</div>
+          <div class="avatar-circle">${u.name.charAt(0).toUpperCase()}<div class="status-dot"></div></div>
+          <div class="avatar-name">${u.name}</div>
         `;
-        avatar.onclick = () => selectPartnerAndOpenChat(u, false);
         bar.appendChild(avatar);
       });
     }
@@ -760,105 +411,22 @@
       listContainer.innerHTML = '';
 
       if (!liveUsers || liveUsers.length === 0) {
-        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בזמן אמת...</p>`;
+        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px;">אין צועדים נוספים מחוברים כרגע</p>`;
         return;
       }
 
       liveUsers.forEach(partner => {
-        if (map && partner.marker) map.removeLayer(partner.marker);
-        if (map && partner.lat && partner.lng) {
-          partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name} (${partner.age || '30'})</b> 🟢<br>קצב: ${partner.pace}`);
-        }
-
         const item = document.createElement('div');
         item.className = 'partner-item';
-        item.innerHTML = `
-          <div style="flex:1;">
-            <b>${partner.name} (${partner.gender}, גיל ${partner.age || '30'})</b> <b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b><br>
-            <span style="color:#666;">קצב: ${partner.pace} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
-          </div>
-          <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openProfileObj('${partner.uid}')">פרופיל</button>
-        `;
-        item.onclick = () => selectPartnerAndOpenChat(partner, false);
+        item.innerHTML = `<b>${partner.name}</b> <b style="color:#2ecc71;">מחובר עכשיו 🟢</b>`;
         listContainer.appendChild(item);
       });
     }
 
-    function selectPartnerAndOpenChat(partner, isLocked) {
-      selectedPartner = partner;
-      window.selectedPartner = partner;
-      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
-      switchTab('chatScreen');
-    }
-
-    function updateDistVal() {
-      const val = document.getElementById('distFilter').value;
-      document.getElementById('distVal').innerText = val;
-    }
-
-    function openProfileObj(uid) {
-      let partner = (liveUsers || []).find(p => p.uid === uid);
-      if (!partner) return;
-      selectedPartner = partner;
-      
-      document.getElementById('modalName').innerText = `${partner.name} (${partner.gender}, גיל ${partner.age || '30'})`;
-      document.getElementById('modalDetails').innerHTML = `📍 אזור: בסביבה<br>🏃‍♂️ קצב: ${partner.pace}<br>🐶 כלב: ${partner.dog === 'כן' ? 'כן' : 'ללא כלב'}`;
-      document.getElementById('profileModal').classList.remove('hidden');
-    }
-
-    function closeModal() { document.getElementById('profileModal').classList.add('hidden'); }
-    function openReportModal() { document.getElementById('reportModal').classList.remove('hidden'); }
-    function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
-
-    function updateVerificationUI() {
-      const text = document.getElementById('verifyText');
-      if (text) text.innerText = `0/3 הליכות עם בני אותו המין (${userGender})`;
-    }
-
-    function switchTab(screenId) {
-      document.getElementById('welcomeScreen').classList.add('hidden');
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('groupsScreen').classList.add('hidden');
-      document.getElementById('favScreen').classList.add('hidden');
-      document.getElementById('profileScreen').classList.add('hidden');
-      document.getElementById('chatScreen').classList.add('hidden');
-      
-      document.getElementById(screenId).classList.remove('hidden');
-
-      document.getElementById('navMap').classList.remove('active');
-      document.getElementById('navGroups').classList.remove('active');
-      document.getElementById('navFav').classList.remove('active');
-      document.getElementById('navProfile').classList.remove('active');
-      
-      if (screenId === 'mainScreen') {
-        document.getElementById('navMap').classList.add('active');
-        if (map) setTimeout(() => map.invalidateSize(), 200);
-      }
-      if (screenId === 'groupsScreen') document.getElementById('navGroups').classList.add('active');
-      if (screenId === 'favScreen') document.getElementById('navFav').classList.add('active');
-      if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
-    }
-
-    window.startApp = startApp;
-    window.switchTab = switchTab;
-    window.renderLiveBar = renderLiveBar;
     window.toggleAuthButtons = toggleAuthButtons;
-    window.openTermsModal = openTermsModal;
-    window.acceptTermsFromModal = acceptTermsFromModal;
-    window.openAccessibilityModal = openAccessibilityModal;
-    window.closeAccessibilityModal = closeAccessibilityModal;
-    window.toggleHighContrast = toggleHighContrast;
-    window.toggleLargeFont = toggleLargeFont;
-    window.locateUser = locateUser;
-    window.updateDistVal = updateDistVal;
-    window.closeModal = closeModal;
-    window.openReportModal = openReportModal;
-    window.closeReportModal = closeReportModal;
-    window.openSpotifyDirect = openSpotifyDirect;
-    window.dismissAlertBanner = dismissAlertBanner;
-
-    document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') sendMsg(); });
+    window.startApp = startApp;
+    window.renderLiveBar = renderLiveBar;
+    window.renderLivePartners = renderLivePartners;
   </script>
 </body>
 </html>
