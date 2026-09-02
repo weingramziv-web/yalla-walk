@@ -136,6 +136,7 @@
 </head>
 <body>
 
+  <!-- כפתור נגישות צף -->
   <button class="accessibility-btn" title="תפריט נגישות" onclick="openAccessibilityModal()">♿</button>
 
   <div class="app-container">
@@ -172,6 +173,7 @@
           </div>
         </div>
 
+        <!-- אישור תקנון -->
         <div style="background:#fff8e1; border:1px solid #ffe082; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
           <input type="checkbox" id="termsCheckbox" style="width:auto; vertical-align:middle;" onchange="toggleAuthButtons()">
           <label for="termsCheckbox" style="vertical-align:middle;">
@@ -190,6 +192,7 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
+      <!-- באנר התראות לייב -->
       <div class="alert-banner hidden" id="liveAlertBanner">
         <span id="alertBannerText">🔔 צועד חדש בסביבה יצא לדרך!</span>
         <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="dismissAlertBanner()">❌ סגור</button>
@@ -204,6 +207,7 @@
         <span style="font-size:11px; color:#e67e22; font-weight:bold;" id="usageTimerDisplay">⏱️ טיימר יומיומי: 120:00</span>
       </div>
 
+      <!-- מעקב כושר לגוגל -->
       <div class="stats-card hidden" id="googleStatsCard">
         <div class="stat-box">
           <span class="stat-num" id="kmDisplay">0.00</span>
@@ -301,7 +305,7 @@
       </div>
     </div>
 
-    <!-- מסך צ'אט אישי בזמן אמת -->
+    <!-- מסך צ'אט אישי -->
     <div class="screen hidden" id="chatScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
