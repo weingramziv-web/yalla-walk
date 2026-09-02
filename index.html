@@ -460,7 +460,7 @@
         lat: jitterLat,
         lng: jitterLng,
         isOnline: true,
-        lastSeen: serverTimestamp(),
+        lastSeen: Date.now(),
         pace: "בינוני",
         dog: "לא"
       }, { merge: true }).then(() => {
@@ -469,6 +469,11 @@
         
         const savedScreen = sessionStorage.getItem('activeScreenTab') || 'mainScreen';
         window.startApp(savedScreen);
+      }).catch(err => {
+        console.error("Error setting user doc:", err);
+        listenToLiveUsers();
+        listenToWalkAlerts();
+        window.startApp('mainScreen');
       });
     }
 
@@ -539,7 +544,7 @@
       signOut(auth).then(() => { location.reload(); });
     };
 
-    // מאזין Real-Time הרמטי - מציג 100% מכל המשתמשים הפעילים בזמן אמת ללא סינון מרחק
+    // מאזין Real-Time הרמטי - מציג את כל המשתמשים באוסף
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -550,15 +555,16 @@
           const data = docSnap.data();
           const currentUid = auth.currentUser ? auth.currentUser.uid : '';
 
-          if (data && data.uid && data.uid !== currentUid) {
+          // מציג כל משתמש שנמצא במסד הנתונים שאינו המשתמש הנוכחי
+          if (data && docSnap.id !== currentUid) {
             liveUsersList.push({
-              uid: data.uid,
+              uid: docSnap.id,
               name: data.name || 'צועד בסביבה',
               age: data.age || '30',
               gender: data.gender || 'גבר',
               lat: typeof data.lat === 'number' ? data.lat : 32.835,
               lng: typeof data.lng === 'number' ? data.lng : 35.076,
-              isOnline: data.isOnline !== false,
+              isOnline: true,
               pace: data.pace || 'בינוני',
               dog: data.dog || 'לא'
             });
@@ -568,6 +574,8 @@
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
+      }, (error) => {
+        console.error("Error listening to users:", error);
       });
     }
 
@@ -578,22 +586,23 @@
       addDoc(collection(db, "walk_alerts"), {
         senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
         senderName: userName,
-        timestamp: serverTimestamp()
+        timestamp: Date.now()
       }).then(() => {
         alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
       });
     };
 
     function listenToWalkAlerts() {
-      const q = query(collection(db, "walk_alerts"), orderBy("timestamp", "desc"), limit(1));
-      onSnapshot(q, (snapshot) => {
-        snapshot.forEach(docSnap => {
-          const alertData = docSnap.data();
-          if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
-            const banner = document.getElementById('liveAlertBanner');
-            const textSpan = document.getElementById('alertBannerText');
-            textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
-            banner.classList.remove('hidden');
+      onSnapshot(collection(db, "walk_alerts"), (snapshot) => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added") {
+            const alertData = change.doc.data();
+            if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
+              const banner = document.getElementById('liveAlertBanner');
+              const textSpan = document.getElementById('alertBannerText');
+              textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
+              banner.classList.remove('hidden');
+            }
           }
         });
       });
@@ -607,7 +616,7 @@
         reporterUid: auth.currentUser ? auth.currentUser.uid : 'guest',
         reporterName: document.getElementById('authUserName').innerText,
         reason: reason,
-        timestamp: serverTimestamp()
+        timestamp: Date.now()
       }).then(() => {
         alert("✅ הדיווח התקבל בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר אישי תוך 72 שעות.");
         closeReportModal();
