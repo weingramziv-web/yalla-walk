@@ -523,6 +523,7 @@
       signOut(auth).then(() => location.reload());
     };
 
+    // הזרמת כל המשתמשים ללא שום סינון שעלול להסתיר אותם
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -672,7 +673,7 @@
 
       if (!liveUsers || liveUsers.length === 0) {
         if (header) header.innerText = "🟢 מחוברים בסביבה:";
-        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים נוספים בסביבה...</div>`;
+        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>`;
         return;
       }
 
@@ -692,6 +693,7 @@
       });
     }
 
+    // הרינדור מציג את כל המשתמשים ללא שום תלות בסינון מרחק
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
