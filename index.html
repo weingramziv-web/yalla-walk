@@ -546,13 +546,11 @@
           }
         });
 
-        alert("תשובת Firebase: נמצאו " + snapshot.docs.length + " משתמשים במסד הנתונים. מתוכם מציג: " + liveUsersList.length);
-
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
       }, (err) => {
-        alert("שגיאת התחברות ל-Firebase: " + err.message);
+        console.error("Firestore Error:", err);
       });
     }
 
@@ -623,11 +621,13 @@
       window.userGender = userGender;
 
       switchTab(targetScreen || 'mainScreen');
-      renderLivePartners();
-      renderLiveBar();
       startUsageTimer();
 
-      setTimeout(() => { initMap(); }, 100);
+      setTimeout(() => { 
+        initMap();
+        renderLivePartners();
+        renderLiveBar();
+      }, 300);
     }
 
     function startUsageTimer() {
@@ -670,19 +670,21 @@
       const bar = document.getElementById('liveUsersBar');
       const header = document.getElementById('liveUsersHeader');
       if (!bar) return;
+      
+      const usersToRender = window.liveUsers || [];
       bar.innerHTML = '';
 
-      if (!liveUsers || liveUsers.length === 0) {
+      if (usersToRender.length === 0) {
         if (header) header.innerText = "🟢 מחוברים בסביבה:";
         bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>`;
         return;
       }
 
       if (header) {
-        header.innerText = `🟢 מחוברים בסביבה (${liveUsers.length}):`;
+        header.innerText = `🟢 מחוברים בסביבה (${usersToRender.length}):`;
       }
 
-      liveUsers.forEach(u => {
+      usersToRender.forEach(u => {
         const avatar = document.createElement('div');
         avatar.className = 'live-user-avatar';
         avatar.innerHTML = `
@@ -697,14 +699,16 @@
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
+      
+      const usersToRender = window.liveUsers || [];
       listContainer.innerHTML = '';
 
-      if (!liveUsers || liveUsers.length === 0) {
+      if (usersToRender.length === 0) {
         listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בזמן אמת...</p>`;
         return;
       }
 
-      liveUsers.forEach(partner => {
+      usersToRender.forEach(partner => {
         if (map && partner.lat && partner.lng) {
           L.marker([partner.lat, partner.lng]).addTo(map)
             .bindPopup(`<b>${partner.name} (${partner.age || '30'})</b> 🟢<br>קצב: ${partner.pace}`);
