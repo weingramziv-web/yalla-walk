@@ -82,7 +82,6 @@
     .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; direction: rtl; }
 
     .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
-    .verified-badge { background: #d4edda; color: #155724; border-color: #c3e6cb; }
     .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 8px; border-radius: 8px; font-size: 11px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
 
     .accessibility-btn { position: fixed; top: 10px; left: 10px; z-index: 9999; background: #2980b9; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -101,7 +100,6 @@
     .live-users-bar { display: flex; gap: 10px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #eee; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 55px; cursor: pointer; position: relative; }
     .avatar-circle { width: 44px; height: 44px; background: #27ae60; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; position: relative; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15); overflow: hidden; }
-    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
     .avatar-name { font-size: 10px; color: #333; margin-top: 4px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 55px; text-align: center; }
     .status-dot { width: 11px; height: 11px; background-color: #2ecc71; border-radius: 50%; position: absolute; bottom: 0; left: 0; border: 2px solid #fff; }
 
@@ -138,7 +136,6 @@
 </head>
 <body>
 
-  <!-- כפתור נגישות צף -->
   <button class="accessibility-btn" title="תפריט נגישות" onclick="openAccessibilityModal()">♿</button>
 
   <div class="app-container">
@@ -175,7 +172,6 @@
           </div>
         </div>
 
-        <!-- אישור תקנון חובה משפטי -->
         <div style="background:#fff8e1; border:1px solid #ffe082; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
           <input type="checkbox" id="termsCheckbox" style="width:auto; vertical-align:middle;" onchange="toggleAuthButtons()">
           <label for="termsCheckbox" style="vertical-align:middle;">
@@ -194,7 +190,6 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <!-- באנר התראות לייב -->
       <div class="alert-banner hidden" id="liveAlertBanner">
         <span id="alertBannerText">🔔 צועד חדש בסביבה יצא לדרך!</span>
         <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="dismissAlertBanner()">❌ סגור</button>
@@ -209,7 +204,6 @@
         <span style="font-size:11px; color:#e67e22; font-weight:bold;" id="usageTimerDisplay">⏱️ טיימר יומיומי: 120:00</span>
       </div>
 
-      <!-- פיצ'ר מעקב כושר בלייב (Google) -->
       <div class="stats-card hidden" id="googleStatsCard">
         <div class="stat-box">
           <span class="stat-num" id="kmDisplay">0.00</span>
@@ -221,17 +215,14 @@
         </div>
       </div>
 
-      <!-- דשבורד חברתי שכונתי -->
       <div class="community-dashboard">
         <div class="dashboard-stat-text">
           🔥 באזור המגורים שלך <span class="dashboard-highlight">84%</span> מהצועדים הרשומים כבר צעדו <span class="dashboard-highlight">3,420 ק"מ</span> השבוע!
         </div>
       </div>
 
-      <!-- כפתור פתיחה ישירה של Spotify -->
       <button class="btn-spotify" onclick="openSpotifyDirect()">🎧 פתח את Spotify (נגן מוזיקה/פודקאסטים)</button>
 
-      <!-- סרגל מחוברים בלייב -->
       <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-top:8px; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
       <div class="live-users-bar" id="liveUsersBar">
         <div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>
@@ -306,7 +297,7 @@
       </div>
       <p>פרטנרים וקבוצות ששמרת לגישה מהירה:</p>
       <div id="favList">
-        <p style="text-align:center; color:#888; font-size:12px;">עדיין לא הוספת מועדפים. לחץ על ⭐ בכרטיס המשתמש להוספה.</p>
+        <p style="text-align:center; color:#888; font-size:12px;">עדיין לא הוספת מועדפים.</p>
       </div>
     </div>
 
@@ -357,38 +348,29 @@
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחזר למסך הכניסה</button>
     </div>
 
-    <!-- מודאל תקנון ותנאי שימוש -->
+    <!-- מודאלים -->
     <div class="modal hidden" id="termsModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#27ae60;">📜 תקנון ותנאי שימוש - OK, Let's Go!</h3>
-        <div style="font-size:11px; color:#444; max-height:220px; overflow-y:auto; line-height:1.5; border:1px solid #eee; padding:8px; border-radius:6px;">
-          <b>1. הצהרת גיל ובטיחות:</b> האפליקציה מיועדת לשימוש בגירים מגיל 18 ומעלה בלבד.<br>
-          <b>2. אחריות המשתמש:</b> האפליקציה מהווה פלטפורמה טכנולוגית בלבד.<br>
-          <b>3. משמעת וקהילה:</b> חל איסור על בריונות, הטרדות או שפה פוגענית.<br>
-          <b>4. פרטיות:</b> המיקום במפה מטושטש לבטיחות.
-        </div>
+        <p style="font-size:11px; color:#444;">אפליקציה למבוגרים (18+) לשימושי הליכה בטוחה בסביבה.</p>
         <button onclick="acceptTermsFromModal()" style="margin-top:10px;">אני מאשר/ת את התקנון</button>
       </div>
     </div>
 
-    <!-- מודאל נגישות -->
     <div class="modal hidden" id="accessibilityModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#2980b9;">♿ תפריט והצהרת נגישות</h3>
-        <p style="font-size:11px; color:#555;">אנו פועלים להנגשת האפליקציה לכלל האוכלוסייה בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות.</p>
-        <button onclick="toggleHighContrast()" style="background:#34495e;">🌓 הפעל/בטל ניגודיות גבוהה</button>
+        <h3 style="margin-top:0; color:#2980b9;">♿ תפריט נגישות</h3>
+        <button onclick="toggleHighContrast()" style="background:#34495e;">🌓 ניגודיות גבוהה</button>
         <button onclick="toggleLargeFont()" style="background:#16a085; margin-top:4px;">🔍 הגדל/הקטן גופן</button>
         <button onclick="closeAccessibilityModal()" class="btn-secondary" style="margin-top:6px;">סגור</button>
       </div>
     </div>
 
-    <!-- פופ-אפ דיווח דיסקרטי -->
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#e74c3c;">🚨 דיווח דיסקרטי למנהל המערכת</h3>
-        <p style="font-size:11px; color:#555;">הדיווח נשלח בדיסקרטיות מלאה. מנהל המערכת ייצור איתך קשר אישי תוך <b>72 שעות</b>.</p>
-        <textarea id="reportReasonInput" placeholder="פרט בקצרה את הסיבה לדיווח..." rows="3"></textarea>
-        <button onclick="submitDiscreteReport()" style="background:#e74c3c;">שלח דיווח דיסקרטי</button>
+        <h3 style="margin-top:0; color:#e74c3c;">🚨 דיווח דיסקרטי</h3>
+        <textarea id="reportReasonInput" placeholder="פרט בקצרה..." rows="3"></textarea>
+        <button onclick="submitDiscreteReport()" style="background:#e74c3c;">שלח דיווח</button>
         <button onclick="closeReportModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
       </div>
     </div>
@@ -411,13 +393,12 @@
 
   </div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Firebase v10 SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -442,34 +423,28 @@
     let walkSeconds = 0;
     let fitnessInterval = null;
 
-    // פתיחה קבועה במסך הרישום
-    onAuthStateChanged(auth, (user) => {
-      document.getElementById('welcomeScreen').classList.remove('hidden');
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('bottomNav').classList.add('hidden');
-    });
+    document.getElementById('welcomeScreen').classList.remove('hidden');
+    document.getElementById('mainScreen').classList.add('hidden');
+    document.getElementById('bottomNav').classList.add('hidden');
 
-    function handleUserLogin(user) {
-      let isGoogleAuth = sessionStorage.getItem('isGoogleVerified') === 'true';
+    function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
       let savedName = sessionStorage.getItem('customGuestName') || inputName;
       let savedAge = sessionStorage.getItem('customGuestAge') || (document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value : '30');
 
       let googleName = user.displayName || (user.email ? user.email.split('@')[0] : '');
-      let finalName = isGoogleAuth ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
+      let finalName = isGoogle ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
 
       sessionStorage.setItem('customGuestName', finalName);
       sessionStorage.setItem('customGuestAge', savedAge);
       window.currentUserCustomName = finalName;
 
-      window.isGuestMode = !isGoogleAuth;
-      document.getElementById('authUserName').innerText = finalName + (window.isGuestMode ? ' (אורח)' : '');
-      
+      document.getElementById('authUserName').innerText = finalName + (!isGoogle ? ' (אורח)' : '');
       if (document.getElementById('profileAvatarChar')) {
         document.getElementById('profileAvatarChar').innerText = finalName.charAt(0).toUpperCase();
       }
 
-      if (isGoogleAuth) {
+      if (isGoogle) {
         document.getElementById('googleStatsCard').classList.remove('hidden');
         startFitnessTracking();
       } else {
@@ -480,17 +455,15 @@
       
       const baseLat = window.userPos ? window.userPos.lat : 32.835;
       const baseLng = window.userPos ? window.userPos.lng : 35.076;
-      const jitterLat = baseLat + (Math.random() - 0.5) * 0.003;
-      const jitterLng = baseLng + (Math.random() - 0.5) * 0.003;
 
       setDoc(currentUserDoc, {
         uid: user.uid,
         name: finalName,
         age: savedAge,
         gender: window.userGender || "גבר",
-        isGuest: window.isGuestMode,
-        lat: jitterLat,
-        lng: jitterLng,
+        isGuest: !isGoogle,
+        lat: baseLat + (Math.random() - 0.5) * 0.003,
+        lng: baseLng + (Math.random() - 0.5) * 0.003,
         isOnline: true,
         lastSeen: Date.now(),
         pace: "בינוני",
@@ -500,7 +473,6 @@
         listenToWalkAlerts();
         window.startApp('mainScreen');
       }).catch(err => {
-        console.error("Error setting user doc:", err);
         listenToLiveUsers();
         listenToWalkAlerts();
         window.startApp('mainScreen');
@@ -520,66 +492,39 @@
 
     window.startAppAsGuest = function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
+        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש!");
         return;
       }
       const nameVal = document.getElementById('guestNameInput').value.trim();
-      const ageVal = document.getElementById('userAgeInput').value.trim();
       if (!nameVal) {
-        alert("⚠️ חובה לרשום את שמך הפרטי לפני הכניסה כאורח!");
-        document.getElementById('guestNameInput').focus();
+        alert("⚠️ חובה לרשום שם פרטי!");
         return;
       }
       
       sessionStorage.setItem('customGuestName', nameVal);
-      sessionStorage.setItem('customGuestAge', ageVal || '30');
-      sessionStorage.setItem('isGoogleVerified', 'false');
-
-      signInAnonymously(auth).then((res) => { 
-        handleUserLogin(res.user); 
-      }).catch((err) => { 
-        console.log("Guest Auth Error:", err);
-        window.startApp('mainScreen'); 
-      });
+      signInAnonymously(auth).then((res) => handleUserLogin(res.user, false)).catch(err => alert("שגיאה בכניסה: " + err.message));
     };
 
     window.loginWithGoogle = function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש לפני הכניסה!");
+        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש!");
         return;
       }
-      
-      const ageVal = document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value.trim() : '30';
-      sessionStorage.setItem('customGuestAge', ageVal);
-      sessionStorage.setItem('isGoogleVerified', 'true');
-
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-
-      signInWithPopup(auth, provider).then((result) => {
-        handleUserLogin(result.user);
-      }).catch((err) => {
-        console.log("Google Auth Error:", err);
-      });
+      signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true)).catch(err => alert("שגיאה בהתחברות Google: " + err.message));
     };
 
     window.logoutUser = function() {
-      sessionStorage.removeItem('customGuestName');
-      sessionStorage.removeItem('customGuestAge');
-      sessionStorage.removeItem('isGoogleVerified');
-      if (currentUserDoc) {
-        setDoc(currentUserDoc, { isOnline: false }, { merge: true });
-      }
-      signOut(auth).then(() => { location.reload(); });
+      if (currentUserDoc) setDoc(currentUserDoc, { isOnline: false }, { merge: true });
+      signOut(auth).then(() => location.reload());
     };
 
-    // מאזין Real-Time לקריאת כל המשתמשים
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
       liveUnsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
         let liveUsersList = [];
-
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (data) {
@@ -590,7 +535,6 @@
               gender: data.gender || 'גבר',
               lat: typeof data.lat === 'number' ? data.lat : 32.835,
               lng: typeof data.lng === 'number' ? data.lng : 35.076,
-              isOnline: true,
               pace: data.pace || 'בינוני',
               dog: data.dog || 'לא'
             });
@@ -600,24 +544,18 @@
         window.liveUsers = liveUsersList;
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
-      }, (error) => {
-        console.error("Error listening to users:", error);
       });
     }
 
-    // תיקון באג השם בהתראה בלייב: שליחת השם המדויק שהוזן
     window.broadcastMyWalk = function() {
       const activeUser = auth.currentUser;
-      const inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
-      const finalSenderName = window.currentUserCustomName || sessionStorage.getItem('customGuestName') || inputName || 'צועד בסביבה';
+      const finalSenderName = window.currentUserCustomName || document.getElementById('guestNameInput').value.trim() || 'צועד בסביבה';
 
       addDoc(collection(db, "walk_alerts"), {
         senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
         senderName: finalSenderName,
         timestamp: Date.now()
-      }).then(() => {
-        alert("📡 יצאת לצעידה! נשלחה התרעה בלייב לכל הצועדים בסביבה.");
-      });
+      }).then(() => alert("📡 נשלחה התרעה בלייב!"));
     };
 
     function listenToWalkAlerts() {
@@ -638,15 +576,9 @@
 
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
-      if (!reason) { alert("אנא רשום בקצרה את סיבת הדיווח."); return; }
-
-      addDoc(collection(db, "reports"), {
-        reporterUid: auth.currentUser ? auth.currentUser.uid : 'guest',
-        reporterName: window.currentUserCustomName || 'צועד',
-        reason: reason,
-        timestamp: Date.now()
-      }).then(() => {
-        alert("✅ הדיווח התקבל בדיסקרטיות מלאה.");
+      if (!reason) return;
+      addDoc(collection(db, "reports"), { reporterName: window.currentUserCustomName || 'צועד', reason: reason, timestamp: Date.now() }).then(() => {
+        alert("✅ הדיווח התקבל.");
         closeReportModal();
       });
     };
@@ -655,7 +587,6 @@
   <script>
     let userGender = "גבר";
     let userPos = { lat: 32.835, lng: 35.076 };
-    let selectedPartner = null;
     let map = null, userMarker = null;
     let liveUsers = [];
     let remainingSeconds = 120 * 60;
@@ -668,11 +599,7 @@
     }
 
     function openTermsModal() { document.getElementById('termsModal').classList.remove('hidden'); }
-    function acceptTermsFromModal() { 
-      document.getElementById('termsCheckbox').checked = true; 
-      toggleAuthButtons();
-      document.getElementById('termsModal').classList.add('hidden'); 
-    }
+    function acceptTermsFromModal() { document.getElementById('termsCheckbox').checked = true; toggleAuthButtons(); document.getElementById('termsModal').classList.add('hidden'); }
 
     function openAccessibilityModal() { document.getElementById('accessibilityModal').classList.remove('hidden'); }
     function closeAccessibilityModal() { document.getElementById('accessibilityModal').classList.add('hidden'); }
@@ -686,10 +613,7 @@
       userGender = document.getElementById('userGenderInput').value;
       window.userGender = userGender;
 
-      const screenToOpen = targetScreen || 'mainScreen';
-      switchTab(screenToOpen);
-
-      updateVerificationUI();
+      switchTab(targetScreen || 'mainScreen');
       renderLivePartners();
       renderLiveBar();
       startUsageTimer();
@@ -716,13 +640,8 @@
         if (!mapContainer) return;
 
         map = L.map('map').setView([userPos.lat, userPos.lng], 13);
-        window.map = map;
-        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        
-        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 })
-          .addTo(map).bindPopup("<b>אזור המיקום שלך</b>");
-
+        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 }).addTo(map);
         map.invalidateSize();
       } catch (e) { console.log(e); }
     }
@@ -732,17 +651,7 @@
         navigator.geolocation.getCurrentPosition((pos) => {
           userPos.lat = pos.coords.latitude;
           userPos.lng = pos.coords.longitude;
-          window.userPos = userPos;
-          
-          if (window.db && window.firebaseAuth && window.firebaseAuth.currentUser) {
-            const userDoc = doc(window.db, "users", window.firebaseAuth.currentUser.uid);
-            setDoc(userDoc, { lat: userPos.lat, lng: userPos.lng }, { merge: true });
-          }
-
-          if (map) {
-            map.flyTo([userPos.lat, userPos.lng], 15);
-            if (userMarker) userMarker.setLatLng([userPos.lat, userPos.lng]);
-          }
+          if (map) map.flyTo([userPos.lat, userPos.lng], 15);
           alert("📍 מיקומך עודכן במפה!");
         });
       }
@@ -750,32 +659,22 @@
 
     function renderLiveBar() {
       const bar = document.getElementById('liveUsersBar');
-      const header = document.getElementById('liveUsersHeader');
       if (!bar) return;
       bar.innerHTML = '';
 
       if (!liveUsers || liveUsers.length === 0) {
-        if (header) header.innerText = "🟢 מחוברים בסביבה:";
         bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>`;
         return;
       }
 
-      if (header) {
-        header.innerText = `🟢 מחוברים בסביבה (${liveUsers.length}):`;
-      }
-
       liveUsers.forEach(u => {
-        const firstLetter = u.name ? u.name.charAt(0).toUpperCase() : '?';
         const avatar = document.createElement('div');
         avatar.className = 'live-user-avatar';
         avatar.innerHTML = `
-          <div class="avatar-circle">
-            ${firstLetter}
-            <div class="status-dot"></div>
-          </div>
-          <div class="avatar-name">${u.name} (${u.age || '30'})</div>
+          <div class="avatar-circle">${u.name ? u.name.charAt(0).toUpperCase() : '?'}<div class="status-dot"></div></div>
+          <div class="avatar-name">${u.name}</div>
         `;
-        avatar.onclick = () => selectPartnerAndOpenChat(u);
+        avatar.onclick = () => switchTab('chatScreen');
         bar.appendChild(avatar);
       });
     }
@@ -786,50 +685,27 @@
       listContainer.innerHTML = '';
 
       if (!liveUsers || liveUsers.length === 0) {
-        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בזמן אמת...</p>`;
+        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">אין צועדים נוספים כרגע...</p>`;
         return;
       }
 
       liveUsers.forEach(partner => {
-        if (map && partner.marker) map.removeLayer(partner.marker);
-        if (map && partner.lat && partner.lng) {
-          partner.marker = L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name} (${partner.age || '30'})</b> 🟢<br>קצב: ${partner.pace}`);
-        }
-
         const item = document.createElement('div');
         item.className = 'partner-item';
         item.innerHTML = `
           <div style="flex:1;">
             <b>${partner.name} (${partner.gender}, גיל ${partner.age || '30'})</b> <b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b><br>
-            <span style="color:#666;">קצב: ${partner.pace} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
+            <span style="color:#666;">קצב: ${partner.pace}</span>
           </div>
-          <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); selectPartnerAndOpenChat(window.liveUsers.find(p=>p.uid==='${partner.uid}'))">פרופיל</button>
         `;
-        item.onclick = () => selectPartnerAndOpenChat(partner);
+        item.onclick = () => switchTab('chatScreen');
         listContainer.appendChild(item);
       });
     }
 
-    function selectPartnerAndOpenChat(partner) {
-      selectedPartner = partner;
-      window.selectedPartner = partner;
-      document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner ? partner.name : 'צועד'}`;
-      switchTab('chatScreen');
-    }
-
-    function updateDistVal() {
-      const val = document.getElementById('distFilter').value;
-      document.getElementById('distVal').innerText = val;
-    }
-
+    function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
     function openReportModal() { document.getElementById('reportModal').classList.remove('hidden'); }
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
-
-    function updateVerificationUI() {
-      const text = document.getElementById('verifyText');
-      if (text) text.innerText = `0/3 הליכות עם בני אותו המין (${userGender})`;
-    }
 
     function switchTab(screenId) {
       document.getElementById('welcomeScreen').classList.add('hidden');
@@ -858,6 +734,7 @@
     window.startApp = startApp;
     window.switchTab = switchTab;
     window.renderLiveBar = renderLiveBar;
+    window.renderLivePartners = renderLivePartners;
     window.toggleAuthButtons = toggleAuthButtons;
     window.openTermsModal = openTermsModal;
     window.acceptTermsFromModal = acceptTermsFromModal;
@@ -871,8 +748,6 @@
     window.closeReportModal = closeReportModal;
     window.openSpotifyDirect = openSpotifyDirect;
     window.dismissAlertBanner = dismissAlertBanner;
-
-    document.getElementById('chatInput').addEventListener('keyup', function(e) { if (e.key === 'Enter') alert('הודעה נשלחה בצ\'אט!'); });
   </script>
 </body>
 </html>
