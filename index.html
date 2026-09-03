@@ -134,7 +134,7 @@
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px; direction: rtl; }
     .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 85vh; overflow-y: auto; }
     
-    .alert-banner { background: #e74c3c; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; direction: rtl; }
+    .alert-banner { background: #e74c3c; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; direction: rtl; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -194,9 +194,9 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <div class="alert-banner hidden" id="liveAlertBanner">
-        <span id="alertBannerText">🔔 צועד חדש בסביבה יצא לדרך!</span>
-        <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="dismissAlertBanner()">❌ סגור</button>
+      <div class="alert-banner hidden" id="liveAlertBanner" onclick="handleBannerClick()">
+        <span id="alertBannerText">🔔 התראה חדשה!</span>
+        <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="event.stopPropagation(); dismissAlertBanner()">❌ סגור</button>
       </div>
 
       <div class="screen-header">
@@ -404,7 +404,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGAQZznuLoKmq_q1qXgEsWpJZhKXCaVcg",
@@ -426,6 +426,7 @@
     let currentUserDoc = null;
     let liveUnsubUsers = null;
     let chatUnsub = null;
+    let incomingChatUnsub = null;
     let walkSeconds = 0;
     let fitnessInterval = null;
     let heartbeatInterval = null;
@@ -481,12 +482,14 @@
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
+        listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
         window.startApp('mainScreen');
       }).catch(err => {
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
+        listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
         window.startApp('mainScreen');
       });
@@ -498,7 +501,7 @@
         if (currentUserDoc) {
           setDoc(currentUserDoc, { lastSeen: Date.now(), isOnline: true }, { merge: true });
         }
-      }, 15000);
+      }, 10000);
     }
 
     function startFitnessTracking() {
@@ -555,13 +558,15 @@
         let liveUsersMap = new Map();
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
         const now = Date.now();
-        const activeThreshold = 180 * 1000; // סינון: מציג משתמשים שהיו פעילים ב-3 הדקות האחרונות
+        const activeThreshold = 60 * 1000; // סינון: פעילים בלבד מהדקה האחרונה
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (data && docSnap.id !== myUid) {
-            const isRecentlyActive = data.lastSeen && (now - data.lastSeen < activeThreshold);
-            if (isRecentlyActive && data.isOnline !== false) {
+            // תנאי מוחלט: קיומו של lastSeen בדקה האחרונה וגם isOnline שאינו false
+            const isRecentlyActive = data.lastSeen && (now - data.lastSeen < activeThreshold) && (data.isOnline !== false);
+            
+            if (isRecentlyActive) {
               const uName = data.name || 'צועד בסביבה';
               if (!liveUsersMap.has(uName) || (data.lastSeen > liveUsersMap.get(uName).lastSeen)) {
                 liveUsersMap.set(uName, {
@@ -588,7 +593,42 @@
       });
     }
 
-    // --- לוגיקת צ'אט בזמן אמת ---
+    // --- לוגיקת התראות צ'אט בזמן אמת ---
+    function listenToIncomingMessages() {
+      if (incomingChatUnsub) incomingChatUnsub();
+      
+      incomingChatUnsub = onSnapshot(collectionGroup(db, "messages"), (snapshot) => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === "added") {
+            const msg = change.doc.data();
+            const activeUser = auth.currentUser;
+            
+            // בדיקה שההודעה נשלחה אליי ולא ממני, ושנוצרה אחרי טעינת הדף
+            if (activeUser && msg.senderUid !== activeUser.uid && msg.timestamp > pageLoadTime) {
+              const banner = document.getElementById('liveAlertBanner');
+              const textSpan = document.getElementById('alertBannerText');
+              
+              window.pendingChatPartner = {
+                uid: msg.senderUid,
+                name: msg.senderName || 'צועד בסביבה'
+              };
+
+              textSpan.innerHTML = `💬 <b>${msg.senderName || 'צועד'}:</b> "${msg.text}" (לחץ למענה)`;
+              banner.classList.remove('hidden');
+            }
+          }
+        });
+      });
+    }
+
+    window.handleBannerClick = function() {
+      if (window.pendingChatPartner) {
+        openChatWithUser(window.pendingChatPartner);
+        window.pendingChatPartner = null;
+      }
+      dismissAlertBanner();
+    };
+
     window.sendChatMessage = function() {
       const chatInput = document.getElementById('chatInput');
       const text = chatInput ? chatInput.value.trim() : '';
