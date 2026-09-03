@@ -107,7 +107,10 @@
     .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
     .tag-chip { background: #e8f8f5; color: #16a085; padding: 3px 8px; border-radius: 12px; font-size: 11px; display: inline-block; margin: 2px; font-weight: bold; }
 
-    .chat-box { flex: 1; min-height: 200px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
+    .chat-box { flex: 1; min-height: 220px; border: 1px solid #ccc; border-radius: 8px; padding: 10px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
+    .chat-msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 12px; line-height: 1.3; word-break: break-word; }
+    .chat-msg.my-msg { background: #27ae60; color: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .chat-msg.other-msg { background: #e2e8f0; color: #2d3748; align-self: flex-end; border-bottom-right-radius: 2px; }
 
     .bottom-nav { 
       position: fixed; 
@@ -313,8 +316,9 @@
         <div style="color:#888; font-size:11px; text-align:center;">תחילת שיחה מאובטחת</div>
       </div>
       
-      <div style="display:flex; gap:4px; margin-top:8px;">
-        <input type="text" id="chatInput" placeholder="רשום הודעה (לחץ Enter לשליחה)..." style="margin:0;">
+      <div style="display:flex; gap:6px; margin-top:8px; direction:rtl;">
+        <input type="text" id="chatInput" placeholder="רשום הודעה... (לחץ Enter לשליחה)" style="margin:0; flex:1;" onkeypress="if(event.key==='Enter') sendChatMessage();">
+        <button onclick="sendChatMessage()" style="width:auto; padding:0 16px; margin:0; background:#27ae60; white-space:nowrap;">שלח 🚀</button>
       </div>
 
       <div style="display:flex; gap:6px; margin-top:6px;">
@@ -421,11 +425,11 @@
 
     let currentUserDoc = null;
     let liveUnsubUsers = null;
+    let chatUnsub = null;
     let walkSeconds = 0;
     let fitnessInterval = null;
     let heartbeatInterval = null;
 
-    // שמירת זמן טעינת הדף למניעת התראות ישנות
     const pageLoadTime = Date.now();
 
     document.getElementById('welcomeScreen').classList.remove('hidden');
@@ -488,7 +492,6 @@
       });
     }
 
-    // מנגנון Heartbeat - מעדכן פעילות כל 15 שניות למניעת ניתוק
     function startHeartbeat() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       heartbeatInterval = setInterval(() => {
@@ -521,7 +524,13 @@
       }
       
       sessionStorage.setItem('customGuestName', nameVal);
-      signInAnonymously(auth).then((res) => handleUserLogin(res.user, false)).catch(err => alert("שגיאה בכניסה: " + err.message));
+      
+      // אם המשתמש כבר מחובר ב-Auth, לא נייצר UID חדש אלא נעדכן את הקיים
+      if (auth.currentUser) {
+        handleUserLogin(auth.currentUser, false);
+      } else {
+        signInAnonymously(auth).then((res) => handleUserLogin(res.user, false)).catch(err => alert("שגיאה בכניסה: " + err.message));
+      }
     };
 
     window.loginWithGoogle = function() {
@@ -544,37 +553,105 @@
       if (liveUnsubUsers) liveUnsubUsers();
       
       liveUnsubUsers = onSnapshot(collection(db, "users"), (snapshot) => {
-        let liveUsersList = [];
+        let liveUsersMap = new Map();
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
         const now = Date.now();
-        const activeThreshold = 60 * 1000; // סינון: מציג רק משתמשים שהיו פעילים בדקה האחרונה
+        const activeThreshold = 60 * 1000;
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (data && docSnap.id !== myUid) {
             const isRecentlyActive = data.lastSeen && (now - data.lastSeen < activeThreshold);
             if (isRecentlyActive && data.isOnline !== false) {
-              liveUsersList.push({
-                uid: docSnap.id,
-                name: data.name || 'צועד בסביבה',
-                age: data.age || '30',
-                gender: data.gender || 'גבר',
-                lat: typeof data.lat === 'number' ? data.lat : 32.835,
-                lng: typeof data.lng === 'number' ? data.lng : 35.076,
-                pace: data.pace || 'בינוני',
-                dog: data.dog || 'לא'
-              });
+              const uName = data.name || 'צועד בסביבה';
+              // אם קיים כבר משתמש עם אותו שם, נשמור רק את המועדון והעדכני ביותר לפי lastSeen
+              if (!liveUsersMap.has(uName) || (data.lastSeen > liveUsersMap.get(uName).lastSeen)) {
+                liveUsersMap.set(uName, {
+                  uid: docSnap.id,
+                  name: uName,
+                  age: data.age || '30',
+                  gender: data.gender || 'גבר',
+                  lat: typeof data.lat === 'number' ? data.lat : 32.835,
+                  lng: typeof data.lng === 'number' ? data.lng : 35.076,
+                  pace: data.pace || 'בינוני',
+                  dog: data.dog || 'לא',
+                  lastSeen: data.lastSeen || 0
+                });
+              }
             }
           }
         });
 
-        window.liveUsers = liveUsersList;
+        window.liveUsers = Array.from(liveUsersMap.values());
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
       }, (err) => {
         console.error("Firestore Error:", err);
       });
     }
+
+    // --- לוגיקת צ'אט בזמן אמת ---
+    window.sendChatMessage = function() {
+      const chatInput = document.getElementById('chatInput');
+      const text = chatInput ? chatInput.value.trim() : '';
+      const activeUser = auth.currentUser;
+      const targetPartner = window.activeChatPartner;
+
+      if (!text) return;
+      if (!activeUser || !targetPartner) {
+        alert("⚠️ יש לבחור משתמש להתחלת שיחה!");
+        return;
+      }
+
+      const chatId = [activeUser.uid, targetPartner.uid].sort().join('_');
+
+      addDoc(collection(db, "chats", chatId, "messages"), {
+        senderUid: activeUser.uid,
+        senderName: window.currentUserCustomName || 'צועד',
+        text: text,
+        timestamp: Date.now()
+      }).then(() => {
+        chatInput.value = '';
+      }).catch(err => alert("שגיאה בשליחת הודעה: " + err.message));
+    };
+
+    window.listenToChatMessages = function(partner) {
+      if (chatUnsub) chatUnsub();
+      window.activeChatPartner = partner;
+
+      const activeUser = auth.currentUser;
+      const chatBox = document.getElementById('chatBox');
+      if (!chatBox || !activeUser || !partner) return;
+
+      chatBox.innerHTML = '<div style="color:#888; font-size:11px; text-align:center;">טוען הודעות...</div>';
+
+      const chatId = [activeUser.uid, partner.uid].sort().join('_');
+      const messagesRef = collection(db, "chats", chatId, "messages");
+
+      chatUnsub = onSnapshot(messagesRef, (snapshot) => {
+        let messages = [];
+        snapshot.forEach(docSnap => messages.push(docSnap.data()));
+        messages.sort((a, b) => a.timestamp - b.timestamp);
+
+        chatBox.innerHTML = '';
+        if (messages.length === 0) {
+          chatBox.innerHTML = `<div style="color:#888; font-size:11px; text-align:center;">תחילת שיחה מאובטחת עם ${partner.name}</div>`;
+          return;
+        }
+
+        messages.forEach(msg => {
+          const isMe = msg.senderUid === activeUser.uid;
+          const msgDiv = document.createElement('div');
+          msgDiv.className = `chat-msg ${isMe ? 'my-msg' : 'other-msg'}`;
+          msgDiv.innerText = msg.text;
+          chatBox.appendChild(msgDiv);
+        });
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, (err) => {
+        console.error("Chat Error:", err);
+      });
+    };
 
     window.broadcastMyWalk = function() {
       const activeUser = auth.currentUser;
@@ -592,7 +669,6 @@
         snapshot.docChanges().forEach(change => {
           if (change.type === "added") {
             const alertData = change.doc.data();
-            // הקפצת התראה רק אם היא נוצרה לאחר טעינת הדף הנוכחי
             if (alertData.timestamp && alertData.timestamp > pageLoadTime) {
               if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
                 const banner = document.getElementById('liveAlertBanner');
@@ -757,6 +833,9 @@
       if (!partner) return;
       document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
       switchTab('chatScreen');
+      if (window.listenToChatMessages) {
+        window.listenToChatMessages(partner);
+      }
     }
 
     function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
