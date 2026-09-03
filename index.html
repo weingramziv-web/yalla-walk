@@ -403,7 +403,7 @@
   <!-- Firebase v10 SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -433,9 +433,29 @@
 
     const pageLoadTime = Date.now();
 
-    document.getElementById('welcomeScreen').classList.remove('hidden');
-    document.getElementById('mainScreen').classList.add('hidden');
-    document.getElementById('bottomNav').classList.add('hidden');
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        handleUserLogin(user, !user.isAnonymous);
+      } else {
+        resetAppState();
+      }
+    });
+
+    function resetAppState() {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      if (liveUnsubUsers) liveUnsubUsers();
+      if (incomingChatUnsub) incomingChatUnsub();
+      if (chatUnsub) chatUnsub();
+      
+      window.liveUsers = [];
+      window.activeChatPartner = null;
+      if (window.renderLivePartners) window.renderLivePartners();
+      if (window.renderLiveBar) window.renderLiveBar();
+
+      document.getElementById('welcomeScreen').classList.remove('hidden');
+      document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('bottomNav').classList.add('hidden');
+    }
 
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
@@ -501,7 +521,7 @@
         if (currentUserDoc) {
           setDoc(currentUserDoc, { lastSeen: Date.now(), isOnline: true }, { merge: true });
         }
-      }, 10000);
+      }, 15000);
     }
 
     function startFitnessTracking() {
@@ -521,12 +541,12 @@
         return;
       }
       const nameVal = document.getElementById('guestNameInput').value.trim();
-      if (!nameVal) {
+      if (!nameVal && !sessionStorage.getItem('customGuestName')) {
         alert("⚠️ חובה לרשום שם פרטי!");
         return;
       }
       
-      sessionStorage.setItem('customGuestName', nameVal);
+      if (nameVal) sessionStorage.setItem('customGuestName', nameVal);
       
       if (auth.currentUser) {
         handleUserLogin(auth.currentUser, false);
@@ -547,8 +567,13 @@
 
     window.logoutUser = function() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
-      if (currentUserDoc) setDoc(currentUserDoc, { isOnline: false }, { merge: true });
-      signOut(auth).then(() => location.reload());
+      if (currentUserDoc) {
+        setDoc(currentUserDoc, { isOnline: false }, { merge: true }).then(() => {
+          signOut(auth).then(() => resetAppState());
+        });
+      } else {
+        signOut(auth).then(() => resetAppState());
+      }
     };
 
     function listenToLiveUsers() {
@@ -558,12 +583,11 @@
         let liveUsersMap = new Map();
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
         const now = Date.now();
-        const activeThreshold = 60 * 1000; // סינון: פעילים בלבד מהדקה האחרונה
+        const activeThreshold = 180 * 1000;
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (data && docSnap.id !== myUid) {
-            // תנאי מוחלט: קיומו של lastSeen בדקה האחרונה וגם isOnline שאינו false
             const isRecentlyActive = data.lastSeen && (now - data.lastSeen < activeThreshold) && (data.isOnline !== false);
             
             if (isRecentlyActive) {
@@ -593,7 +617,7 @@
       });
     }
 
-    // --- לוגיקת התראות צ'אט בזמן אמת ---
+    // --- התראת צ'אט נכנס בלייב ---
     function listenToIncomingMessages() {
       if (incomingChatUnsub) incomingChatUnsub();
       
@@ -603,7 +627,6 @@
             const msg = change.doc.data();
             const activeUser = auth.currentUser;
             
-            // בדיקה שההודעה נשלחה אליי ולא ממני, ושנוצרה אחרי טעינת הדף
             if (activeUser && msg.senderUid !== activeUser.uid && msg.timestamp > pageLoadTime) {
               const banner = document.getElementById('liveAlertBanner');
               const textSpan = document.getElementById('alertBannerText');
@@ -661,6 +684,7 @@
       const chatBox = document.getElementById('chatBox');
       if (!chatBox || !activeUser || !partner) return;
 
+      // ניקוי מלא של תיבת הצ'אט לפני טעינת השיחה הספציפית
       chatBox.innerHTML = '<div style="color:#888; font-size:11px; text-align:center;">טוען הודעות...</div>';
 
       const chatId = [activeUser.uid, partner.uid].sort().join('_');
