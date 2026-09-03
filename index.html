@@ -425,6 +425,9 @@
     let fitnessInterval = null;
     let heartbeatInterval = null;
 
+    // שמירת זמן טעינת הדף למניעת התראות ישנות
+    const pageLoadTime = Date.now();
+
     document.getElementById('welcomeScreen').classList.remove('hidden');
     document.getElementById('mainScreen').classList.add('hidden');
     document.getElementById('bottomNav').classList.add('hidden');
@@ -485,14 +488,14 @@
       });
     }
 
-    // מנגנון Heartbeat - מעדכן פעילות כל 30 שניות
+    // מנגנון Heartbeat - מעדכן פעילות כל 15 שניות למניעת ניתוק
     function startHeartbeat() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       heartbeatInterval = setInterval(() => {
         if (currentUserDoc) {
           setDoc(currentUserDoc, { lastSeen: Date.now(), isOnline: true }, { merge: true });
         }
-      }, 30000);
+      }, 15000);
     }
 
     function startFitnessTracking() {
@@ -544,7 +547,7 @@
         let liveUsersList = [];
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
         const now = Date.now();
-        const activeThreshold = 2 * 60 * 1000; // סינון: רק מי שהיה פעיל ב-2 הדקות האחרונות
+        const activeThreshold = 60 * 1000; // סינון: מציג רק משתמשים שהיו פעילים בדקה האחרונה
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
@@ -589,11 +592,14 @@
         snapshot.docChanges().forEach(change => {
           if (change.type === "added") {
             const alertData = change.doc.data();
-            if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
-              const banner = document.getElementById('liveAlertBanner');
-              const textSpan = document.getElementById('alertBannerText');
-              textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
-              banner.classList.remove('hidden');
+            // הקפצת התראה רק אם היא נוצרה לאחר טעינת הדף הנוכחי
+            if (alertData.timestamp && alertData.timestamp > pageLoadTime) {
+              if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
+                const banner = document.getElementById('liveAlertBanner');
+                const textSpan = document.getElementById('alertBannerText');
+                textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
+                banner.classList.remove('hidden');
+              }
             }
           }
         });
