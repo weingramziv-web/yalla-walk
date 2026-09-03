@@ -575,15 +575,18 @@
         let liveUsersMap = new Map();
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
         const now = Date.now();
-        const activeThreshold = 180 * 1000;
+        const activeThreshold = 30 * 1000; // 30 שניות בלבד
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
           if (data && docSnap.id !== myUid) {
             const isRecentlyActive = data.lastSeen && (now - data.lastSeen < activeThreshold) && (data.isOnline !== false);
             
-            if (isRecentlyActive) {
-              const uName = data.name || 'צועד בסביבה';
+            // סינון קשיח: חובה שיהיה שם תקין שאינו ריק ואינו ברירת מחדל
+            const hasValidName = data.name && data.name.trim() !== '' && data.name !== 'צועד בסביבה' && data.name !== 'צועד אורח';
+
+            if (isRecentlyActive && hasValidName) {
+              const uName = data.name.trim();
               if (!liveUsersMap.has(uName) || (data.lastSeen > liveUsersMap.get(uName).lastSeen)) {
                 liveUsersMap.set(uName, {
                   uid: docSnap.id,
