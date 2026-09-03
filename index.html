@@ -403,7 +403,7 @@
   <!-- Firebase v10 SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -433,13 +433,9 @@
 
     const pageLoadTime = Date.now();
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        handleUserLogin(user, !user.isAnonymous);
-      } else {
-        resetAppState();
-      }
-    });
+    document.getElementById('welcomeScreen').classList.remove('hidden');
+    document.getElementById('mainScreen').classList.add('hidden');
+    document.getElementById('bottomNav').classList.add('hidden');
 
     function resetAppState() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
@@ -548,11 +544,7 @@
       
       if (nameVal) sessionStorage.setItem('customGuestName', nameVal);
       
-      if (auth.currentUser) {
-        handleUserLogin(auth.currentUser, false);
-      } else {
-        signInAnonymously(auth).then((res) => handleUserLogin(res.user, false)).catch(err => alert("שגיאה בכניסה: " + err.message));
-      }
+      signInAnonymously(auth).then((res) => handleUserLogin(res.user, false)).catch(err => alert("שגיאה בכניסה: " + err.message));
     };
 
     window.loginWithGoogle = function() {
@@ -617,7 +609,6 @@
       });
     }
 
-    // --- התראת צ'אט נכנס בלייב ---
     function listenToIncomingMessages() {
       if (incomingChatUnsub) incomingChatUnsub();
       
@@ -684,7 +675,6 @@
       const chatBox = document.getElementById('chatBox');
       if (!chatBox || !activeUser || !partner) return;
 
-      // ניקוי מלא של תיבת הצ'אט לפני טעינת השיחה הספציפית
       chatBox.innerHTML = '<div style="color:#888; font-size:11px; text-align:center;">טוען הודעות...</div>';
 
       const chatId = [activeUser.uid, partner.uid].sort().join('_');
