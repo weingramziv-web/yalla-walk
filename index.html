@@ -75,7 +75,6 @@
     .btn-logout { background: #c0392b; margin-top: 15px; }
     .hidden { display: none !important; }
 
-    /* כפתור SOS קטן ועגול בצד המסך */
     .btn-sos-circle {
       position: absolute;
       top: 12px;
@@ -126,7 +125,8 @@
     .avatar-name { font-size: 10px; color: #333; margin-top: 4px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 58px; text-align: center; font-weight: 600; }
     .status-dot { width: 12px; height: 12px; background-color: #2ecc71; border-radius: 50%; position: absolute; bottom: 0; left: 0; border: 2px solid #fff; }
 
-    .partner-item { background: #fff; padding: 12px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 5px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; box-shadow: 0 2px 5px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; border-right: 5px solid #27ae60; }
+    .partner-item { background: #fff; padding: 12px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 5px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; box-shadow: 0 2px 5px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
+    .walk-alert-card { background: #fdfefe; padding: 12px; border-radius: 12px; margin: 8px 0; border-right: 5px solid #e67e22; box-shadow: 0 2px 6px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
     .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
     .tag-chip { background: #e8f8f5; color: #16a085; padding: 4px 10px; border-radius: 14px; font-size: 11px; display: inline-block; margin: 2px; font-weight: bold; }
 
@@ -152,7 +152,7 @@
       direction: rtl; 
       box-shadow: 0 -3px 10px rgba(0,0,0,0.03);
     }
-    .nav-btn { background: none; color: #7f8c8d; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0; margin: 0; width: 25%; box-shadow: none; }
+    .nav-btn { background: none; color: #7f8c8d; border: none; font-size: 10px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0; margin: 0; width: 20%; box-shadow: none; }
     .nav-btn.active { color: #27ae60; font-weight: bold; }
 
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px; direction: rtl; }
@@ -218,7 +218,6 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <!-- כפתור SOS קטן ועגול בראש המסך הראשי -->
       <button class="btn-sos-circle" title="לחצן מצוקה חירום (SOS)" onclick="triggerSOS()">SOS</button>
 
       <div class="alert-banner hidden" id="liveAlertBanner" onclick="handleBannerClick()">
@@ -263,7 +262,7 @@
         ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
       </div>
 
-      <button style="background:#27ae60;" id="btnBroadcastWalk" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
+      <button style="background:#27ae60;" id="btnBroadcastWalk" onclick="openBroadcastModal()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
 
       <div class="filter-box" style="margin-top:8px;">
         <div class="filter-row">
@@ -298,6 +297,18 @@
       
       <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#2c3e50;">👇 לחץ על פרטנר להתחלת שיחה בזמן אמת:</p>
       <div id="partnersList"></div>
+    </div>
+
+    <!-- טאב חדש: משתמשים שיצאו להליכה עכשיו -->
+    <div class="screen hidden" id="activeWalkersScreen">
+      <div class="screen-header">
+        <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
+        <h1>🚶‍♂️ צועדים יצאו לדרך!</h1>
+      </div>
+      <p>משתמשים שהתריעו בלייב כי יצאו לצעידה בסביבה:</p>
+      <div id="activeWalkersList" style="margin-top:10px;">
+        <div style="font-size:12px; color:#888; text-align:center;">טוען צעידות פעילות...</div>
+      </div>
     </div>
 
     <!-- מסך הליכות קבוצתיות -->
@@ -379,7 +390,6 @@
         </div>
       </div>
 
-      <!-- הגדרת 3 אנשי קשר לשעת חירום -->
       <div class="community-dashboard" style="margin-top:10px;">
         <b>🚨 אנשי קשר לשעת חירום (SOS):</b>
         <p style="font-size:11px; color:#666; margin:4px 0;">הגדר עד 3 מספרי טלפון אליהם תישלח הודעת מצוקה בלחיצה על SOS:</p>
@@ -401,7 +411,33 @@
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחזר למסך הכניסה</button>
     </div>
 
-    <!-- מודאלים -->
+    <!-- מודאל דיווח הליכה -->
+    <div class="modal hidden" id="broadcastModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#27ae60;">🚶‍♂️ פרטי הצעידה שלך</h3>
+        
+        <label style="font-weight:bold; display:block; margin-top:6px;">📏 מרחק מתוכנן (ק"מ):</label>
+        <input type="number" id="walkDistanceInput" value="5" min="1" max="30">
+
+        <label style="font-weight:bold; display:block; margin-top:6px;">🏃‍♂️ קצב הליכה:</label>
+        <select id="walkPaceInput">
+          <option value="איטי">איטי</option>
+          <option value="בינוני" selected>בינוני</option>
+          <option value="מהיר">מהיר</option>
+        </select>
+
+        <label style="font-weight:bold; display:block; margin-top:6px;">🐶 מגיע עם כלב?</label>
+        <select id="walkDogInput">
+          <option value="ללא כלב 🚫">ללא כלב 🚫</option>
+          <option value="מגיע עם כלב 🐶">מגיע עם כלב 🐶</option>
+        </select>
+
+        <button onclick="confirmBroadcastWalk()" style="margin-top:12px; background:#27ae60;">📡 התרע בלייב לצועדים בסביבה!</button>
+        <button onclick="closeBroadcastModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
+      </div>
+    </div>
+
+    <!-- מודאלים נוספים -->
     <div class="modal hidden" id="termsModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#27ae60;">📜 תקנון ותנאי שימוש - OK, Let's Go!</h3>
@@ -428,19 +464,22 @@
       </div>
     </div>
 
-    <!-- ניווט תחתון -->
+    <!-- ניווט תחתון מורחב -->
     <div class="bottom-nav hidden" id="bottomNav">
       <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
-        <span style="font-size:18px;">🗺️</span> ראשי
+        <span style="font-size:17px;">🗺️</span> ראשי
+      </button>
+      <button class="nav-btn" id="navWalkers" onclick="switchTab('activeWalkersScreen')">
+        <span style="font-size:17px;">🚶‍♂️</span> צועדים
       </button>
       <button class="nav-btn" id="navGroups" onclick="switchTab('groupsScreen')">
-        <span style="font-size:18px;">👥</span> קבוצות
+        <span style="font-size:17px;">👥</span> קבוצות
       </button>
       <button class="nav-btn" id="navFav" onclick="switchTab('favScreen')">
-        <span style="font-size:18px;">⭐</span> מועדפים
+        <span style="font-size:17px;">⭐</span> מועדפים
       </button>
       <button class="nav-btn" id="navProfile" onclick="switchTab('profileScreen')">
-        <span style="font-size:18px;">📊</span> פרופיל
+        <span style="font-size:17px;">📊</span> פרופיל
       </button>
     </div>
 
@@ -496,7 +535,6 @@
     document.getElementById('mainScreen').classList.add('hidden');
     document.getElementById('bottomNav').classList.add('hidden');
 
-    // טעינת אנשי קשר לשעת חירום מהזיכרון המקומי
     window.loadEmergencyContacts = function() {
       document.getElementById('emergencyContact1').value = localStorage.getItem('emergency1') || '';
       document.getElementById('emergencyContact2').value = localStorage.getItem('emergency2') || '';
@@ -746,20 +784,17 @@
       }
     };
 
-    // הפעלת מצוקה (SOS) שליחה לרשת + אנשי קשר מוגדרים
     window.triggerSOS = function() {
       const activeUser = auth.currentUser;
       const finalSenderName = window.currentUserCustomName || 'צועד בסביבה';
       
       if (confirm("🚨 האם לשלוח התראת מצוקה SOS בלייב?")) {
-        // 1. הפצה באפליקציה לרשת בלייב
         addDoc(collection(db, "walk_alerts"), {
           senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
           senderName: `🚨 מצוקה (SOS): ${finalSenderName}`,
           timestamp: Date.now()
         });
 
-        // 2. שליחת הודעה לאנשי הקשר במידה והוגדרו
         const c1 = localStorage.getItem('emergency1');
         const c2 = localStorage.getItem('emergency2');
         const c3 = localStorage.getItem('emergency3');
@@ -769,12 +804,39 @@
         const sosText = encodeURIComponent(`🚨 הודעת מצוקה מ-${finalSenderName}! אני זקוק/ה לעזרה בהליכה. מיקום נוכחי: ${mapUrl}`);
 
         if (contacts.length > 0) {
-          // פתיחת אפליקציית ההודעות בטלפון עבור איש הקשר הראשון
           window.location.href = `sms:${contacts[0]}?body=${sosText}`;
         } else {
           alert("🚨 התראת SOS נשלחה ברשת האפליקציה! (ניתן להגדיר אנשי קשר אישיים בלשונית הפרופיל).");
         }
       }
+    };
+
+    window.openBroadcastModal = function() {
+      document.getElementById('broadcastModal').classList.remove('hidden');
+    };
+
+    window.closeBroadcastModal = function() {
+      document.getElementById('broadcastModal').classList.add('hidden');
+    };
+
+    window.confirmBroadcastWalk = function() {
+      const activeUser = auth.currentUser;
+      const finalSenderName = window.currentUserCustomName || document.getElementById('guestNameInput').value.trim() || 'צועד בסביבה';
+      const km = document.getElementById('walkDistanceInput').value || '5';
+      const pace = document.getElementById('walkPaceInput').value || 'בינוני';
+      const dog = document.getElementById('walkDogInput').value || 'ללא כלב 🚫';
+
+      addDoc(collection(db, "walk_alerts"), {
+        senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
+        senderName: finalSenderName,
+        distanceKm: km,
+        pace: pace,
+        dog: dog,
+        timestamp: Date.now()
+      }).then(() => {
+        alert("📡 יצאת לצעידה! ההתראה והפרטים הופצו לכל הצועדים בסביבה.");
+        closeBroadcastModal();
+      });
     };
 
     window.handleBannerClick = function() {
@@ -847,19 +909,40 @@
       });
     };
 
-    window.broadcastMyWalk = function() {
-      const activeUser = auth.currentUser;
-      const finalSenderName = window.currentUserCustomName || document.getElementById('guestNameInput').value.trim() || 'צועד בסביבה';
-
-      addDoc(collection(db, "walk_alerts"), {
-        senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
-        senderName: finalSenderName,
-        timestamp: Date.now()
-      }).then(() => alert("📡 נשלחה התרעה בלייב!"));
-    };
-
     function listenToWalkAlerts() {
       onSnapshot(collection(db, "walk_alerts"), (snapshot) => {
+        const walkersList = document.getElementById('activeWalkersList');
+        let alerts = [];
+
+        snapshot.forEach(docSnap => alerts.push({ id: docSnap.id, ...docSnap.data() }));
+        alerts.sort((a, b) => b.timestamp - a.timestamp);
+
+        if (walkersList) {
+          walkersList.innerHTML = '';
+          if (alerts.length === 0) {
+            walkersList.innerHTML = `<p style="text-align:center; color:#888; font-size:12px;">עדיין אין צועדים פעילים שהתריעו בלייב.</p>`;
+          } else {
+            alerts.forEach(al => {
+              const card = document.createElement('div');
+              card.className = 'walk-alert-card';
+              const timeStr = new Date(al.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+              card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <b>🚶‍♂️ ${al.senderName || 'צועד'}</b>
+                  <span style="font-size:10px; color:#888;">${timeStr}</span>
+                </div>
+                <div style="font-size:12px; color:#444; margin-top:4px;">
+                  • מרחק מתוכנן: <b>${al.distanceKm || '5'} ק"מ</b><br>
+                  • קצב הליכה: <b>${al.pace || 'בינוני'}</b> | חיית מחמד: <b>${al.dog || 'ללא כלב 🚫'}</b>
+                </div>
+                <button style="width:auto; padding:5px 10px; font-size:11px; margin-top:6px;" onclick="openChatWithUser({uid: '${al.senderUid}', name: '${al.senderName}'})">💬 פנה אליו בצ'אט</button>
+              `;
+              walkersList.appendChild(card);
+            });
+          }
+        }
+
         snapshot.docChanges().forEach(change => {
           if (change.type === "added") {
             const alertData = change.doc.data();
@@ -867,10 +950,10 @@
               if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
                 const banner = document.getElementById('liveAlertBanner');
                 const textSpan = document.getElementById('alertBannerText');
-                textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
+                textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה (${alertData.distanceKm || '5'} ק"מ)!`;
                 banner.classList.remove('hidden');
 
-                sendBrowserNotification("🚶‍♂️ צועד חדש בסביבה", `${alertData.senderName || 'צועד בסביבה'} יצא/ה לצעידה עכשיו!`);
+                sendBrowserNotification("🚶‍♂️ צועד חדש בסביבה", `${alertData.senderName || 'צועד בסביבה'} יצא/ה לצעידה של ${alertData.distanceKm || '5'} ק"מ!`);
               }
             }
           }
@@ -1041,6 +1124,7 @@
     function switchTab(screenId) {
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('activeWalkersScreen').classList.add('hidden');
       document.getElementById('groupsScreen').classList.add('hidden');
       document.getElementById('favScreen').classList.add('hidden');
       document.getElementById('profileScreen').classList.add('hidden');
@@ -1049,6 +1133,7 @@
       document.getElementById(screenId).classList.remove('hidden');
 
       document.getElementById('navMap').classList.remove('active');
+      document.getElementById('navWalkers').classList.remove('active');
       document.getElementById('navGroups').classList.remove('active');
       document.getElementById('navFav').classList.remove('active');
       document.getElementById('navProfile').classList.remove('active');
@@ -1057,6 +1142,7 @@
         document.getElementById('navMap').classList.add('active');
         if (map) setTimeout(() => map.invalidateSize(), 200);
       }
+      if (screenId === 'activeWalkersScreen') document.getElementById('navWalkers').classList.add('active');
       if (screenId === 'groupsScreen') document.getElementById('navGroups').classList.add('active');
       if (screenId === 'favScreen') document.getElementById('navFav').classList.add('active');
       if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
