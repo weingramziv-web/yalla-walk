@@ -69,12 +69,34 @@
     .btn-spotify { background: #1DB954; color: #fff; margin-top: 6px; font-weight: bold; box-shadow: 0 3px 6px rgba(29,185,84,0.2); }
     .btn-secondary { background: #7f8c8d; box-shadow: none; }
     .btn-fav { background: #f1c40f; color: #2c3e50; }
-    .btn-sos { background: #e74c3c; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.35); }
     .btn-report { background: #95a5a6; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
     .btn-block { background: #d35400; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
     .btn-group { background: #2980b9; }
     .btn-logout { background: #c0392b; margin-top: 15px; }
     .hidden { display: none !important; }
+
+    /* כפתור SOS קטן ועגול בצד המסך */
+    .btn-sos-circle {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #c0392b;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(192,57,43,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 0;
+      margin: 0;
+    }
 
     #map { height: 200px; width: 100%; border-radius: 14px; margin: 8px 0; background: #e0e0e0; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
     
@@ -157,7 +179,7 @@
         <p style="margin:0;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
         • הגנת פרטיות: מיקומים מוצגים ברדיוס כללי בלבד.<br>
         • דירוגים חיוביים בלבד – אפס סובלנות לבריונות.<br>
-        • כפתור מצוקה SOS מהיר, התראות Push ואפשרויות חסימה.</p>
+        • כפתור מצוקה SOS דיסקרטי ואפשרויות חסימה.</p>
       </div>
 
       <div style="margin-top: auto;">
@@ -196,6 +218,9 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
+      <!-- כפתור SOS קטן ועגול בראש המסך הראשי -->
+      <button class="btn-sos-circle" title="לחצן מצוקה חירום (SOS)" onclick="triggerSOS()">SOS</button>
+
       <div class="alert-banner hidden" id="liveAlertBanner" onclick="handleBannerClick()">
         <span id="alertBannerText">🔔 התראה חדשה!</span>
         <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="event.stopPropagation(); dismissAlertBanner()">❌ סגור</button>
@@ -238,8 +263,7 @@
         ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
       </div>
 
-      <button class="btn-sos" id="btnBroadcastWalk" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
-      <button class="btn-sos" style="background:#c0392b; margin-top:4px;" onclick="triggerSOS()">🚨 לחצן מצוקה חירום (SOS)</button>
+      <button style="background:#27ae60;" id="btnBroadcastWalk" onclick="broadcastMyWalk()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
 
       <div class="filter-box" style="margin-top:8px;">
         <div class="filter-row">
@@ -355,6 +379,16 @@
         </div>
       </div>
 
+      <!-- הגדרת 3 אנשי קשר לשעת חירום -->
+      <div class="community-dashboard" style="margin-top:10px;">
+        <b>🚨 אנשי קשר לשעת חירום (SOS):</b>
+        <p style="font-size:11px; color:#666; margin:4px 0;">הגדר עד 3 מספרי טלפון אליהם תישלח הודעת מצוקה בלחיצה על SOS:</p>
+        <input type="tel" id="emergencyContact1" placeholder="איש קשר 1 (למשל: 0501234567)">
+        <input type="tel" id="emergencyContact2" placeholder="איש קשר 2">
+        <input type="tel" id="emergencyContact3" placeholder="איש קשר 3">
+        <button style="padding:6px; font-size:12px; margin-top:4px; background:#2980b9;" onclick="saveEmergencyContacts()">💾 שמור אנשי קשר</button>
+      </div>
+
       <div class="community-dashboard" style="margin-top:10px;">
         <b>🌟 תגי הערכה חיוביים שקיבלת:</b>
         <div style="margin-top:6px;">
@@ -448,7 +482,6 @@
 
     const pageLoadTime = Date.now();
 
-    // בקשת הרשאת Push Notifications בדפדפן
     if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
       Notification.requestPermission();
     }
@@ -462,6 +495,25 @@
     document.getElementById('welcomeScreen').classList.remove('hidden');
     document.getElementById('mainScreen').classList.add('hidden');
     document.getElementById('bottomNav').classList.add('hidden');
+
+    // טעינת אנשי קשר לשעת חירום מהזיכרון המקומי
+    window.loadEmergencyContacts = function() {
+      document.getElementById('emergencyContact1').value = localStorage.getItem('emergency1') || '';
+      document.getElementById('emergencyContact2').value = localStorage.getItem('emergency2') || '';
+      document.getElementById('emergencyContact3').value = localStorage.getItem('emergency3') || '';
+    };
+
+    window.saveEmergencyContacts = function() {
+      const c1 = document.getElementById('emergencyContact1').value.trim();
+      const c2 = document.getElementById('emergencyContact2').value.trim();
+      const c3 = document.getElementById('emergencyContact3').value.trim();
+
+      localStorage.setItem('emergency1', c1);
+      localStorage.setItem('emergency2', c2);
+      localStorage.setItem('emergency3', c3);
+
+      alert("✅ אנשי הקשר לשעת חירום נשמרו בהצלחה!");
+    };
 
     function resetAppState() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
@@ -525,6 +577,7 @@
         listenToLiveUsers();
         listenToWalkAlerts();
         listenToIncomingMessages();
+        loadEmergencyContacts();
         document.getElementById('bottomNav').classList.remove('hidden');
         window.startApp('mainScreen');
       }).catch(err => {
@@ -532,6 +585,7 @@
         listenToLiveUsers();
         listenToWalkAlerts();
         listenToIncomingMessages();
+        loadEmergencyContacts();
         document.getElementById('bottomNav').classList.remove('hidden');
         window.startApp('mainScreen');
       });
@@ -663,7 +717,6 @@
               textSpan.innerHTML = `💬 <b>${msg.senderName || 'צועד'}:</b> "${msg.text}" (לחץ למענה)`;
               banner.classList.remove('hidden');
 
-              // שליחת התראת Push בדפדפן
               sendBrowserNotification(`💬 הודעה חדשה מ-${msg.senderName}`, msg.text);
             }
           }
@@ -693,16 +746,34 @@
       }
     };
 
+    // הפעלת מצוקה (SOS) שליחה לרשת + אנשי קשר מוגדרים
     window.triggerSOS = function() {
       const activeUser = auth.currentUser;
       const finalSenderName = window.currentUserCustomName || 'צועד בסביבה';
       
-      if (confirm("🚨 האם לשלוח התראת מצוקה SOS לכל הצועדים בסביבה?")) {
+      if (confirm("🚨 האם לשלוח התראת מצוקה SOS בלייב?")) {
+        // 1. הפצה באפליקציה לרשת בלייב
         addDoc(collection(db, "walk_alerts"), {
           senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
           senderName: `🚨 מצוקה (SOS): ${finalSenderName}`,
           timestamp: Date.now()
-        }).then(() => alert("🚨 התראת SOS נשלחה בהצלחה בסביבה!"));
+        });
+
+        // 2. שליחת הודעה לאנשי הקשר במידה והוגדרו
+        const c1 = localStorage.getItem('emergency1');
+        const c2 = localStorage.getItem('emergency2');
+        const c3 = localStorage.getItem('emergency3');
+
+        const contacts = [c1, c2, c3].filter(c => c && c.trim() !== '');
+        const mapUrl = `https://maps.google.com/?q=${window.userPos.lat},${window.userPos.lng}`;
+        const sosText = encodeURIComponent(`🚨 הודעת מצוקה מ-${finalSenderName}! אני זקוק/ה לעזרה בהליכה. מיקום נוכחי: ${mapUrl}`);
+
+        if (contacts.length > 0) {
+          // פתיחת אפליקציית ההודעות בטלפון עבור איש הקשר הראשון
+          window.location.href = `sms:${contacts[0]}?body=${sosText}`;
+        } else {
+          alert("🚨 התראת SOS נשלחה ברשת האפליקציה! (ניתן להגדיר אנשי קשר אישיים בלשונית הפרופיל).");
+        }
       }
     };
 
@@ -799,7 +870,6 @@
                 textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה!`;
                 banner.classList.remove('hidden');
 
-                // התראת Push בדפדפן
                 sendBrowserNotification("🚶‍♂️ צועד חדש בסביבה", `${alertData.senderName || 'צועד בסביבה'} יצא/ה לצעידה עכשיו!`);
               }
             }
