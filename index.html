@@ -525,7 +525,6 @@
       
       sessionStorage.setItem('customGuestName', nameVal);
       
-      // אם המשתמש כבר מחובר ב-Auth, לא נייצר UID חדש אלא נעדכן את הקיים
       if (auth.currentUser) {
         handleUserLogin(auth.currentUser, false);
       } else {
@@ -556,7 +555,7 @@
         let liveUsersMap = new Map();
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
         const now = Date.now();
-        const activeThreshold = 60 * 1000;
+        const activeThreshold = 180 * 1000; // סינון: מציג משתמשים שהיו פעילים ב-3 הדקות האחרונות
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
@@ -564,7 +563,6 @@
             const isRecentlyActive = data.lastSeen && (now - data.lastSeen < activeThreshold);
             if (isRecentlyActive && data.isOnline !== false) {
               const uName = data.name || 'צועד בסביבה';
-              // אם קיים כבר משתמש עם אותו שם, נשמור רק את המועדון והעדכני ביותר לפי lastSeen
               if (!liveUsersMap.has(uName) || (data.lastSeen > liveUsersMap.get(uName).lastSeen)) {
                 liveUsersMap.set(uName, {
                   uid: docSnap.id,
