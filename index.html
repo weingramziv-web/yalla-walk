@@ -84,7 +84,7 @@
       margin: 0;
     }
 
-    /* דשבורד ספורטיבי חדש */
+    /* דשבורד ספורטיבי מרכזי */
     .sport-dashboard {
       background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
       border-radius: 16px;
@@ -235,7 +235,7 @@
       </div>
     </div>
 
-    <!-- מסך ראשי (דשבורד ספורטיבי) -->
+    <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
       <button class="btn-sos-circle" title="לחצן מצוקה חירום (SOS)" onclick="triggerSOS()">SOS</button>
 
@@ -253,7 +253,6 @@
         <span style="font-size:11px; color:#f59e0b; font-weight:bold;" id="usageTimerDisplay">⏱️ 120:00</span>
       </div>
 
-      <!-- דשבורד ספורט מרכזי -->
       <div class="sport-dashboard">
         <div class="start-walk-btn-circle" onclick="openBroadcastModal()">
           <span>START</span>
@@ -314,7 +313,7 @@
       <div id="partnersList"></div>
     </div>
 
-    <!-- טאב: צועדים (24 שעות אחרונות) -->
+    <!-- טאב: צועדים (24 שעות) -->
     <div class="screen hidden" id="activeWalkersScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
@@ -410,10 +409,10 @@
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק</button>
     </div>
 
-    <!-- מודאל דיווח הליכה -->
+    <!-- מודאל דיווח/התחלת הליכה -->
     <div class="modal hidden" id="broadcastModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#22c55e;">🚶‍♂️ פרטי הצעידה שלך</h3>
+        <h3 style="margin-top:0; color:#22c55e;">יוצאים להליכה? ספרו למי שבסביבה! 🚶‍♂️</h3>
         
         <label style="font-weight:bold; display:block; margin-top:6px;">📏 מרחק מתוכנן (ק"מ):</label>
         <input type="number" id="walkDistanceInput" value="5" min="1" max="30">
@@ -431,8 +430,9 @@
           <option value="מגיע עם כלב 🐶">מגיע עם כלב 🐶</option>
         </select>
 
-        <button onclick="confirmBroadcastWalk()" style="margin-top:12px; background:#22c55e; color:#0f172a;">📡 התרע בלייב לצועדים בסביבה!</button>
-        <button onclick="closeBroadcastModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
+        <button onclick="confirmBroadcastWalk(true)" style="margin-top:12px; background:#22c55e; color:#0f172a;">📢 עדכן את הצועדים בסביבה וצא לדרך!</button>
+        <button onclick="confirmBroadcastWalk(false)" class="btn-secondary" style="margin-top:6px; background:#475569;">🚶‍♂️ התחל צעידה אישית (ללא התראה)</button>
+        <button onclick="closeBroadcastModal()" style="margin-top:6px; background:none; color:#94a3b8; box-shadow:none; font-weight:normal; font-size:12px;">ביטול</button>
       </div>
     </div>
 
@@ -711,7 +711,6 @@
       });
     }
 
-    // ניהול מועדפים בלוקל סטורג'
     window.addActiveUserToFavorites = function() {
       const partner = window.activeChatPartner;
       if (!partner) return;
@@ -804,24 +803,30 @@
     window.openBroadcastModal = function() { document.getElementById('broadcastModal').classList.remove('hidden'); };
     window.closeBroadcastModal = function() { document.getElementById('broadcastModal').classList.add('hidden'); };
 
-    window.confirmBroadcastWalk = function() {
+    // עדכון: אפשרות יציאה פומבית (shouldBroadcast=true) או אישית בלבד (shouldBroadcast=false)
+    window.confirmBroadcastWalk = function(shouldBroadcast) {
       const activeUser = auth.currentUser;
       const finalSenderName = window.currentUserCustomName || 'צועד אורח';
       const km = document.getElementById('walkDistanceInput').value || '5';
       const pace = document.getElementById('walkPaceInput').value || 'בינוני';
       const dog = document.getElementById('walkDogInput').value || 'ללא כלב 🚫';
 
-      addDoc(collection(db, "walk_alerts"), {
-        senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
-        senderName: finalSenderName,
-        distanceKm: km,
-        pace: pace,
-        dog: dog,
-        timestamp: Date.now()
-      }).then(() => {
-        alert("📡 יצאת לצעידה! ההתראה הופצה.");
+      if (shouldBroadcast) {
+        addDoc(collection(db, "walk_alerts"), {
+          senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
+          senderName: finalSenderName,
+          distanceKm: km,
+          pace: pace,
+          dog: dog,
+          timestamp: Date.now()
+        }).then(() => {
+          alert("📢 יצאת לצעידה! ההתראה והפרטים הופצו לצועדים בסביבה.");
+          closeBroadcastModal();
+        });
+      } else {
+        alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצועדים אחרים).");
         closeBroadcastModal();
-      });
+      }
     };
 
     window.sendChatMessage = function() {
@@ -873,7 +878,6 @@
       });
     };
 
-    // התראות יציאה לצעידה (סינון 24 שעות + בדיקת מחובר מול liveUsers)
     function listenToWalkAlerts() {
       onSnapshot(collection(db, "walk_alerts"), (snapshot) => {
         const walkersList = document.getElementById('activeWalkersList');
@@ -883,7 +887,6 @@
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
-          // סינון להתרעות מ-24 השעות האחרונות בלבד
           if (data.timestamp && (now - data.timestamp < twentyFourHours)) {
             alerts.push({ id: docSnap.id, ...data });
           }
@@ -901,7 +904,6 @@
               card.className = 'walk-alert-card';
               const timeStr = new Date(al.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-              // בדיקת סטטוס חיבור בזמן אמת
               const isUserOnline = (window.liveUsers || []).some(u => u.uid === al.senderUid);
               const statusBadge = isUserOnline 
                 ? `<b style="color:#22c55e; font-size:11px;">🟢 מחובר עכשיו</b>` 
