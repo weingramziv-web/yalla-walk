@@ -13,7 +13,8 @@
     html, body { 
       margin: 0; 
       padding: 0; 
-      background: #f4f6f8; 
+      background: #0f172a; 
+      color: #f8fafc;
       min-height: 100vh; 
       min-height: 100dvh;
       display: flex; 
@@ -23,71 +24,57 @@
     }
     
     body.high-contrast { background: #000 !important; color: #fff !important; }
-    body.high-contrast .app-container { background: #121212 !important; color: #fff !important; }
+    body.high-contrast .app-container { background: #000 !important; color: #fff !important; }
     body.high-contrast button { background: #ffff00 !important; color: #000 !important; font-weight: bold !important; }
-    body.high-contrast input, body.high-contrast select, body.high-contrast textarea { background: #222 !important; color: #fff !important; border-color: #ffff00 !important; }
-
-    body.large-font, 
-    body.large-font p, 
-    body.large-font h1, 
-    body.large-font button, 
-    body.large-font input, 
-    body.large-font select, 
-    body.large-font span, 
-    body.large-font div, 
-    body.large-font label, 
-    body.large-font b { 
-      font-size: 125% !important; 
-      line-height: 1.5 !important;
-    }
 
     .app-container { 
       width: 100%; 
       max-width: 500px; 
-      background: #fff; 
+      background: #1e293b; 
       min-height: 100vh; 
       min-height: 100dvh;
       display: flex; 
       flex-direction: column; 
       position: relative; 
-      box-shadow: 0 0 25px rgba(0,0,0,0.08); 
+      box-shadow: 0 0 30px rgba(0,0,0,0.5); 
       padding-bottom: calc(65px + env(safe-area-inset-bottom)); 
     }
     .screen { padding: 15px; display: flex; flex-direction: column; flex: 1; text-align: right; }
     
     .screen-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; direction: rtl; }
-    .btn-back-header { background: #7f8c8d; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; width: auto; margin: 0; }
+    .btn-back-header { background: #475569; color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; width: auto; margin: 0; }
     
-    h1 { color: #2c3e50; font-size: 22px; margin: 0; text-align: center; flex: 1; font-weight: 800; }
-    p { font-size: 13px; color: #555; line-height: 1.4; margin: 0 0 10px 0; text-align: right; }
+    h1 { color: #f8fafc; font-size: 22px; margin: 0; text-align: center; flex: 1; font-weight: 800; }
+    p { font-size: 13px; color: #94a3b8; line-height: 1.4; margin: 0 0 10px 0; text-align: right; }
     
-    input, select, textarea { width: 100%; padding: 12px; margin: 4px 0; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 13px; text-align: right; direction: rtl; background: #fafafa; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 6px; text-align: center; box-shadow: 0 3px 6px rgba(39,174,96,0.2); transition: all 0.2s; }
+    input, select, textarea { width: 100%; padding: 12px; margin: 4px 0; border: 1px solid #334155; border-radius: 10px; font-size: 13px; text-align: right; direction: rtl; background: #0f172a; color: #fff; }
+    button { width: 100%; padding: 12px; background: #22c55e; color: #0f172a; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 6px; text-align: center; box-shadow: 0 4px 12px rgba(34,197,94,0.25); transition: all 0.2s; }
     button:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
     button:active { transform: scale(0.98); }
-    .btn-google { background: #4285F4; color: #fff; margin-top: 8px; box-shadow: 0 3px 6px rgba(66,133,244,0.2); }
-    .btn-spotify { background: #1DB954; color: #fff; margin-top: 6px; font-weight: bold; box-shadow: 0 3px 6px rgba(29,185,84,0.2); }
-    .btn-secondary { background: #7f8c8d; box-shadow: none; }
-    .btn-fav { background: #f1c40f; color: #2c3e50; }
-    .btn-report { background: #95a5a6; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
-    .btn-block { background: #d35400; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
-    .btn-group { background: #2980b9; }
-    .btn-logout { background: #c0392b; margin-top: 15px; }
+    .btn-google { background: #3b82f6; color: #fff; margin-top: 8px; }
+    .btn-spotify { background: #1ed760; color: #0f172a; margin-top: 6px; font-weight: bold; }
+    .btn-secondary { background: #475569; color: #fff; box-shadow: none; }
+    .btn-fav { background: #eab308; color: #0f172a; }
+    .btn-report { background: #64748b; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
+    .btn-block { background: #f97316; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
+    .btn-group { background: #0284c7; color: #fff; }
+    .btn-logout { background: #ef4444; color: #fff; margin-top: 15px; }
     .hidden { display: none !important; }
 
+    /* כפתור SOS קטן עגול */
     .btn-sos-circle {
       position: absolute;
       top: 12px;
       right: 12px;
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: #c0392b;
+      background: #ef4444;
       color: #fff;
       font-size: 11px;
       font-weight: 900;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 6px rgba(192,57,43,0.4);
+      border: 2px solid #1e293b;
+      box-shadow: 0 2px 8px rgba(239,68,68,0.5);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -97,43 +84,80 @@
       margin: 0;
     }
 
-    #map { height: 200px; width: 100%; border-radius: 14px; margin: 8px 0; background: #e0e0e0; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+    /* דשבורד ספורטיבי חדש */
+    .sport-dashboard {
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 12px;
+      border: 1px solid #334155;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
+    }
+
+    .start-walk-btn-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #22c55e 0%, #15803d 100%);
+      color: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 16px;
+      box-shadow: 0 0 25px rgba(34,197,94,0.4);
+      border: 4px solid #4ade80;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: transform 0.2s;
+    }
+    .start-walk-btn-circle:active { transform: scale(0.95); }
+
+    .sport-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .sport-stat-card {
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+    .sport-stat-val { font-size: 20px; font-weight: 800; color: #22c55e; }
+    .sport-stat-lbl { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+    #map { height: 180px; width: 100%; border-radius: 14px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; }
     
-    .filter-box { background: #f0fdf4; padding: 12px; border-radius: 12px; font-size: 12px; text-align: right; border: 1px solid #dcfce7; }
-    .filter-box label { font-weight: bold; color: #166534; display: block; margin-top: 4px; }
+    .filter-box { background: #0f172a; padding: 12px; border-radius: 12px; font-size: 12px; text-align: right; border: 1px solid #334155; }
+    .filter-box label { font-weight: bold; color: #38bdf8; display: block; margin-top: 4px; }
     .filter-row { display: flex; gap: 8px; align-items: center; margin-top: 4px; direction: rtl; }
 
-    .verification-badge { background: #fff3cd; color: #856404; padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; border: 1px solid #ffeeba; margin-bottom: 6px; }
-    .user-auth-badge { background: #e8f0fe; color: #1967d2; padding: 10px; border-radius: 10px; font-size: 12px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+    .user-auth-badge { background: #0f172a; color: #38bdf8; padding: 10px; border-radius: 10px; font-size: 12px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; font-weight: 600; border: 1px solid #334155; }
 
-    .accessibility-btn { position: fixed; top: 12px; left: 12px; z-index: 9999; background: #2980b9; color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 3px 8px rgba(0,0,0,0.25); }
+    .accessibility-btn { position: fixed; top: 12px; left: 12px; z-index: 9999; background: #0284c7; color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
 
-    .legal-disclaimer { font-size: 10px; color: #7f8c8d; text-align: center; margin-top: 6px; line-height: 1.2; }
-
-    .community-dashboard { background: linear-gradient(135deg, #e8f5e9, #ffffff); border: 1px solid #c8e6c9; border-radius: 12px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-    .dashboard-stat-text { font-size: 13px; color: #2c3e50; font-weight: bold; line-height: 1.4; }
-    .dashboard-highlight { color: #27ae60; font-size: 16px; font-weight: 800; }
-
-    .stats-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-around; text-align: center; }
-    .stat-box { display: flex; flex-direction: column; }
-    .stat-num { font-size: 18px; font-weight: bold; color: #15803d; }
-    .stat-lbl { font-size: 10px; color: #166534; }
-
-    .live-users-bar { display: flex; gap: 12px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; direction: rtl; }
+    .live-users-bar { display: flex; gap: 12px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #334155; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 58px; cursor: pointer; position: relative; }
-    .avatar-circle { width: 46px; height: 46px; background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 17px; position: relative; border: 2px solid #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.12); overflow: hidden; }
-    .avatar-name { font-size: 10px; color: #333; margin-top: 4px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 58px; text-align: center; font-weight: 600; }
-    .status-dot { width: 12px; height: 12px; background-color: #2ecc71; border-radius: 50%; position: absolute; bottom: 0; left: 0; border: 2px solid #fff; }
+    .avatar-circle { width: 46px; height: 46px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 17px; position: relative; border: 2px solid #38bdf8; box-shadow: 0 3px 6px rgba(0,0,0,0.3); overflow: hidden; }
+    .avatar-name { font-size: 10px; color: #cbd5e1; margin-top: 4px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; max-width: 58px; text-align: center; font-weight: 600; }
+    .status-dot { width: 12px; height: 12px; background-color: #22c55e; border-radius: 50%; position: absolute; bottom: 0; left: 0; border: 2px solid #0f172a; }
 
-    .partner-item { background: #fff; padding: 12px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 12px; border-right: 5px solid #27ae60; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; box-shadow: 0 2px 5px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
-    .walk-alert-card { background: #fdfefe; padding: 12px; border-radius: 12px; margin: 8px 0; border-right: 5px solid #e67e22; box-shadow: 0 2px 6px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
-    .group-item { background: #ebf5fb; border-right: 4px solid #2980b9; padding: 10px; border-radius: 8px; margin: 6px 0; text-align: right; font-size: 12px; }
-    .tag-chip { background: #e8f8f5; color: #16a085; padding: 4px 10px; border-radius: 14px; font-size: 11px; display: inline-block; margin: 2px; font-weight: bold; }
+    .partner-item { background: #0f172a; padding: 12px; border-radius: 12px; margin: 6px 0; text-align: right; font-size: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; direction: rtl; border: 1px solid #334155; border-right: 5px solid #22c55e; }
+    .walk-alert-card { background: #0f172a; padding: 12px; border-radius: 12px; margin: 8px 0; border: 1px solid #334155; border-right: 5px solid #38bdf8; }
 
-    .chat-box { flex: 1; min-height: 220px; border: 1px solid #e0e0e0; border-radius: 12px; padding: 12px; overflow-y: auto; text-align: right; font-size: 13px; background: #fafafa; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
-    .chat-msg { padding: 9px 14px; border-radius: 14px; max-width: 80%; font-size: 12px; line-height: 1.35; word-break: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .chat-msg.my-msg { background: #27ae60; color: #fff; align-self: flex-start; border-bottom-left-radius: 2px; }
-    .chat-msg.other-msg { background: #ffffff; color: #2d3748; align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid #e2e8f0; }
+    .chat-box { flex: 1; min-height: 220px; border: 1px solid #334155; border-radius: 12px; padding: 12px; overflow-y: auto; text-align: right; font-size: 13px; background: #0f172a; display: flex; flex-direction: column; gap: 8px; direction: rtl; }
+    .chat-msg { padding: 9px 14px; border-radius: 14px; max-width: 80%; font-size: 12px; line-height: 1.35; word-break: break-word; }
+    .chat-msg.my-msg { background: #22c55e; color: #0f172a; align-self: flex-start; border-bottom-left-radius: 2px; font-weight: 600; }
+    .chat-msg.other-msg { background: #334155; color: #f8fafc; align-self: flex-end; border-bottom-right-radius: 2px; }
 
     .bottom-nav { 
       position: fixed; 
@@ -142,23 +166,22 @@
       transform: translateX(-50%); 
       width: 100%; 
       max-width: 500px; 
-      background: #fff; 
-      border-top: 1px solid #f0f0f0; 
+      background: #0f172a; 
+      border-top: 1px solid #334155; 
       display: flex; 
       justify-content: space-around; 
       padding-top: 8px;
       padding-bottom: calc(8px + env(safe-area-inset-bottom)); 
       z-index: 9999; 
       direction: rtl; 
-      box-shadow: 0 -3px 10px rgba(0,0,0,0.03);
     }
-    .nav-btn { background: none; color: #7f8c8d; border: none; font-size: 10px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0; margin: 0; width: 20%; box-shadow: none; }
-    .nav-btn.active { color: #27ae60; font-weight: bold; }
+    .nav-btn { background: none; color: #64748b; border: none; font-size: 10px; display: flex; flex-direction: column; align-items: center; cursor: pointer; padding: 0; margin: 0; width: 20%; box-shadow: none; }
+    .nav-btn.active { color: #22c55e; font-weight: bold; }
 
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px; direction: rtl; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 14px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 85vh; overflow-y: auto; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 15px; direction: rtl; }
+    .modal-content { background: #1e293b; padding: 20px; border-radius: 14px; width: 100%; max-width: 400px; text-align: right; font-size: 13px; max-height: 85vh; overflow-y: auto; border: 1px solid #334155; }
     
-    .alert-banner { background: #e74c3c; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; direction: rtl; cursor: pointer; box-shadow: 0 4px 10px rgba(231,76,60,0.3); }
+    .alert-banner { background: #ef4444; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 12px; margin-bottom: 10px; text-align: center; font-weight: bold; display: flex; justify-content: space-between; align-items: center; direction: rtl; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -170,26 +193,26 @@
 
     <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
-      <div style="text-align: center; margin-top: 10px;">
-        <h1 style="font-size: 26px; color: #27ae60;">🚶‍♂️ OK, Let's Go!</h1>
-        <p style="font-size: 13px; font-weight: bold; color: #2c3e50; text-align: center;">הקהילה הבטוחה והבריאה של הצעידה בסביבה</p>
+      <div style="text-align: center; margin-top: 20px;">
+        <h1 style="font-size: 28px; color: #22c55e;">🚶‍♂️ OK, Let's Go!</h1>
+        <p style="font-size: 13px; font-weight: bold; color: #94a3b8; text-align: center;">הקהילה הבטוחה והבריאה של הצעידה בסביבה</p>
       </div>
 
-      <div style="background: #eef9f1; padding: 12px; border-radius: 12px; margin: 8px 0; text-align: right; font-size: 11px; border: 1px solid #c8e6c9;">
-        <p style="margin:0;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
+      <div style="background: #0f172a; padding: 12px; border-radius: 12px; margin: 15px 0; text-align: right; font-size: 12px; border: 1px solid #334155;">
+        <p style="margin:0; color:#cbd5e1;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
         • הגנת פרטיות: מיקומים מוצגים ברדיוס כללי בלבד.<br>
         • דירוגים חיוביים בלבד – אפס סובלנות לבריונות.<br>
         • כפתור מצוקה SOS דיסקרטי ואפשרויות חסימה.</p>
       </div>
 
       <div style="margin-top: auto;">
-        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#c0392b;">* שם פרטי (עבור כניסה כאורח):</label>
+        <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#ef4444;">* שם פרטי (עבור כניסה כאורח):</label>
         <input type="text" id="guestNameInput" placeholder="רשום את שמך הפרטי...">
 
         <div style="display:flex; gap:8px; margin-top:4px;">
           <div style="flex:1;">
             <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">גיל:</label>
-            <input type="number" id="userAgeInput" placeholder="גיל (למשל: 35)" min="18" max="99" value="30">
+            <input type="number" id="userAgeInput" placeholder="גיל" min="18" max="99" value="30">
           </div>
           <div style="flex:1;">
             <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">מין:</label>
@@ -200,69 +223,61 @@
           </div>
         </div>
 
-        <div style="background:#fff8e1; border:1px solid #ffe082; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
+        <div style="background:#0f172a; border:1px solid #334155; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
           <input type="checkbox" id="termsCheckbox" style="width:auto; vertical-align:middle;" onchange="toggleAuthButtons()">
-          <label for="termsCheckbox" style="vertical-align:middle;">
-            קראתי ואני מסכים/ה ל<a href="javascript:void(0)" onclick="openTermsModal()" style="color:#2980b9; font-weight:bold;">תקנון האפליקציה, תנאי השימוש והצהרת הגיל (18+)</a>.
+          <label for="termsCheckbox" style="vertical-align:middle; color:#cbd5e1;">
+            אני מסכים/ה ל<a href="javascript:void(0)" onclick="openTermsModal()" style="color:#38bdf8; font-weight:bold;">תקנון האפליקציה ותנאי השימוש (18+)</a>.
           </label>
         </div>
 
         <button onclick="loginWithGoogle()" class="btn-google" id="btnGoogleAuth" disabled style="font-size:15px; padding:12px;">🌐 התחברות מאובטחת מלאה (Google)</button>
         <button onclick="startAppAsGuest()" class="btn-secondary" id="btnGuestAuth" disabled style="margin-top: 6px; font-size: 13px;">כניסה במצב אורח 🚀</button>
-
-        <div class="legal-disclaimer">
-          בלחיצה על התחברות, הנך מצהיר/ה כי גילך מעל 18 וכי הנך מסכים/ה לתקנון הקהילה ובטיחות המשתמשים.
-        </div>
       </div>
     </div>
 
-    <!-- מסך ראשי -->
+    <!-- מסך ראשי (דשבורד ספורטיבי) -->
     <div class="screen hidden" id="mainScreen">
       <button class="btn-sos-circle" title="לחצן מצוקה חירום (SOS)" onclick="triggerSOS()">SOS</button>
 
       <div class="alert-banner hidden" id="liveAlertBanner" onclick="handleBannerClick()">
         <span id="alertBannerText">🔔 התראה חדשה!</span>
-        <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#e74c3c; margin:0;" onclick="event.stopPropagation(); dismissAlertBanner()">❌ סגור</button>
+        <button style="width:auto; padding:2px 6px; font-size:11px; background:#fff; color:#ef4444; margin:0;" onclick="event.stopPropagation(); dismissAlertBanner()">❌ סגור</button>
       </div>
 
       <div class="screen-header">
-        <h1>🗺️ OK, Let's Go!</h1>
+        <h1>🚶‍♂️ OK, Let's Go!</h1>
       </div>
 
       <div class="user-auth-badge" id="userAuthBadge">
-        <span>👤 מחובר כ: <b id="authUserName">אורח</b></span>
-        <span style="font-size:11px; color:#e67e22; font-weight:bold;" id="usageTimerDisplay">⏱️ טיימר יומיומי: 120:00</span>
+        <span>👤 מחובר כ: <b id="authUserName" style="color:#fff;">אורח</b></span>
+        <span style="font-size:11px; color:#f59e0b; font-weight:bold;" id="usageTimerDisplay">⏱️ 120:00</span>
       </div>
 
-      <div class="stats-card hidden" id="googleStatsCard">
-        <div class="stat-box">
-          <span class="stat-num" id="kmDisplay">0.00</span>
-          <span class="stat-lbl">קילומטרים צעדת</span>
+      <!-- דשבורד ספורט מרכזי -->
+      <div class="sport-dashboard">
+        <div class="start-walk-btn-circle" onclick="openBroadcastModal()">
+          <span>START</span>
+          <span style="font-size:13px;">WALK</span>
         </div>
-        <div class="stat-box">
-          <span class="stat-num" id="calDisplay">0</span>
-          <span class="stat-lbl">קלוריות שרפת🔥</span>
-        </div>
-      </div>
 
-      <div class="community-dashboard">
-        <div class="dashboard-stat-text">
-          🔥 באזור המגורים שלך <span class="dashboard-highlight">84%</span> מהצועדים הרשומים כבר צעדו <span class="dashboard-highlight">3,420 ק"מ</span> השבוע!
+        <div class="sport-grid">
+          <div class="sport-stat-card">
+            <div class="sport-stat-val" id="kmDisplay">0.00</div>
+            <div class="sport-stat-lbl">קילומטרים צעדת</div>
+          </div>
+          <div class="sport-stat-card">
+            <div class="sport-stat-val" id="calDisplay">0</div>
+            <div class="sport-stat-lbl">קלוריות שרפת🔥</div>
+          </div>
         </div>
       </div>
 
       <button class="btn-spotify" onclick="openSpotifyDirect()">🎧 פתח את Spotify (נגן מוזיקה/פודקאסטים)</button>
 
-      <div style="font-size: 11px; font-weight: bold; color: #2c3e50; margin-top:8px; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
+      <div style="font-size: 11px; font-weight: bold; color: #38bdf8; margin-top:10px; margin-bottom: 2px;" id="liveUsersHeader">🟢 מחוברים בסביבה:</div>
       <div class="live-users-bar" id="liveUsersBar">
-        <div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>
+        <div style="font-size:11px; color:#64748b;">מחפש צועדים בסביבה...</div>
       </div>
-
-      <div class="verification-badge" id="verificationBadge">
-        ⏳ <b>סטטוס אימות:</b> <span id="verifyText">0/3 הליכות</span>
-      </div>
-
-      <button style="background:#27ae60;" id="btnBroadcastWalk" onclick="openBroadcastModal()">🚶‍♂️ יצאתי לצעידה עכשיו! (התרע לסביבה)</button>
 
       <div class="filter-box" style="margin-top:8px;">
         <div class="filter-row">
@@ -279,7 +294,7 @@
             <label for="dogFilter">🐶 חיות מחמד:</label>
             <select id="dogFilter" onchange="renderLivePartners()">
               <option value="all">הכל</option>
-              <option value="כן">מגיע עם כלב 🐶</option>
+              <option value="כן">עם כלב 🐶</option>
               <option value="לא">ללא כלב 🚫</option>
             </select>
           </div>
@@ -295,19 +310,31 @@
 
       <div id="map"></div>
       
-      <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#2c3e50;">👇 לחץ על פרטנר להתחלת שיחה בזמן אמת:</p>
+      <p style="font-weight:bold; margin-top:10px; margin-bottom:2px; font-size:12px; color:#38bdf8;">👇 לחץ על פרטנר להתחלת שיחה בזמן אמת:</p>
       <div id="partnersList"></div>
     </div>
 
-    <!-- טאב חדש: משתמשים שיצאו להליכה עכשיו -->
+    <!-- טאב: צועדים (24 שעות אחרונות) -->
     <div class="screen hidden" id="activeWalkersScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1>🚶‍♂️ צועדים יצאו לדרך!</h1>
+        <h1>🚶‍♂️ צועדים בסביבה</h1>
       </div>
-      <p>משתמשים שהתריעו בלייב כי יצאו לצעידה בסביבה:</p>
+      <p>התראות יציאה לדרך ב-24 השעות האחרונות:</p>
       <div id="activeWalkersList" style="margin-top:10px;">
-        <div style="font-size:12px; color:#888; text-align:center;">טוען צעידות פעילות...</div>
+        <div style="font-size:12px; color:#64748b; text-align:center;">טוען צעידות...</div>
+      </div>
+    </div>
+
+    <!-- טאב: מועדפים -->
+    <div class="screen hidden" id="favScreen">
+      <div class="screen-header">
+        <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
+        <h1>⭐ המועדפים שלי</h1>
+      </div>
+      <p>פרטנרים ששמרת לגישה מהירה:</p>
+      <div id="favList" style="margin-top:10px;">
+        <p style="text-align:center; color:#64748b; font-size:12px;">עדיין לא הוספת מועדפים.</p>
       </div>
     </div>
 
@@ -317,29 +344,12 @@
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
         <h1>👥 הליכות קבוצתיות</h1>
       </div>
-      <p>הצטרף לקבוצת הליכה בסביבה או פתח קבוצה חדשה!</p>
       <button class="btn-group" onclick="alert('פתיחת קבוצה חדשה בקרוב!')">➕ פתח קבוצת הליכה חדשה</button>
       <div id="groupsList" style="margin-top:10px;">
-        <div class="group-item">
+        <div class="partner-item">
           <b>👟 קבוצת הליכת בוקר שכונתית</b><br>
-          <span style="color:#555;">ימים א'-ה' בשעה 07:00 | נפגשים בפארק המרכזי</span>
+          <span style="color:#94a3b8;">ימים א'-ה' בשעה 07:00 | בפארק המרכזי</span>
         </div>
-        <div class="group-item">
-          <b>🐶 צועדים עם כלבים</b><br>
-          <span style="color:#555;">ימים ב' ו-ה' בשעה 19:00 | מסלול גינת הכלבים</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- מסך מועדפים -->
-    <div class="screen hidden" id="favScreen">
-      <div class="screen-header">
-        <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1>⭐ המועדפים שלי</h1>
-      </div>
-      <p>פרטנרים וקבוצות ששמרת לגישה מהירה:</p>
-      <div id="favList">
-        <p style="text-align:center; color:#888; font-size:12px;">עדיין לא הוספת מועדפים.</p>
       </div>
     </div>
 
@@ -351,21 +361,20 @@
       </div>
 
       <div class="chat-box" id="chatBox">
-        <div style="color:#888; font-size:11px; text-align:center;">תחילת שיחה מאובטחת</div>
+        <div style="color:#64748b; font-size:11px; text-align:center;">תחילת שיחה מאובטחת</div>
       </div>
       
       <div style="display:flex; gap:6px; margin-top:8px; direction:rtl;">
-        <input type="text" id="chatInput" placeholder="רשום הודעה... (לחץ Enter לשליחה)" style="margin:0; flex:1;" onkeypress="if(event.key==='Enter') sendChatMessage();">
-        <button onclick="sendChatMessage()" style="width:auto; padding:0 16px; margin:0; background:#27ae60; white-space:nowrap;">שלח 🚀</button>
+        <input type="text" id="chatInput" placeholder="רשום הודעה..." style="margin:0; flex:1;" onkeypress="if(event.key==='Enter') sendChatMessage();">
+        <button onclick="sendChatMessage()" style="width:auto; padding:0 16px; margin:0; background:#22c55e; color:#0f172a; font-weight:bold;">שלח 🚀</button>
       </div>
 
       <div style="display:flex; gap:6px; margin-top:6px;">
-        <button class="btn-fav" style="flex:1;" onclick="alert('נוסף לפייבוריטים!')">⭐ הוסף לפייבוריטים</button>
-        <button style="background:#e67e22; flex:1;" onclick="alert('תג חיובי נשלח!')">🏃‍♂️ צעדנו יחד! (תג חיובי)</button>
+        <button class="btn-fav" style="flex:1;" onclick="addActiveUserToFavorites()">⭐ הוסף לפייבוריטים</button>
       </div>
       <div style="display:flex; gap:4px; margin-top:4px;">
         <button class="btn-report" style="flex:1;" onclick="openReportModal()">🚨 דיווח דיסקרטי</button>
-        <button class="btn-block" style="flex:1;" onclick="blockActiveUser()">🚫 חסום משתמש זה</button>
+        <button class="btn-block" style="flex:1;" onclick="blockActiveUser()">🚫 חסום משתמש</button>
       </div>
     </div>
 
@@ -382,39 +391,29 @@
         </div>
       </div>
 
-      <div class="community-dashboard">
+      <div class="filter-box">
         <b>🛡️ הגדרות פרטיות ובטיחות:</b>
         <div style="margin-top:8px; font-size:12px;">
           <input type="checkbox" id="ghostModeToggle" style="width:auto; vertical-align:middle;" onchange="toggleGhostMode(this.checked)">
-          <label for="ghostModeToggle" style="vertical-align:middle; font-weight:bold;">👻 מצב הליכה סמויה (הסתר אותי מהמפה)</label>
+          <label for="ghostModeToggle" style="vertical-align:middle; font-weight:bold;">👻 מצב סמוי (הסתר אותי מהמפה)</label>
         </div>
       </div>
 
-      <div class="community-dashboard" style="margin-top:10px;">
+      <div class="filter-box" style="margin-top:10px;">
         <b>🚨 אנשי קשר לשעת חירום (SOS):</b>
-        <p style="font-size:11px; color:#666; margin:4px 0;">הגדר עד 3 מספרי טלפון אליהם תישלח הודעת מצוקה בלחיצה על SOS:</p>
         <input type="tel" id="emergencyContact1" placeholder="איש קשר 1 (למשל: 0501234567)">
         <input type="tel" id="emergencyContact2" placeholder="איש קשר 2">
         <input type="tel" id="emergencyContact3" placeholder="איש קשר 3">
-        <button style="padding:6px; font-size:12px; margin-top:4px; background:#2980b9;" onclick="saveEmergencyContacts()">💾 שמור אנשי קשר</button>
+        <button style="padding:6px; font-size:12px; margin-top:4px; background:#0284c7; color:#fff;" onclick="saveEmergencyContacts()">💾 שמור אנשי קשר</button>
       </div>
 
-      <div class="community-dashboard" style="margin-top:10px;">
-        <b>🌟 תגי הערכה חיוביים שקיבלת:</b>
-        <div style="margin-top:6px;">
-          <span class="tag-chip">🏃‍♂️ קצב מעולה (4)</span>
-          <span class="tag-chip">🗣️ שיחה נעימה (6)</span>
-          <span class="tag-chip">⏰ דייקן (5)</span>
-        </div>
-      </div>
-
-      <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחזר למסך הכניסה</button>
+      <button class="btn-logout" onclick="logoutUser()">🚪 התנתק</button>
     </div>
 
     <!-- מודאל דיווח הליכה -->
     <div class="modal hidden" id="broadcastModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#27ae60;">🚶‍♂️ פרטי הצעידה שלך</h3>
+        <h3 style="margin-top:0; color:#22c55e;">🚶‍♂️ פרטי הצעידה שלך</h3>
         
         <label style="font-weight:bold; display:block; margin-top:6px;">📏 מרחק מתוכנן (ק"מ):</label>
         <input type="number" id="walkDistanceInput" value="5" min="1" max="30">
@@ -432,7 +431,7 @@
           <option value="מגיע עם כלב 🐶">מגיע עם כלב 🐶</option>
         </select>
 
-        <button onclick="confirmBroadcastWalk()" style="margin-top:12px; background:#27ae60;">📡 התרע בלייב לצועדים בסביבה!</button>
+        <button onclick="confirmBroadcastWalk()" style="margin-top:12px; background:#22c55e; color:#0f172a;">📡 התרע בלייב לצועדים בסביבה!</button>
         <button onclick="closeBroadcastModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
       </div>
     </div>
@@ -440,31 +439,30 @@
     <!-- מודאלים נוספים -->
     <div class="modal hidden" id="termsModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#27ae60;">📜 תקנון ותנאי שימוש - OK, Let's Go!</h3>
-        <p style="font-size:11px; color:#444;">אפליקציה למבוגרים (18+) לשימושי הליכה בטוחה בסביבה.</p>
-        <button onclick="acceptTermsFromModal()" style="margin-top:10px;">אני מאשר/ת את התקנון</button>
+        <h3 style="margin-top:0; color:#22c55e;">📜 תקנון ותנאי שימוש</h3>
+        <p style="font-size:11px; color:#cbd5e1;">אפליקציה למבוגרים (18+) לשימושי הליכה בטוחה בסביבה.</p>
+        <button onclick="acceptTermsFromModal()" style="margin-top:10px;">אני מאשר/ת</button>
       </div>
     </div>
 
     <div class="modal hidden" id="accessibilityModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#2980b9;">♿ תפריט נגישות</h3>
-        <button onclick="toggleHighContrast()" style="background:#34495e;">🌓 ניגודיות גבוהה</button>
-        <button onclick="toggleLargeFont()" style="background:#16a085; margin-top:4px;">🔍 הגדל/הקטן גופן</button>
+        <h3 style="margin-top:0; color:#0284c7;">♿ תפריט נגישות</h3>
+        <button onclick="toggleHighContrast()" style="background:#334155; color:#fff;">🌓 ניגודיות גבוהה</button>
         <button onclick="closeAccessibilityModal()" class="btn-secondary" style="margin-top:6px;">סגור</button>
       </div>
     </div>
 
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#e74c3c;">🚨 דיווח דיסקרטי</h3>
+        <h3 style="margin-top:0; color:#ef4444;">🚨 דיווח דיסקרטי</h3>
         <textarea id="reportReasonInput" placeholder="פרט בקצרה..." rows="3"></textarea>
-        <button onclick="submitDiscreteReport()" style="background:#e74c3c;">שלח דיווח</button>
+        <button onclick="submitDiscreteReport()" style="background:#ef4444; color:#fff;">שלח דיווח</button>
         <button onclick="closeReportModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
       </div>
     </div>
 
-    <!-- ניווט תחתון מורחב -->
+    <!-- ניווט תחתון -->
     <div class="bottom-nav hidden" id="bottomNav">
       <button class="nav-btn active" id="navMap" onclick="switchTab('mainScreen')">
         <span style="font-size:17px;">🗺️</span> ראשי
@@ -487,7 +485,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Firebase v10 SDK -->
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -521,20 +519,6 @@
 
     const pageLoadTime = Date.now();
 
-    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
-      Notification.requestPermission();
-    }
-
-    function sendBrowserNotification(title, body) {
-      if ("Notification" in window && Notification.permission === "granted") {
-        new Notification(title, { body: body, icon: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png" });
-      }
-    }
-
-    document.getElementById('welcomeScreen').classList.remove('hidden');
-    document.getElementById('mainScreen').classList.add('hidden');
-    document.getElementById('bottomNav').classList.add('hidden');
-
     window.loadEmergencyContacts = function() {
       document.getElementById('emergencyContact1').value = localStorage.getItem('emergency1') || '';
       document.getElementById('emergencyContact2').value = localStorage.getItem('emergency2') || '';
@@ -542,15 +526,10 @@
     };
 
     window.saveEmergencyContacts = function() {
-      const c1 = document.getElementById('emergencyContact1').value.trim();
-      const c2 = document.getElementById('emergencyContact2').value.trim();
-      const c3 = document.getElementById('emergencyContact3').value.trim();
-
-      localStorage.setItem('emergency1', c1);
-      localStorage.setItem('emergency2', c2);
-      localStorage.setItem('emergency3', c3);
-
-      alert("✅ אנשי הקשר לשעת חירום נשמרו בהצלחה!");
+      localStorage.setItem('emergency1', document.getElementById('emergencyContact1').value.trim());
+      localStorage.setItem('emergency2', document.getElementById('emergencyContact2').value.trim());
+      localStorage.setItem('emergency3', document.getElementById('emergencyContact3').value.trim());
+      alert("✅ אנשי הקשר נשמרו!");
     };
 
     function resetAppState() {
@@ -561,9 +540,6 @@
       
       window.liveUsers = [];
       window.activeChatPartner = null;
-      if (window.renderLivePartners) window.renderLivePartners();
-      if (window.renderLiveBar) window.renderLiveBar();
-
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
@@ -572,13 +548,10 @@
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
       let savedName = sessionStorage.getItem('customGuestName') || inputName;
-      let savedAge = sessionStorage.getItem('customGuestAge') || (document.getElementById('userAgeInput') ? document.getElementById('userAgeInput').value : '30');
-
       let googleName = user.displayName || (user.email ? user.email.split('@')[0] : '');
       let finalName = isGoogle ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
 
       sessionStorage.setItem('customGuestName', finalName);
-      sessionStorage.setItem('customGuestAge', savedAge);
       window.currentUserCustomName = finalName;
 
       document.getElementById('authUserName').innerText = finalName + (!isGoogle ? ' (אורח)' : '');
@@ -586,13 +559,7 @@
         document.getElementById('profileAvatarChar').innerText = finalName.charAt(0).toUpperCase();
       }
 
-      if (isGoogle) {
-        document.getElementById('googleStatsCard').classList.remove('hidden');
-        startFitnessTracking();
-      } else {
-        document.getElementById('googleStatsCard').classList.add('hidden');
-      }
-
+      startFitnessTracking();
       currentUserDoc = doc(db, "users", user.uid);
       
       const baseLat = window.userPos ? window.userPos.lat : 32.835;
@@ -601,8 +568,6 @@
       setDoc(currentUserDoc, {
         uid: user.uid,
         name: finalName,
-        age: savedAge,
-        gender: window.userGender || "גבר",
         isGuest: !isGoogle,
         lat: baseLat + (Math.random() - 0.5) * 0.003,
         lng: baseLng + (Math.random() - 0.5) * 0.003,
@@ -618,7 +583,7 @@
         loadEmergencyContacts();
         document.getElementById('bottomNav').classList.remove('hidden');
         window.startApp('mainScreen');
-      }).catch(err => {
+      }).catch(() => {
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
@@ -651,7 +616,7 @@
 
     window.startAppAsGuest = function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש!");
+        alert("⚠️ חובה לאשר את התקנון!");
         return;
       }
       const nameVal = document.getElementById('guestNameInput').value.trim();
@@ -659,24 +624,20 @@
         alert("⚠️ חובה לרשום שם פרטי!");
         return;
       }
-      
       if (nameVal) sessionStorage.setItem('customGuestName', nameVal);
-      
-      signInAnonymously(auth).then((res) => handleUserLogin(res.user, false)).catch(err => alert("שגיאה בכניסה: " + err.message));
+      signInAnonymously(auth).then((res) => handleUserLogin(res.user, false));
     };
 
     window.loginWithGoogle = function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון ותנאי השימוש!");
+        alert("⚠️ חובה לאשר את התקנון!");
         return;
       }
       const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true)).catch(err => alert("שגיאה בהתחברות Google: " + err.message));
+      signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true));
     };
 
     window.logoutUser = function() {
-      if (heartbeatInterval) clearInterval(heartbeatInterval);
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true }).then(() => {
           signOut(auth).then(() => resetAppState());
@@ -703,11 +664,8 @@
 
             if (isRecentlyActive && hasValidName) {
               const uName = data.name.trim();
-              
               const rawLat = typeof data.lat === 'number' ? data.lat : 32.835;
               const rawLng = typeof data.lng === 'number' ? data.lng : 35.076;
-              const fuzzedLat = rawLat + (Math.random() - 0.5) * 0.004;
-              const fuzzedLng = rawLng + (Math.random() - 0.5) * 0.004;
 
               if (!liveUsersMap.has(uName) || (data.lastSeen > liveUsersMap.get(uName).lastSeen)) {
                 liveUsersMap.set(uName, {
@@ -715,8 +673,8 @@
                   name: uName,
                   age: data.age || '30',
                   gender: data.gender || 'גבר',
-                  lat: fuzzedLat,
-                  lng: fuzzedLng,
+                  lat: rawLat + (Math.random() - 0.5) * 0.004,
+                  lng: rawLng + (Math.random() - 0.5) * 0.004,
                   pace: data.pace || 'בינוני',
                   dog: data.dog || 'לא',
                   lastSeen: data.lastSeen || 0
@@ -729,14 +687,11 @@
         window.liveUsers = Array.from(liveUsersMap.values());
         if (window.renderLivePartners) window.renderLivePartners();
         if (window.renderLiveBar) window.renderLiveBar();
-      }, (err) => {
-        console.error("Firestore Error:", err);
       });
     }
 
     function listenToIncomingMessages() {
       if (incomingChatUnsub) incomingChatUnsub();
-      
       incomingChatUnsub = onSnapshot(collectionGroup(db, "messages"), (snapshot) => {
         snapshot.docChanges().forEach(change => {
           if (change.type === "added") {
@@ -747,29 +702,74 @@
               const banner = document.getElementById('liveAlertBanner');
               const textSpan = document.getElementById('alertBannerText');
               
-              window.pendingChatPartner = {
-                uid: msg.senderUid,
-                name: msg.senderName || 'צועד בסביבה'
-              };
-
-              textSpan.innerHTML = `💬 <b>${msg.senderName || 'צועד'}:</b> "${msg.text}" (לחץ למענה)`;
+              window.pendingChatPartner = { uid: msg.senderUid, name: msg.senderName || 'צועד' };
+              textSpan.innerHTML = `💬 <b>${msg.senderName}:</b> "${msg.text}"`;
               banner.classList.remove('hidden');
-
-              sendBrowserNotification(`💬 הודעה חדשה מ-${msg.senderName}`, msg.text);
             }
           }
         });
       });
     }
 
-    window.blockActiveUser = function() {
+    // ניהול מועדפים בלוקל סטורג'
+    window.addActiveUserToFavorites = function() {
       const partner = window.activeChatPartner;
       if (!partner) return;
 
-      if (confirm(`האם לחסום את ${partner.name}? המשתמש לא יראה אותך במפה יותר.`)) {
+      let favs = JSON.parse(localStorage.getItem('favPartners') || '[]');
+      if (!favs.some(f => f.uid === partner.uid)) {
+        favs.push(partner);
+        localStorage.setItem('favPartners', JSON.stringify(favs));
+        alert(`⭐ ${partner.name} נוסף/ה למועדפים!`);
+      } else {
+        alert("⭐ המשתמש כבר נמצא במועדפים.");
+      }
+      window.renderFavoritesList();
+    };
+
+    window.renderFavoritesList = function() {
+      const favList = document.getElementById('favList');
+      if (!favList) return;
+
+      let favs = JSON.parse(localStorage.getItem('favPartners') || '[]');
+      favList.innerHTML = '';
+
+      if (favs.length === 0) {
+        favList.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px;">עדיין לא הוספת מועדפים.</p>`;
+        return;
+      }
+
+      favs.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'partner-item';
+        item.innerHTML = `
+          <div>
+            <b>⭐ ${f.name}</b><br>
+            <span style="font-size:11px; color:#94a3b8;">שמור במועדפים</span>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button style="width:auto; padding:5px 10px; font-size:11px;" onclick="openChatWithUser({uid:'${f.uid}', name:'${f.name}'})">💬 שיחה</button>
+            <button style="width:auto; padding:5px 8px; font-size:11px; background:#ef4444; color:#fff;" onclick="removeFavorite('${f.uid}')">🗑️</button>
+          </div>
+        `;
+        favList.appendChild(item);
+      });
+    };
+
+    window.removeFavorite = function(uid) {
+      let favs = JSON.parse(localStorage.getItem('favPartners') || '[]');
+      favs = favs.filter(f => f.uid !== uid);
+      localStorage.setItem('favPartners', JSON.stringify(favs));
+      window.renderFavoritesList();
+    };
+
+    window.blockActiveUser = function() {
+      const partner = window.activeChatPartner;
+      if (!partner) return;
+      if (confirm(`לחסום את ${partner.name}?`)) {
         blockedUsers.push(partner.uid);
         localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
-        alert("✅ המשתמש נחסם בהצלחה.");
+        alert("✅ נחסם.");
         switchTab('mainScreen');
         listenToLiveUsers();
       }
@@ -778,17 +778,15 @@
     window.toggleGhostMode = function(enabled) {
       window.isGhostMode = enabled;
       if (currentUserDoc) {
-        setDoc(currentUserDoc, { isOnline: !enabled }, { merge: true }).then(() => {
-          alert(enabled ? "👻 מצב סמוי הופעל (אתה לא מופיע במפה)" : "🟢 חזרת למצב מחובר רגיל");
-        });
+        setDoc(currentUserDoc, { isOnline: !enabled }, { merge: true });
       }
     };
 
     window.triggerSOS = function() {
       const activeUser = auth.currentUser;
-      const finalSenderName = window.currentUserCustomName || 'צועד בסביבה';
+      const finalSenderName = window.currentUserCustomName || 'צועד';
       
-      if (confirm("🚨 האם לשלוח התראת מצוקה SOS בלייב?")) {
+      if (confirm("🚨 לשלוח התראת מצוקה SOS בלייב?")) {
         addDoc(collection(db, "walk_alerts"), {
           senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
           senderName: `🚨 מצוקה (SOS): ${finalSenderName}`,
@@ -796,32 +794,19 @@
         });
 
         const c1 = localStorage.getItem('emergency1');
-        const c2 = localStorage.getItem('emergency2');
-        const c3 = localStorage.getItem('emergency3');
-
-        const contacts = [c1, c2, c3].filter(c => c && c.trim() !== '');
-        const mapUrl = `https://maps.google.com/?q=${window.userPos.lat},${window.userPos.lng}`;
-        const sosText = encodeURIComponent(`🚨 הודעת מצוקה מ-${finalSenderName}! אני זקוק/ה לעזרה בהליכה. מיקום נוכחי: ${mapUrl}`);
-
-        if (contacts.length > 0) {
-          window.location.href = `sms:${contacts[0]}?body=${sosText}`;
-        } else {
-          alert("🚨 התראת SOS נשלחה ברשת האפליקציה! (ניתן להגדיר אנשי קשר אישיים בלשונית הפרופיל).");
+        if (c1) {
+          const mapUrl = `https://maps.google.com/?q=${window.userPos.lat},${window.userPos.lng}`;
+          window.location.href = `sms:${c1}?body=${encodeURIComponent(`🚨 מצוקה מ-${finalSenderName}! מיקום: ${mapUrl}`)}`;
         }
       }
     };
 
-    window.openBroadcastModal = function() {
-      document.getElementById('broadcastModal').classList.remove('hidden');
-    };
-
-    window.closeBroadcastModal = function() {
-      document.getElementById('broadcastModal').classList.add('hidden');
-    };
+    window.openBroadcastModal = function() { document.getElementById('broadcastModal').classList.remove('hidden'); };
+    window.closeBroadcastModal = function() { document.getElementById('broadcastModal').classList.add('hidden'); };
 
     window.confirmBroadcastWalk = function() {
       const activeUser = auth.currentUser;
-      const finalSenderName = window.currentUserCustomName || document.getElementById('guestNameInput').value.trim() || 'צועד בסביבה';
+      const finalSenderName = window.currentUserCustomName || 'צועד אורח';
       const km = document.getElementById('walkDistanceInput').value || '5';
       const pace = document.getElementById('walkPaceInput').value || 'בינוני';
       const dog = document.getElementById('walkDogInput').value || 'ללא כלב 🚫';
@@ -834,17 +819,9 @@
         dog: dog,
         timestamp: Date.now()
       }).then(() => {
-        alert("📡 יצאת לצעידה! ההתראה והפרטים הופצו לכל הצועדים בסביבה.");
+        alert("📡 יצאת לצעידה! ההתראה הופצה.");
         closeBroadcastModal();
       });
-    };
-
-    window.handleBannerClick = function() {
-      if (window.pendingChatPartner) {
-        openChatWithUser(window.pendingChatPartner);
-        window.pendingChatPartner = null;
-      }
-      dismissAlertBanner();
     };
 
     window.sendChatMessage = function() {
@@ -853,12 +830,7 @@
       const activeUser = auth.currentUser;
       const targetPartner = window.activeChatPartner;
 
-      if (!text) return;
-      if (!activeUser || !targetPartner) {
-        alert("⚠️ יש לבחור משתמש להתחלת שיחה!");
-        return;
-      }
-
+      if (!text || !activeUser || !targetPartner) return;
       const chatId = [activeUser.uid, targetPartner.uid].sort().join('_');
 
       addDoc(collection(db, "chats", chatId, "messages"), {
@@ -866,9 +838,7 @@
         senderName: window.currentUserCustomName || 'צועד',
         text: text,
         timestamp: Date.now()
-      }).then(() => {
-        chatInput.value = '';
-      }).catch(err => alert("שגיאה בשליחת הודעה: " + err.message));
+      }).then(() => { chatInput.value = ''; });
     };
 
     window.listenToChatMessages = function(partner) {
@@ -879,19 +849,15 @@
       const chatBox = document.getElementById('chatBox');
       if (!chatBox || !activeUser || !partner) return;
 
-      chatBox.innerHTML = '<div style="color:#888; font-size:11px; text-align:center;">טוען הודעות...</div>';
-
       const chatId = [activeUser.uid, partner.uid].sort().join('_');
-      const messagesRef = collection(db, "chats", chatId, "messages");
-
-      chatUnsub = onSnapshot(messagesRef, (snapshot) => {
+      chatUnsub = onSnapshot(collection(db, "chats", chatId, "messages"), (snapshot) => {
         let messages = [];
         snapshot.forEach(docSnap => messages.push(docSnap.data()));
         messages.sort((a, b) => a.timestamp - b.timestamp);
 
         chatBox.innerHTML = '';
         if (messages.length === 0) {
-          chatBox.innerHTML = `<div style="color:#888; font-size:11px; text-align:center;">תחילת שיחה מאובטחת עם ${partner.name}</div>`;
+          chatBox.innerHTML = `<div style="color:#64748b; font-size:11px; text-align:center;">תחילת שיחה עם ${partner.name}</div>`;
           return;
         }
 
@@ -904,60 +870,58 @@
         });
 
         chatBox.scrollTop = chatBox.scrollHeight;
-      }, (err) => {
-        console.error("Chat Error:", err);
       });
     };
 
+    // התראות יציאה לצעידה (סינון 24 שעות + בדיקת מחובר מול liveUsers)
     function listenToWalkAlerts() {
       onSnapshot(collection(db, "walk_alerts"), (snapshot) => {
         const walkersList = document.getElementById('activeWalkersList');
         let alerts = [];
+        const now = Date.now();
+        const twentyFourHours = 24 * 60 * 60 * 1000;
 
-        snapshot.forEach(docSnap => alerts.push({ id: docSnap.id, ...docSnap.data() }));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          // סינון להתרעות מ-24 השעות האחרונות בלבד
+          if (data.timestamp && (now - data.timestamp < twentyFourHours)) {
+            alerts.push({ id: docSnap.id, ...data });
+          }
+        });
+
         alerts.sort((a, b) => b.timestamp - a.timestamp);
 
         if (walkersList) {
           walkersList.innerHTML = '';
           if (alerts.length === 0) {
-            walkersList.innerHTML = `<p style="text-align:center; color:#888; font-size:12px;">עדיין אין צועדים פעילים שהתריעו בלייב.</p>`;
+            walkersList.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px;">אין צועדים שהתריעו ב-24 השעות האחרונות.</p>`;
           } else {
             alerts.forEach(al => {
               const card = document.createElement('div');
               card.className = 'walk-alert-card';
               const timeStr = new Date(al.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+              // בדיקת סטטוס חיבור בזמן אמת
+              const isUserOnline = (window.liveUsers || []).some(u => u.uid === al.senderUid);
+              const statusBadge = isUserOnline 
+                ? `<b style="color:#22c55e; font-size:11px;">🟢 מחובר עכשיו</b>` 
+                : `<b style="color:#94a3b8; font-size:11px;">⚪ לא מחובר</b>`;
+
               card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <b>🚶‍♂️ ${al.senderName || 'צועד'}</b>
-                  <span style="font-size:10px; color:#888;">${timeStr}</span>
+                  <span>${statusBadge} | <span style="font-size:10px; color:#94a3b8;">${timeStr}</span></span>
                 </div>
-                <div style="font-size:12px; color:#444; margin-top:4px;">
+                <div style="font-size:12px; color:#cbd5e1; margin-top:4px;">
                   • מרחק מתוכנן: <b>${al.distanceKm || '5'} ק"מ</b><br>
-                  • קצב הליכה: <b>${al.pace || 'בינוני'}</b> | חיית מחמד: <b>${al.dog || 'ללא כלב 🚫'}</b>
+                  • קצב: <b>${al.pace || 'בינוני'}</b> | <b>${al.dog || 'ללא כלב 🚫'}</b>
                 </div>
-                <button style="width:auto; padding:5px 10px; font-size:11px; margin-top:6px;" onclick="openChatWithUser({uid: '${al.senderUid}', name: '${al.senderName}'})">💬 פנה אליו בצ'אט</button>
+                <button style="width:auto; padding:5px 10px; font-size:11px; margin-top:6px;" onclick="openChatWithUser({uid: '${al.senderUid}', name: '${al.senderName}'})">💬 פנה אליו בצ'אט ${isUserOnline ? '' : '(לא מחובר)'}</button>
               `;
               walkersList.appendChild(card);
             });
           }
         }
-
-        snapshot.docChanges().forEach(change => {
-          if (change.type === "added") {
-            const alertData = change.doc.data();
-            if (alertData.timestamp && alertData.timestamp > pageLoadTime) {
-              if (auth.currentUser && alertData.senderUid !== auth.currentUser.uid) {
-                const banner = document.getElementById('liveAlertBanner');
-                const textSpan = document.getElementById('alertBannerText');
-                textSpan.innerHTML = `🔔 <b>${alertData.senderName || 'צועד בסביבה'}</b> יצא/ה לצעידה (${alertData.distanceKm || '5'} ק"מ)!`;
-                banner.classList.remove('hidden');
-
-                sendBrowserNotification("🚶‍♂️ צועד חדש בסביבה", `${alertData.senderName || 'צועד בסביבה'} יצא/ה לצעידה של ${alertData.distanceKm || '5'} ק"מ!`);
-              }
-            }
-          }
-        });
       });
     }
 
@@ -976,8 +940,6 @@
     let userPos = { lat: 32.835, lng: 35.076 };
     let map = null, userMarker = null;
     let liveUsers = [];
-    let remainingSeconds = 120 * 60;
-    let usageTimerInterval = null;
 
     function toggleAuthButtons() {
       const isChecked = document.getElementById('termsCheckbox').checked;
@@ -991,7 +953,6 @@
     function openAccessibilityModal() { document.getElementById('accessibilityModal').classList.remove('hidden'); }
     function closeAccessibilityModal() { document.getElementById('accessibilityModal').classList.add('hidden'); }
     function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
-    function toggleLargeFont() { document.body.classList.toggle('large-font'); }
 
     function openSpotifyDirect() { window.open("https://open.spotify.com", "_blank"); }
     function dismissAlertBanner() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
@@ -999,27 +960,13 @@
     function startApp(targetScreen) {
       userGender = document.getElementById('userGenderInput').value;
       window.userGender = userGender;
-
       switchTab(targetScreen || 'mainScreen');
-      startUsageTimer();
 
       setTimeout(() => { 
         initMap();
         renderLivePartners();
         renderLiveBar();
       }, 300);
-    }
-
-    function startUsageTimer() {
-      if (usageTimerInterval) clearInterval(usageTimerInterval);
-      usageTimerInterval = setInterval(() => {
-        if (remainingSeconds > 0) {
-          remainingSeconds--;
-          const mins = Math.floor(remainingSeconds / 60);
-          const secs = remainingSeconds % 60;
-          document.getElementById('usageTimerDisplay').innerText = `⏱️ טיימר יומיומי: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-      }, 1000);
     }
 
     function initMap() {
@@ -1029,8 +976,8 @@
         if (!mapContainer) return;
 
         map = L.map('map').setView([userPos.lat, userPos.lng], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#27ae60', fillColor: '#27ae60', fillOpacity: 0.8 }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.8 }).addTo(map);
         map.invalidateSize();
       } catch (e) { console.log(e); }
     }
@@ -1056,13 +1003,11 @@
 
       if (usersToRender.length === 0) {
         if (header) header.innerText = "🟢 מחוברים בסביבה:";
-        bar.innerHTML = `<div style="font-size:11px; color:#888;">מחפש צועדים בסביבה...</div>`;
+        bar.innerHTML = `<div style="font-size:11px; color:#64748b;">מחפש צועדים בסביבה...</div>`;
         return;
       }
 
-      if (header) {
-        header.innerText = `🟢 מחוברים בסביבה (${usersToRender.length}):`;
-      }
+      if (header) header.innerText = `🟢 מחוברים בסביבה (${usersToRender.length}):`;
 
       usersToRender.forEach(u => {
         const avatar = document.createElement('div');
@@ -1084,22 +1029,21 @@
       listContainer.innerHTML = '';
 
       if (usersToRender.length === 0) {
-        listContainer.innerHTML = `<p style="text-align:center; color:#7f8c8d; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בזמן אמת...</p>`;
+        listContainer.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בלייב...</p>`;
         return;
       }
 
       usersToRender.forEach(partner => {
         if (map && partner.lat && partner.lng) {
-          L.marker([partner.lat, partner.lng]).addTo(map)
-            .bindPopup(`<b>${partner.name} (${partner.age || '30'})</b> 🟢<br>קצב: ${partner.pace}`);
+          L.marker([partner.lat, partner.lng]).addTo(map).bindPopup(`<b>${partner.name}</b> 🟢`);
         }
 
         const item = document.createElement('div');
         item.className = 'partner-item';
         item.innerHTML = `
           <div style="flex:1;">
-            <b>${partner.name} (${partner.gender}, גיל ${partner.age || '30'})</b> <b style="color:#2ecc71; font-size:11px;">מחובר עכשיו</b><br>
-            <span style="color:#666;">קצב: ${partner.pace} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
+            <b>${partner.name} (${partner.gender}, גיל ${partner.age || '30'})</b> <b style="color:#22c55e; font-size:11px;">מחובר עכשיו</b><br>
+            <span style="color:#94a3b8;">קצב: ${partner.pace} | כלב: ${partner.dog === 'כן' ? '🐶' : '🚫'}</span>
           </div>
           <button style="width:auto; padding: 6px 12px; font-size:11px;" onclick="event.stopPropagation(); openChatWithUser(window.liveUsers.find(p=>p.uid==='${partner.uid}'))">שיחה/פרופיל</button>
         `;
@@ -1144,7 +1088,10 @@
       }
       if (screenId === 'activeWalkersScreen') document.getElementById('navWalkers').classList.add('active');
       if (screenId === 'groupsScreen') document.getElementById('navGroups').classList.add('active');
-      if (screenId === 'favScreen') document.getElementById('navFav').classList.add('active');
+      if (screenId === 'favScreen') {
+        document.getElementById('navFav').classList.add('active');
+        if (window.renderFavoritesList) window.renderFavoritesList();
+      }
       if (screenId === 'profileScreen') document.getElementById('navProfile').classList.add('active');
     }
 
@@ -1159,7 +1106,6 @@
     window.openAccessibilityModal = openAccessibilityModal;
     window.closeAccessibilityModal = closeAccessibilityModal;
     window.toggleHighContrast = toggleHighContrast;
-    window.toggleLargeFont = toggleLargeFont;
     window.locateUser = locateUser;
     window.updateDistVal = updateDistVal;
     window.openReportModal = openReportModal;
