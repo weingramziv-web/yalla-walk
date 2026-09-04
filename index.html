@@ -8,6 +8,14 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+  <!-- EmailJS SDK (שליחת התראות מייל ל-weingram.ziv@gmail.com) -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init("1Lo7OvQNxdHXCiWaT");
+    })();
+  </script>
+
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     html, body { 
@@ -309,7 +317,6 @@
         <span style="font-size:11px; color:#f59e0b; font-weight:bold;" id="usageTimerDisplay">⏱️ 120:00</span>
       </div>
 
-      <!-- מדד קהילתי שכונתי שבועי (סעיף ג') -->
       <div style="background: linear-gradient(135deg, #0284c7, #0f172a); border-radius:12px; padding:8px 12px; margin-bottom:10px; font-size:11px; text-align:center; border:1px solid #38bdf8;">
         🔥 <b>האתגר הקהילתי השבועי:</b> צועדי השכונה צעדו השבוע יחד <b style="color:#22c55e; font-size:13px;">1,240 ק"מ!</b>
       </div>
@@ -381,17 +388,11 @@
         <h1>🚶‍♂️ צועדים ולוח צעידות</h1>
       </div>
 
-      <!-- לוח מודעות שכונתי: צעידות מתוכננות (סעיף ג') -->
       <div class="filter-box" style="margin-bottom:10px; border-right:4px solid #eab308;">
         <b style="color:#eab308;">📅 לוח צעידות מתוכננות בשכונה:</b>
         <p style="font-size:11px; margin:4px 0; color:#cbd5e1;">קבע צעידה מראש ומצא שותפים מראש:</p>
         <div id="scheduledWalksList">
-          <div style="background:#0f172a; padding:8px; border-radius:8px; margin-top:4px; font-size:11px;">
-            <b>👟 יואב:</b> מחר ב-07:00 בבוקר לפארק המרכזי (5 ק"מ, קצב מהיר)
-          </div>
-          <div style="background:#0f172a; padding:8px; border-radius:8px; margin-top:4px; font-size:11px;">
-            <b>🐕 מיכל:</b> היום ב-19:30 סיבוב בשכונה עם כלבים 🐶
-          </div>
+          <div style="font-size:11px; color:#64748b; text-align:center;">טוען צעידות מתוכננות...</div>
         </div>
         <button style="padding:6px; font-size:11px; background:#eab308; color:#0f172a; margin-top:6px; font-weight:bold;" onclick="openScheduleWalkModal()">➕ פרסם צעידה מתוכננת מראש</button>
       </div>
@@ -429,14 +430,13 @@
       </div>
     </div>
 
-    <!-- מסך צ'אט אישי (עם מנגנון בקשת שיחה ותגי הערכה חיוביים) -->
+    <!-- מסך צ'אט אישי -->
     <div class="screen hidden" id="chatScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
         <h1 id="chatTitle">💬 שיחה בזמן אמת</h1>
       </div>
 
-      <!-- באנר בקשת שיחה ממתינה (סעיף א') -->
       <div id="chatRequestBanner" class="hidden" style="background:#0284c7; padding:10px; border-radius:10px; font-size:12px; margin-bottom:8px; text-align:center;">
         <b>📩 משתמש זה פנה אליך בבקשת שיחה חדשה.</b><br>
         <div style="display:flex; gap:6px; margin-top:6px;">
@@ -456,7 +456,6 @@
 
       <div style="display:flex; gap:6px; margin-top:6px;">
         <button class="btn-fav" style="flex:1;" onclick="addActiveUserToFavorites()">⭐ הוסף לפייבוריטים</button>
-        <!-- הענקת תג הערכה חיובי בלבד (סעיף ב') -->
         <button class="btn-secondary" style="flex:1; background:#0284c7;" onclick="openVouchModal()">🎖️ הענק תג הערכה</button>
       </div>
 
@@ -499,12 +498,11 @@
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק</button>
     </div>
 
-    <!-- מודאל הגדרות ⚙️ (כולל פילטור פניות - סעיף א') -->
+    <!-- מודאל הגדרות ⚙️ -->
     <div class="modal hidden" id="settingsModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#38bdf8;">⚙️ הגדרות האפליקציה</h3>
 
-        <!-- פילטור פניות בצ'אט -->
         <div style="background:#0f172a; padding:10px; border-radius:10px; border:1px solid #3b82f6; margin-bottom:12px;">
           <b style="color:#38bdf8;">🛡️ פילטור פניות ופניות בצ'אט:</b>
           <p style="font-size:10px; color:#cbd5e1; margin:2px 0;">בחר ממי ברצונך לקבל פניות בצ'אט:</p>
@@ -538,7 +536,7 @@
       </div>
     </div>
 
-    <!-- מודאל הענקת תג הערכה חיובי (סעיף ב') -->
+    <!-- מודאל הענקת תג הערכה חיובי -->
     <div class="modal hidden" id="vouchModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#eab308;">🎖️ הענק תג הערכה חיובי</h3>
@@ -554,7 +552,7 @@
       </div>
     </div>
 
-    <!-- מודאל פרסום צעידה מתוכננת (סעיף ג') -->
+    <!-- מודאל פרסום צעידה מתוכננת -->
     <div class="modal hidden" id="scheduleWalkModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#38bdf8;">📅 קבע צעידה מתוכננת מראש</h3>
@@ -753,6 +751,7 @@
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
+        listenToScheduledWalks();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
         
@@ -762,6 +761,7 @@
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
+        listenToScheduledWalks();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
         
@@ -883,6 +883,52 @@
         });
       });
     }
+
+    function listenToScheduledWalks() {
+      onSnapshot(collection(db, "scheduled_walks"), (snapshot) => {
+        const list = document.getElementById('scheduledWalksList');
+        if (!list) return;
+
+        let scheduled = [];
+        snapshot.forEach(docSnap => scheduled.push(docSnap.data()));
+        scheduled.sort((a, b) => b.timestamp - a.timestamp);
+
+        list.innerHTML = '';
+        if (scheduled.length === 0) {
+          list.innerHTML = `<div style="font-size:11px; color:#64748b; text-align:center;">אין צעידות מתוכננות כרגע. קבע צעידה ראשונה!</div>`;
+          return;
+        }
+
+        scheduled.slice(0, 5).forEach(s => {
+          const item = document.createElement('div');
+          item.style.cssText = "background:#0f172a; padding:8px; border-radius:8px; margin-top:4px; font-size:11px;";
+          item.innerHTML = `<b>👟 ${s.userName}:</b> ${s.timeText} ב-${s.locationText}`;
+          list.appendChild(item);
+        });
+      });
+    }
+
+    window.submitScheduledWalk = function() {
+      const time = document.getElementById('scheduleTimeInput').value.trim();
+      const loc = document.getElementById('scheduleLocInput').value.trim();
+      const activeUser = auth.currentUser;
+
+      if (!time || !loc) {
+        alert("⚠️ נא למלא מועד ומיקום צעידה!");
+        return;
+      }
+
+      addDoc(collection(db, "scheduled_walks"), {
+        senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
+        userName: window.currentUserCustomName || 'צועד',
+        timeText: time,
+        locationText: loc,
+        timestamp: Date.now()
+      }).then(() => {
+        alert("📢 הצעידה המתוכננת פורסמה בהצלחה בלוח השכונתי בענן!");
+        closeScheduleWalkModal();
+      });
+    };
 
     window.addActiveUserToFavorites = function() {
       const partner = window.activeChatPartner;
@@ -1110,11 +1156,35 @@
       });
     }
 
+    // שליחת דיווח דיסקרטי - שמירה ב-Firebase + התראת אימייל בלייב ל-weingram.ziv@gmail.com
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
+      const activeUser = auth.currentUser;
+      const reporterName = window.currentUserCustomName || 'צועד';
+      const dateTimeStr = new Date().toLocaleString('he-IL');
+
       if (!reason) return;
-      addDoc(collection(db, "reports"), { reporterName: window.currentUserCustomName || 'צועד', reason: reason, timestamp: Date.now() }).then(() => {
-        alert("✅ הדיווח התקבל.");
+
+      // 1. שמירה בדאטהבייס Firestore
+      addDoc(collection(db, "reports"), { 
+        reporterUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
+        reporterName: reporterName, 
+        reason: reason, 
+        timestamp: Date.now() 
+      }).then(() => {
+        
+        // 2. שליחת התראת אימייל אוטומטית ל-weingram.ziv@gmail.com באמצעות EmailJS
+        emailjs.send("service_3sikbvo", "template_a8djdvl", {
+          reporter_name: reporterName,
+          report_reason: reason,
+          date_time: dateTimeStr
+        }).then(function() {
+          console.log('SUCCESS! Email sent to admin.');
+        }, function(error) {
+          console.log('FAILED...', error);
+        });
+
+        alert("✅ הדיווח התקבל ונרשם במערכת הניהול הדיסקרטית (נשלחה התראה למנהל).");
         closeReportModal();
       });
     };
@@ -1158,24 +1228,6 @@
 
     function openScheduleWalkModal() { document.getElementById('scheduleWalkModal').classList.remove('hidden'); }
     function closeScheduleWalkModal() { document.getElementById('scheduleWalkModal').classList.add('hidden'); }
-
-    function submitScheduledWalk() {
-      const time = document.getElementById('scheduleTimeInput').value.trim();
-      const loc = document.getElementById('scheduleLocInput').value.trim();
-      if (!time || !loc) {
-        alert("⚠️ נא למלא מועד ומיקום צעידה!");
-        return;
-      }
-      const list = document.getElementById('scheduledWalksList');
-      if (list) {
-        const item = document.createElement('div');
-        item.style.cssText = "background:#0f172a; padding:8px; border-radius:8px; margin-top:4px; font-size:11px;";
-        item.innerHTML = `<b>👟 ${window.currentUserCustomName || 'צועד'}:</b> ${time} ב-${loc}`;
-        list.prepend(item);
-      }
-      alert("📢 הצעידה המתוכננת פורסמה בהצלחה בלוח השכונתי!");
-      closeScheduleWalkModal();
-    }
 
     function acceptChatRequest() {
       document.getElementById('chatRequestBanner').classList.add('hidden');
@@ -1458,10 +1510,6 @@
     window.stopWalkTracking = stopWalkTracking;
     window.openVouchModal = openVouchModal;
     window.closeVouchModal = closeVouchModal;
-    window.submitVouch = submitVouch;
-    window.openScheduleWalkModal = openScheduleWalkModal;
-    window.closeScheduleWalkModal = closeScheduleWalkModal;
-    window.submitScheduledWalk = submitScheduledWalk;
     window.acceptChatRequest = acceptChatRequest;
     window.declineChatRequest = declineChatRequest;
   </script>
