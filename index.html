@@ -61,6 +61,7 @@
     .btn-logout { background: #ef4444; color: #fff; margin-top: 15px; }
     .hidden { display: none !important; }
 
+    /* כפתור SOS */
     .btn-sos-circle {
       position: absolute;
       top: 12px;
@@ -83,6 +84,7 @@
       margin: 0;
     }
 
+    /* כפתור הגדרות ⚙️ */
     .btn-settings-circle {
       position: absolute;
       top: 12px;
@@ -104,6 +106,7 @@
       margin: 0;
     }
 
+    /* דשבורד ספורטיבי */
     .sport-dashboard {
       background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
       border-radius: 16px;
@@ -205,7 +208,7 @@
 
   <div class="app-container">
 
-    <!-- מסך פתיחה (יוצג תמיד כברירת מחדל) -->
+    <!-- מסך פתיחה -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 20px;">
         <h1 style="font-size: 28px; color: #22c55e;">🚶‍♂️ OK, Let's Go!</h1>
@@ -514,7 +517,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -570,12 +573,23 @@
       if (incomingChatUnsub) incomingChatUnsub();
       if (chatUnsub) chatUnsub();
       
+      sessionStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('activeTab');
       window.liveUsers = [];
       window.activeChatPartner = null;
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
     }
+
+    // בדיקת הישארות מחובר ברפרש
+    onAuthStateChanged(auth, (user) => {
+      if (user && sessionStorage.getItem('isLoggedIn') === 'true') {
+        handleUserLogin(user, !user.isAnonymous);
+      } else {
+        resetAppState();
+      }
+    });
 
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
@@ -584,6 +598,7 @@
       let finalName = isGoogle ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
 
       sessionStorage.setItem('customGuestName', finalName);
+      sessionStorage.setItem('isLoggedIn', 'true');
       window.currentUserCustomName = finalName;
 
       document.getElementById('authUserName').innerText = finalName + (!isGoogle ? ' (אורח)' : '');
@@ -613,24 +628,29 @@
         listenToWalkAlerts();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastActiveTab = sessionStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastActiveTab);
       }).catch(() => {
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastActiveTab = sessionStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastActiveTab);
       });
     }
 
+    // Heartbeat מהיר (כל 5 שניות מקבל עדכון)
     function startHeartbeat() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       heartbeatInterval = setInterval(() => {
         if (currentUserDoc && !window.isGhostMode) {
           setDoc(currentUserDoc, { lastSeen: Date.now(), isOnline: true }, { merge: true });
         }
-      }, 15000);
+      }, 5000);
     }
 
     function startFitnessTracking() {
@@ -655,6 +675,7 @@
         return;
       }
       if (nameVal) sessionStorage.setItem('customGuestName', nameVal);
+      sessionStorage.setItem('isLoggedIn', 'true');
       signInAnonymously(auth).then((res) => handleUserLogin(res.user, false));
     };
 
@@ -664,10 +685,13 @@
         return;
       }
       const provider = new GoogleAuthProvider();
+      sessionStorage.setItem('isLoggedIn', 'true');
       signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true));
     };
 
     window.logoutUser = function() {
+      sessionStorage.removeItem('isLoggedIn');
+      sessionStorage.removeItem('activeTab');
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true }).then(() => {
           signOut(auth).then(() => resetAppState());
@@ -677,6 +701,7 @@
       }
     };
 
+    // סינון מחוברים קשיח: 10 שניות בלבד!
     function listenToLiveUsers() {
       if (liveUnsubUsers) liveUnsubUsers();
       
@@ -684,7 +709,7 @@
         let liveUsersMap = new Map();
         const myUid = auth.currentUser ? auth.currentUser.uid : '';
         const now = Date.now();
-        const activeThreshold = 30 * 1000;
+        const activeThreshold = 10 * 1000; // 10 שניות בלבד!
 
         snapshot.forEach(docSnap => {
           const data = docSnap.data();
@@ -1111,6 +1136,8 @@
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function switchTab(screenId) {
+      sessionStorage.setItem('activeTab', screenId);
+
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('activeWalkersScreen').classList.add('hidden');
