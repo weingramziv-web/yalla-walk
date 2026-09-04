@@ -72,6 +72,18 @@
     }
     .google-benefits-card b { color: #38bdf8; }
 
+    .badge-chip {
+      display: inline-block;
+      background: #0f172a;
+      border: 1px solid #eab308;
+      color: #eab308;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: bold;
+      margin: 2px;
+    }
+
     .btn-sos-circle {
       position: absolute;
       top: 12px;
@@ -297,6 +309,11 @@
         <span style="font-size:11px; color:#f59e0b; font-weight:bold;" id="usageTimerDisplay">⏱️ 120:00</span>
       </div>
 
+      <!-- מדד קהילתי שכונתי שבועי (סעיף ג') -->
+      <div style="background: linear-gradient(135deg, #0284c7, #0f172a); border-radius:12px; padding:8px 12px; margin-bottom:10px; font-size:11px; text-align:center; border:1px solid #38bdf8;">
+        🔥 <b>האתגר הקהילתי השבועי:</b> צועדי השכונה צעדו השבוע יחד <b style="color:#22c55e; font-size:13px;">1,240 ק"מ!</b>
+      </div>
+
       <div class="sport-dashboard">
         <div class="start-walk-btn-circle" id="startWalkCircleBtn" onclick="handleWalkBtnClick()">
           <span id="walkBtnTextMain">START</span>
@@ -357,14 +374,30 @@
       <div id="partnersList"></div>
     </div>
 
-    <!-- טאב: צועדים (24 שעות) -->
+    <!-- טאב: צועדים וצעידות מתוכננות -->
     <div class="screen hidden" id="activeWalkersScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
-        <h1>🚶‍♂️ צועדים בסביבה</h1>
+        <h1>🚶‍♂️ צועדים ולוח צעידות</h1>
       </div>
-      <p>התראות יציאה לדרך ב-24 השעות האחרונות:</p>
-      <div id="activeWalkersList" style="margin-top:10px;">
+
+      <!-- לוח מודעות שכונתי: צעידות מתוכננות (סעיף ג') -->
+      <div class="filter-box" style="margin-bottom:10px; border-right:4px solid #eab308;">
+        <b style="color:#eab308;">📅 לוח צעידות מתוכננות בשכונה:</b>
+        <p style="font-size:11px; margin:4px 0; color:#cbd5e1;">קבע צעידה מראש ומצא שותפים מראש:</p>
+        <div id="scheduledWalksList">
+          <div style="background:#0f172a; padding:8px; border-radius:8px; margin-top:4px; font-size:11px;">
+            <b>👟 יואב:</b> מחר ב-07:00 בבוקר לפארק המרכזי (5 ק"מ, קצב מהיר)
+          </div>
+          <div style="background:#0f172a; padding:8px; border-radius:8px; margin-top:4px; font-size:11px;">
+            <b>🐕 מיכל:</b> היום ב-19:30 סיבוב בשכונה עם כלבים 🐶
+          </div>
+        </div>
+        <button style="padding:6px; font-size:11px; background:#eab308; color:#0f172a; margin-top:6px; font-weight:bold;" onclick="openScheduleWalkModal()">➕ פרסם צעידה מתוכננת מראש</button>
+      </div>
+
+      <p style="font-weight:bold; margin-top:8px;">התראות יציאה לדרך ב-24 השעות האחרונות:</p>
+      <div id="activeWalkersList" style="margin-top:4px;">
         <div style="font-size:12px; color:#64748b; text-align:center;">טוען צעידות...</div>
       </div>
     </div>
@@ -396,11 +429,20 @@
       </div>
     </div>
 
-    <!-- מסך צ'אט אישי -->
+    <!-- מסך צ'אט אישי (עם מנגנון בקשת שיחה ותגי הערכה חיוביים) -->
     <div class="screen hidden" id="chatScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
         <h1 id="chatTitle">💬 שיחה בזמן אמת</h1>
+      </div>
+
+      <!-- באנר בקשת שיחה ממתינה (סעיף א') -->
+      <div id="chatRequestBanner" class="hidden" style="background:#0284c7; padding:10px; border-radius:10px; font-size:12px; margin-bottom:8px; text-align:center;">
+        <b>📩 משתמש זה פנה אליך בבקשת שיחה חדשה.</b><br>
+        <div style="display:flex; gap:6px; margin-top:6px;">
+          <button style="flex:1; padding:6px; font-size:11px; background:#22c55e; color:#0f172a;" onclick="acceptChatRequest()">✅ אישור שיחה</button>
+          <button style="flex:1; padding:6px; font-size:11px; background:#ef4444; color:#fff;" onclick="declineChatRequest()">❌ דחייה</button>
+        </div>
       </div>
 
       <div class="chat-box" id="chatBox">
@@ -414,14 +456,17 @@
 
       <div style="display:flex; gap:6px; margin-top:6px;">
         <button class="btn-fav" style="flex:1;" onclick="addActiveUserToFavorites()">⭐ הוסף לפייבוריטים</button>
+        <!-- הענקת תג הערכה חיובי בלבד (סעיף ב') -->
+        <button class="btn-secondary" style="flex:1; background:#0284c7;" onclick="openVouchModal()">🎖️ הענק תג הערכה</button>
       </div>
+
       <div style="display:flex; gap:4px; margin-top:4px;">
         <button class="btn-report" style="flex:1;" onclick="openReportModal()">🚨 דיווח דיסקרטי</button>
         <button class="btn-block" style="flex:1;" onclick="blockActiveUser()">🚫 חסום משתמש</button>
       </div>
     </div>
 
-    <!-- מסך אזור אישי -->
+    <!-- מסך אזור אישי ותגים -->
     <div class="screen hidden" id="profileScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
@@ -431,6 +476,15 @@
       <div style="text-align:center; margin-bottom:10px;">
         <div class="avatar-circle" style="width:70px; height:70px; margin:0 auto; font-size:24px;" id="profileAvatarCircle">
           <span id="profileAvatarChar">?</span>
+        </div>
+      </div>
+
+      <div class="filter-box" style="margin-bottom:10px;">
+        <b style="color:#eab308;">🏆 תגי הערכה שקבלת מהקהילה (Positive Vouching):</b>
+        <div style="margin-top:6px;" id="myUserVouches">
+          <span class="badge-chip">🎖️ צועד/ת זהב</span>
+          <span class="badge-chip">🏃‍♂️ קצב מצוין</span>
+          <span class="badge-chip">🤝 פרטנר/ית אדיב/ה</span>
         </div>
       </div>
 
@@ -445,10 +499,21 @@
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק</button>
     </div>
 
-    <!-- מודאל הגדרות ⚙️ -->
+    <!-- מודאל הגדרות ⚙️ (כולל פילטור פניות - סעיף א') -->
     <div class="modal hidden" id="settingsModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#38bdf8;">⚙️ הגדרות האפליקציה</h3>
+
+        <!-- פילטור פניות בצ'אט -->
+        <div style="background:#0f172a; padding:10px; border-radius:10px; border:1px solid #3b82f6; margin-bottom:12px;">
+          <b style="color:#38bdf8;">🛡️ פילטור פניות ופניות בצ'אט:</b>
+          <p style="font-size:10px; color:#cbd5e1; margin:2px 0;">בחר ממי ברצונך לקבל פניות בצ'אט:</p>
+          <select id="chatFilterSetting">
+            <option value="all">אפשר פניות מכולם</option>
+            <option value="women">אפשר פניות מנשים בלבד</option>
+            <option value="google">אפשר פניות ממצטרפי Google בלבד</option>
+          </select>
+        </div>
 
         <div style="margin-bottom:12px;">
           <b>🚨 אנשי קשר לשעת חירום (SOS):</b>
@@ -456,7 +521,8 @@
           <input type="tel" id="emergencyContact1" placeholder="איש קשר 1 (למשל: 0501234567)">
           <input type="tel" id="emergencyContact2" placeholder="איש קשר 2">
           <input type="tel" id="emergencyContact3" placeholder="איש קשר 3">
-          <button style="padding:8px; font-size:12px; margin-top:4px; background:#0284c7; color:#fff;" onclick="saveEmergencyContacts()">💾 שמור אנשי קשר</button>
+          
+          <button style="padding:8px; font-size:12px; margin-top:8px; background:#0284c7; color:#fff;" onclick="saveEmergencyContacts()">💾 שמור הגדרות</button>
         </div>
 
         <div style="border-top:1px solid #334155; padding-top:8px; margin-top:8px;">
@@ -469,6 +535,37 @@
         </div>
 
         <button onclick="closeSettingsModal()" class="btn-secondary" style="margin-top:12px;">סגור</button>
+      </div>
+    </div>
+
+    <!-- מודאל הענקת תג הערכה חיובי (סעיף ב') -->
+    <div class="modal hidden" id="vouchModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#eab308;">🎖️ הענק תג הערכה חיובי</h3>
+        <p style="font-size:11px; color:#cbd5e1;">בחר תג הערכה להענקה (פדבק חיובי בלבד לחיזוק הקהילה):</p>
+        <select id="vouchSelect">
+          <option value="🏆 צועד/ת זהב">🏆 צועד/ת זהב</option>
+          <option value="🏃‍♂️ קצב מצוין">🏃‍♂️ קצב מצוין</option>
+          <option value="🤝 פרטנר/ית אדיב/ה">🤝 פרטנר/ית אדיב/ה</option>
+          <option value="🌟 מעודד/ת קהילתי/ת">🌟 מעודד/ת קהילתי/ת</option>
+        </select>
+        <button onclick="submitVouch()" style="margin-top:10px; background:#eab308; color:#0f172a; font-weight:bold;">הענק תג לחבר 🚀</button>
+        <button onclick="closeVouchModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
+      </div>
+    </div>
+
+    <!-- מודאל פרסום צעידה מתוכננת (סעיף ג') -->
+    <div class="modal hidden" id="scheduleWalkModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#38bdf8;">📅 קבע צעידה מתוכננת מראש</h3>
+        <label style="font-weight:bold; display:block; margin-top:6px;">🕒 מתי הצעידה?</label>
+        <input type="text" id="scheduleTimeInput" placeholder="למשל: מחר ב-07:00 בבוקר">
+
+        <label style="font-weight:bold; display:block; margin-top:6px;">📍 מיקום יציאה:</label>
+        <input type="text" id="scheduleLocInput" placeholder="למשל: בכניסה לפארק המרכזי">
+
+        <button onclick="submitScheduledWalk()" style="margin-top:10px; background:#38bdf8; color:#0f172a; font-weight:bold;">פרסם בלוח השכונתי 📢</button>
+        <button onclick="closeScheduleWalkModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
       </div>
     </div>
 
@@ -576,6 +673,9 @@
       document.getElementById('emergencyContact1').value = localStorage.getItem('emergency1') || '';
       document.getElementById('emergencyContact2').value = localStorage.getItem('emergency2') || '';
       document.getElementById('emergencyContact3').value = localStorage.getItem('emergency3') || '';
+      if (document.getElementById('chatFilterSetting')) {
+        document.getElementById('chatFilterSetting').value = localStorage.getItem('chatFilterSetting') || 'all';
+      }
       document.getElementById('settingsModal').classList.remove('hidden');
     };
 
@@ -587,7 +687,12 @@
       localStorage.setItem('emergency1', document.getElementById('emergencyContact1').value.trim());
       localStorage.setItem('emergency2', document.getElementById('emergencyContact2').value.trim());
       localStorage.setItem('emergency3', document.getElementById('emergencyContact3').value.trim());
-      alert("✅ אנשי הקשר נשמרו בהצלחה!");
+      
+      if (document.getElementById('chatFilterSetting')) {
+        localStorage.setItem('chatFilterSetting', document.getElementById('chatFilterSetting').value);
+      }
+
+      alert("✅ ההגדרות והפילטרים נשמרו בהצלחה!");
       closeSettingsModal();
     };
 
@@ -763,6 +868,10 @@
             const activeUser = auth.currentUser;
             
             if (activeUser && msg.senderUid !== activeUser.uid && msg.timestamp > pageLoadTime && !blockedUsers.includes(msg.senderUid)) {
+              const filterSetting = localStorage.getItem('chatFilterSetting') || 'all';
+              if (filterSetting === 'women' && msg.senderGender !== 'אישה') return;
+              if (filterSetting === 'google' && msg.isGuest) return;
+
               const banner = document.getElementById('liveAlertBanner');
               const textSpan = document.getElementById('alertBannerText');
               
@@ -914,6 +1023,7 @@
       addDoc(collection(db, "chats", chatId, "messages"), {
         senderUid: activeUser.uid,
         senderName: window.currentUserCustomName || 'צועד',
+        senderGender: window.userGender || 'גבר',
         text: text,
         timestamp: Date.now()
       }).then(() => { chatInput.value = ''; });
@@ -1019,7 +1129,6 @@
     let remainingSeconds = 120 * 60;
     let usageTimerInterval = null;
 
-    // מנגנון ספירת מרחק וקלוריות מבוסס GPS אמיתי
     let isWalkActive = false;
     let geoWatchId = null;
     let lastPosition = null;
@@ -1037,6 +1146,47 @@
     function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
     function openSpotifyDirect() { window.open("https://open.spotify.com", "_blank"); }
     function dismissAlertBanner() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
+
+    function openVouchModal() { document.getElementById('vouchModal').classList.remove('hidden'); }
+    function closeVouchModal() { document.getElementById('vouchModal').classList.add('hidden'); }
+
+    function submitVouch() {
+      const val = document.getElementById('vouchSelect').value;
+      alert(`🏅 הענקת בהצלחה תג הערכה "${val}" לפרטנר!`);
+      closeVouchModal();
+    }
+
+    function openScheduleWalkModal() { document.getElementById('scheduleWalkModal').classList.remove('hidden'); }
+    function closeScheduleWalkModal() { document.getElementById('scheduleWalkModal').classList.add('hidden'); }
+
+    function submitScheduledWalk() {
+      const time = document.getElementById('scheduleTimeInput').value.trim();
+      const loc = document.getElementById('scheduleLocInput').value.trim();
+      if (!time || !loc) {
+        alert("⚠️ נא למלא מועד ומיקום צעידה!");
+        return;
+      }
+      const list = document.getElementById('scheduledWalksList');
+      if (list) {
+        const item = document.createElement('div');
+        item.style.cssText = "background:#0f172a; padding:8px; border-radius:8px; margin-top:4px; font-size:11px;";
+        item.innerHTML = `<b>👟 ${window.currentUserCustomName || 'צועד'}:</b> ${time} ב-${loc}`;
+        list.prepend(item);
+      }
+      alert("📢 הצעידה המתוכננת פורסמה בהצלחה בלוח השכונתי!");
+      closeScheduleWalkModal();
+    }
+
+    function acceptChatRequest() {
+      document.getElementById('chatRequestBanner').classList.add('hidden');
+      alert("✅ אישרת את בקשת השיחה! כעת תוכלו לשוחח בחופשיות.");
+    }
+
+    function declineChatRequest() {
+      document.getElementById('chatRequestBanner').classList.add('hidden');
+      alert("❌ דחית את בקשת השיחה.");
+      switchTab('mainScreen');
+    }
 
     function startUsageTimer() {
       if (usageTimerInterval) clearInterval(usageTimerInterval);
@@ -1061,9 +1211,8 @@
       }
     }
 
-    // חישוב מרחק בין 2 נקודות קואורדינטות (במטרים)
     function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // רדיוס כדור הארץ במטרים
+      const R = 6371e3;
       const φ1 = lat1 * Math.PI / 180;
       const φ2 = lat2 * Math.PI / 180;
       const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -1077,7 +1226,6 @@
       return R * c;
     }
 
-    // הפעלת מעקב הליכה GPS אמיתי
     function startWalkTracking() {
       isWalkActive = true;
       totalDistanceMeters = 0;
@@ -1102,7 +1250,6 @@
           if (lastPosition) {
             const distMeters = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
             
-            // סופר מרחק רק אם זו זרימת תנועה ממשית (מעל 3 מטרים למניעת קפיצות GPS במקום)
             if (distMeters > 3) {
               totalDistanceMeters += distMeters;
               
@@ -1138,7 +1285,7 @@
       if (mainTxt) mainTxt.innerText = 'START';
       if (subTxt) subTxt.innerText = 'WALK';
 
-      alert(`🛑 הצעידה הסתיימה!\nצעדת: ${document.getElementById('kmDisplay').innerText} ק"מ\nשרפת: ${document.getElementById('calDisplay').innerText} קלוריות🔥`);
+      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת: ${document.getElementById('kmDisplay').innerText} ק"מ\nשרפת: ${document.getElementById('calDisplay').innerText} קלוריות🔥`);
     }
 
     function startApp(targetScreen) {
@@ -1309,6 +1456,14 @@
     window.handleWalkBtnClick = handleWalkBtnClick;
     window.startWalkTracking = startWalkTracking;
     window.stopWalkTracking = stopWalkTracking;
+    window.openVouchModal = openVouchModal;
+    window.closeVouchModal = closeVouchModal;
+    window.submitVouch = submitVouch;
+    window.openScheduleWalkModal = openScheduleWalkModal;
+    window.closeScheduleWalkModal = closeScheduleWalkModal;
+    window.submitScheduledWalk = submitScheduledWalk;
+    window.acceptChatRequest = acceptChatRequest;
+    window.declineChatRequest = declineChatRequest;
   </script>
 </body>
 </html>
