@@ -349,10 +349,12 @@
         <div style="font-size:11px; color:#64748b;">מחפש צועדים בסביבה...</div>
       </div>
 
+      <!-- פילטור תצוגת צועדים בלבד -->
       <div class="filter-box" style="margin-top:8px;">
+        <b style="color:#38bdf8; font-size:12px;">🔍 סינון צועדים המוצגים במפה:</b>
         <div class="filter-row">
           <div style="flex:1;">
-            <label for="paceFilter">🏃‍♂️ קצב:</label>
+            <label for="paceFilter">🏃‍♂️ קצב צועדים:</label>
             <select id="paceFilter" onchange="renderLivePartners()">
               <option value="all">הכל</option>
               <option value="איטי">איטי</option>
@@ -370,12 +372,12 @@
           </div>
         </div>
 
-        <label>📍 מרחק מרבי: <span id="distVal">10</span> ק"מ</label>
+        <label>📍 מרחק סינון מרבי: <span id="distVal">10</span> ק"מ</label>
         <input type="range" id="distFilter" min="1" max="50" value="10" oninput="updateDistVal(); renderLivePartners(); renderLiveBar();">
       </div>
 
       <div style="display:flex; gap:5px; margin-top:4px;">
-        <button class="btn-secondary" style="padding: 6px; font-size: 11px;" onclick="locateUser()">📍 אתר אותי במפה</button>
+        <button class="btn-secondary" style="padding: 6px; font-size: 11px;" onclick="locateUser()">📍 עדכן את מיקומי במפה</button>
       </div>
 
       <div id="map"></div>
@@ -570,15 +572,15 @@
       </div>
     </div>
 
-    <!-- מודאל דיווח/התחלת הליכה -->
+    <!-- מודאל הגדרות יציאה לצעידה אישית -->
     <div class="modal hidden" id="broadcastModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#22c55e;">יוצאים להליכה? ספרו למי שבסביבה! 🚶‍♂️</h3>
+        <h3 style="margin-top:0; color:#22c55e;">הגדרות היציאה לצעידה שלך 🚶‍♂️</h3>
         
-        <label style="font-weight:bold; display:block; margin-top:6px;">📏 מרחק מתוכנן (ק"מ):</label>
+        <label style="font-weight:bold; display:block; margin-top:6px;">📏 המרחק שברצונך לצעוד (ק"מ):</label>
         <input type="number" id="walkDistanceInput" value="5" min="1" max="30">
 
-        <label style="font-weight:bold; display:block; margin-top:6px;">🏃‍♂️ קצב הליכה:</label>
+        <label style="font-weight:bold; display:block; margin-top:6px;">🏃‍♂️ הקצב שבו תצעד:</label>
         <select id="walkPaceInput">
           <option value="איטי">איטי</option>
           <option value="בינוני" selected>בינוני</option>
@@ -713,7 +715,6 @@
       document.getElementById('bottomNav').classList.add('hidden');
     }
 
-    // זיהוי סשן פעיל בעת מעבר בין אפליקציות/לשוניות
     onAuthStateChanged(auth, (user) => {
       if (user && localStorage.getItem('appLoggedIn') === 'true') {
         handleUserLogin(user, !user.isAnonymous);
