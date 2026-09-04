@@ -472,7 +472,7 @@
       </div>
     </div>
 
-    <!-- מסך אזור אישי ותגים -->
+    <!-- מסך אזור אישי ותגים (כולל הגדרות פרטיות ופילטור צ'אט) -->
     <div class="screen hidden" id="profileScreen">
       <div class="screen-header">
         <button class="btn-back-header" onclick="switchTab('mainScreen')">➔ חזרה למפה</button>
@@ -494,6 +494,16 @@
         </div>
       </div>
 
+      <div class="filter-box" style="margin-bottom:10px;">
+        <b style="color:#38bdf8;">🛡️ פילטור פניות ופניות בצ'אט:</b>
+        <p style="font-size:10px; color:#cbd5e1; margin:2px 0;">בחר ממי ברצונך לקבל פניות בצ'אט:</p>
+        <select id="chatFilterSetting" onchange="localStorage.setItem('chatFilterSetting', this.value);">
+          <option value="all">אפשר פניות מכולם</option>
+          <option value="women">אפשר פניות מנשים בלבד</option>
+          <option value="google">אפשר פניות ממצטרפי Google בלבד</option>
+        </select>
+      </div>
+
       <div class="filter-box">
         <b>🛡️ הגדרות פרטיות ובטיחות:</b>
         <div style="margin-top:8px; font-size:12px;">
@@ -503,20 +513,10 @@
       </div>
     </div>
 
-    <!-- מודאל הגדרות ⚙️ (כולל כפתור התנתקות מועבר) -->
+    <!-- מודאל הגדרות ⚙️ -->
     <div class="modal hidden" id="settingsModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#38bdf8;">⚙️ הגדרות האפליקציה</h3>
-
-        <div style="background:#0f172a; padding:10px; border-radius:10px; border:1px solid #3b82f6; margin-bottom:12px;">
-          <b style="color:#38bdf8;">🛡️ פילטור פניות ופניות בצ'אט:</b>
-          <p style="font-size:10px; color:#cbd5e1; margin:2px 0;">בחר ממי ברצונך לקבל פניות בצ'אט:</p>
-          <select id="chatFilterSetting">
-            <option value="all">אפשר פניות מכולם</option>
-            <option value="women">אפשר פניות מנשים בלבד</option>
-            <option value="google">אפשר פניות ממצטרפי Google בלבד</option>
-          </select>
-        </div>
 
         <div style="margin-bottom:12px;">
           <b>🚨 אנשי קשר לשעת חירום (SOS):</b>
@@ -525,15 +525,11 @@
           <input type="tel" id="emergencyContact2" placeholder="איש קשר 2">
           <input type="tel" id="emergencyContact3" placeholder="איש קשר 3">
           
-          <button style="padding:8px; font-size:12px; margin-top:8px; background:#0284c7; color:#fff;" onclick="saveEmergencyContacts()">💾 שמור הגדרות</button>
+          <button style="padding:8px; font-size:12px; margin-top:8px; background:#0284c7; color:#fff;" onclick="saveEmergencyContacts()">💾 שמור אנשי קשר</button>
         </div>
 
         <div style="border-top:1px solid #334155; padding-top:8px; margin-top:8px;">
-          <b>🛡️ פרטיות ונגישות:</b>
-          <div style="margin-top:6px; font-size:12px;">
-            <input type="checkbox" id="settingsGhostToggle" style="width:auto; vertical-align:middle;" onchange="toggleGhostMode(this.checked)">
-            <label for="settingsGhostToggle" style="vertical-align:middle; font-weight:bold;">👻 מצב סמוי (הסתר אותי מהמפה)</label>
-          </div>
+          <b>🌓 תצוגה ונגישות:</b>
           <button onclick="toggleHighContrast()" style="background:#334155; color:#fff; font-size:12px; padding:8px; margin-top:6px;">🌓 מצב ניגודיות גבוהה</button>
         </div>
 
@@ -679,9 +675,6 @@
       document.getElementById('emergencyContact1').value = localStorage.getItem('emergency1') || '';
       document.getElementById('emergencyContact2').value = localStorage.getItem('emergency2') || '';
       document.getElementById('emergencyContact3').value = localStorage.getItem('emergency3') || '';
-      if (document.getElementById('chatFilterSetting')) {
-        document.getElementById('chatFilterSetting').value = localStorage.getItem('chatFilterSetting') || 'all';
-      }
       document.getElementById('settingsModal').classList.remove('hidden');
     };
 
@@ -694,15 +687,10 @@
       localStorage.setItem('emergency2', document.getElementById('emergencyContact2').value.trim());
       localStorage.setItem('emergency3', document.getElementById('emergencyContact3').value.trim());
       
-      if (document.getElementById('chatFilterSetting')) {
-        localStorage.setItem('chatFilterSetting', document.getElementById('chatFilterSetting').value);
-      }
-
-      alert("✅ ההגדרות והפילטרים נשמרו בהצלחה!");
+      alert("✅ אנשי הקשר נשמרו בהצלחה!");
       closeSettingsModal();
     };
 
-    // איפוס תצוגה נקי בעת התנתקות
     function resetAppState() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       if (liveUnsubUsers) liveUnsubUsers();
@@ -802,7 +790,7 @@
       }, 5000);
     }
 
-    // בדיקת כפילות טלפון לפני הרשמה
+    // בדיקת כפילות טלפון קשיחה והרמטית
     window.startAppAsGuest = async function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון!");
@@ -811,7 +799,7 @@
       const nameVal = document.getElementById('guestNameInput').value.trim();
       const phoneVal = document.getElementById('guestPhoneInput').value.trim();
 
-      if (!nameVal && !localStorage.getItem('customGuestName')) {
+      if (!nameVal) {
         alert("⚠️ חובה לרשום שם פרטי!");
         return;
       }
@@ -823,24 +811,32 @@
         return;
       }
 
-      // בדיקה בענן האם הטלפון כבר רשום בשם אחר
+      // חסימת הרשמה כפולה תחת אותו נייד ושם שונה
       try {
         const q = query(collection(db, "users"), where("contactInfo", "==", cleanPhone));
         const querySnapshot = await getDocs(q);
+        
         if (!querySnapshot.empty) {
-          let existingDoc = querySnapshot.docs[0].data();
-          if (existingDoc.name && existingDoc.name !== nameVal) {
-            if (!confirm(`⚠️ מספר הטלפון ${cleanPhone} כבר רשום במערכת תחת השם "${existingDoc.name}". האם ברצונך לעדכן את השם ל-"${nameVal}"?`)) {
-              return;
+          let isNameMatch = false;
+          querySnapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data.name && data.name.trim() === nameVal) {
+              isNameMatch = true;
             }
+          });
+
+          if (!isNameMatch) {
+            const existingName = querySnapshot.docs[0].data().name || 'משתמש אחר';
+            alert(`⛔ מספר הטלפון ${cleanPhone} כבר רשום במערכת תחת השם "${existingName}".\nנא להתחבר בשמך המקורי או להשתמש במספר הנייד האישי שלך.`);
+            return;
           }
         }
       } catch (err) {
-        console.log("Check phone err", err);
+        console.log("Phone uniqueness check:", err);
       }
 
-      if (nameVal) localStorage.setItem('customGuestName', nameVal);
-      if (phoneVal) localStorage.setItem('customGuestPhone', cleanPhone);
+      localStorage.setItem('customGuestName', nameVal);
+      localStorage.setItem('customGuestPhone', cleanPhone);
       localStorage.setItem('appLoggedIn', 'true');
 
       signInAnonymously(auth).then((res) => handleUserLogin(res.user, false));
