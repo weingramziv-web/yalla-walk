@@ -61,7 +61,6 @@
     .btn-logout { background: #ef4444; color: #fff; margin-top: 15px; }
     .hidden { display: none !important; }
 
-    /* כרטיסיית יתרונות התחברות לגוגל */
     .google-benefits-card {
       background: linear-gradient(135deg, #1e293b, #0f172a);
       border: 1px solid #3b82f6;
@@ -73,7 +72,6 @@
     }
     .google-benefits-card b { color: #38bdf8; }
 
-    /* כפתור SOS קטן ועגול בצד ימין */
     .btn-sos-circle {
       position: absolute;
       top: 12px;
@@ -96,7 +94,6 @@
       margin: 0;
     }
 
-    /* כפתור הגדרות ⚙️ בצד שמאל */
     .btn-settings-circle {
       position: absolute;
       top: 12px;
@@ -118,7 +115,6 @@
       margin: 0;
     }
 
-    /* דשבורד ספורטיבי */
     .sport-dashboard {
       background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
       border-radius: 16px;
@@ -148,6 +144,12 @@
       cursor: pointer;
       margin: 10px 0;
       transition: transform 0.2s;
+    }
+    .start-walk-btn-circle.active-walk {
+      background: radial-gradient(circle, #ef4444 0%, #991b1b 100%);
+      border-color: #f87171;
+      box-shadow: 0 0 25px rgba(239,68,68,0.5);
+      color: #fff;
     }
     .start-walk-btn-circle:active { transform: scale(0.95); }
 
@@ -235,7 +237,6 @@
       </div>
 
       <div style="margin-top: auto;">
-        <!-- כרטיסיית יתרונות התחברות לגוגל -->
         <div class="google-benefits-card">
           <b>💡 למה כדאי להתחבר דרך Google?</b>
           <div style="margin-top:4px; line-height:1.4;">
@@ -297,9 +298,9 @@
       </div>
 
       <div class="sport-dashboard">
-        <div class="start-walk-btn-circle" onclick="openBroadcastModal()">
-          <span>START</span>
-          <span style="font-size:13px;">WALK</span>
+        <div class="start-walk-btn-circle" id="startWalkCircleBtn" onclick="handleWalkBtnClick()">
+          <span id="walkBtnTextMain">START</span>
+          <span id="walkBtnTextSub" style="font-size:13px;">WALK</span>
         </div>
 
         <div class="sport-grid">
@@ -542,7 +543,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -566,8 +567,6 @@
     let liveUnsubUsers = null;
     let chatUnsub = null;
     let incomingChatUnsub = null;
-    let walkSeconds = 0;
-    let fitnessInterval = null;
     let heartbeatInterval = null;
     let blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
 
@@ -598,8 +597,8 @@
       if (incomingChatUnsub) incomingChatUnsub();
       if (chatUnsub) chatUnsub();
       
-      sessionStorage.removeItem('isLoggedIn');
-      sessionStorage.removeItem('activeTab');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('activeTab');
       window.liveUsers = [];
       window.activeChatPartner = null;
       document.getElementById('welcomeScreen').classList.remove('hidden');
@@ -607,14 +606,22 @@
       document.getElementById('bottomNav').classList.add('hidden');
     }
 
+    onAuthStateChanged(auth, (user) => {
+      if (user && localStorage.getItem('isLoggedIn') === 'true') {
+        handleUserLogin(user, !user.isAnonymous);
+      } else if (!user && localStorage.getItem('isLoggedIn') !== 'true') {
+        resetAppState();
+      }
+    });
+
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
-      let savedName = sessionStorage.getItem('customGuestName') || inputName;
+      let savedName = localStorage.getItem('customGuestName') || inputName;
       let googleName = user.displayName || (user.email ? user.email.split('@')[0] : '');
       let finalName = isGoogle ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
 
-      sessionStorage.setItem('customGuestName', finalName);
-      sessionStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('customGuestName', finalName);
+      localStorage.setItem('isLoggedIn', 'true');
       window.currentUserCustomName = finalName;
 
       document.getElementById('authUserName').innerText = finalName + (!isGoogle ? ' (אורח)' : '');
@@ -622,7 +629,6 @@
         document.getElementById('profileAvatarChar').innerText = finalName.charAt(0).toUpperCase();
       }
 
-      startFitnessTracking();
       currentUserDoc = doc(db, "users", user.uid);
       
       const baseLat = window.userPos ? window.userPos.lat : 32.835;
@@ -644,14 +650,18 @@
         listenToWalkAlerts();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastActiveTab = localStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastActiveTab);
       }).catch(() => {
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastActiveTab = localStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastActiveTab);
       });
     }
 
@@ -664,29 +674,18 @@
       }, 5000);
     }
 
-    function startFitnessTracking() {
-      if (fitnessInterval) clearInterval(fitnessInterval);
-      fitnessInterval = setInterval(() => {
-        walkSeconds++;
-        const km = (walkSeconds * (5 / 3600)).toFixed(2);
-        const cal = Math.floor(walkSeconds * (280 / 3600));
-        document.getElementById('kmDisplay').innerText = km;
-        document.getElementById('calDisplay').innerText = cal;
-      }, 1000);
-    }
-
     window.startAppAsGuest = function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון!");
         return;
       }
       const nameVal = document.getElementById('guestNameInput').value.trim();
-      if (!nameVal && !sessionStorage.getItem('customGuestName')) {
+      if (!nameVal && !localStorage.getItem('customGuestName')) {
         alert("⚠️ חובה לרשום שם פרטי!");
         return;
       }
-      if (nameVal) sessionStorage.setItem('customGuestName', nameVal);
-      sessionStorage.setItem('isLoggedIn', 'true');
+      if (nameVal) localStorage.setItem('customGuestName', nameVal);
+      localStorage.setItem('isLoggedIn', 'true');
       signInAnonymously(auth).then((res) => handleUserLogin(res.user, false));
     };
 
@@ -696,13 +695,13 @@
         return;
       }
       const provider = new GoogleAuthProvider();
-      sessionStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('isLoggedIn', 'true');
       signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true));
     };
 
     window.logoutUser = function() {
-      sessionStorage.removeItem('isLoggedIn');
-      sessionStorage.removeItem('activeTab');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('activeTab');
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true }).then(() => {
           signOut(auth).then(() => resetAppState());
@@ -894,10 +893,12 @@
         }).then(() => {
           alert("📢 יצאת לצעידה! ההתראה והפרטים הופצו לצועדים בסביבה.");
           closeBroadcastModal();
+          window.startWalkTracking();
         });
       } else {
         alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצועדים אחרים).");
         closeBroadcastModal();
+        window.startWalkTracking();
       }
     };
 
@@ -1018,6 +1019,12 @@
     let remainingSeconds = 120 * 60;
     let usageTimerInterval = null;
 
+    // מנגנון ספירת מרחק וקלוריות מבוסס GPS אמיתי
+    let isWalkActive = false;
+    let geoWatchId = null;
+    let lastPosition = null;
+    let totalDistanceMeters = 0;
+
     function toggleAuthButtons() {
       const isChecked = document.getElementById('termsCheckbox').checked;
       document.getElementById('btnGoogleAuth').disabled = !isChecked;
@@ -1044,6 +1051,94 @@
           }
         }
       }, 1000);
+    }
+
+    function handleWalkBtnClick() {
+      if (!isWalkActive) {
+        openBroadcastModal();
+      } else {
+        stopWalkTracking();
+      }
+    }
+
+    // חישוב מרחק בין 2 נקודות קואורדינטות (במטרים)
+    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // רדיוס כדור הארץ במטרים
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c;
+    }
+
+    // הפעלת מעקב הליכה GPS אמיתי
+    function startWalkTracking() {
+      isWalkActive = true;
+      totalDistanceMeters = 0;
+      lastPosition = null;
+
+      const btn = document.getElementById('startWalkCircleBtn');
+      const mainTxt = document.getElementById('walkBtnTextMain');
+      const subTxt = document.getElementById('walkBtnTextSub');
+
+      if (btn) btn.classList.add('active-walk');
+      if (mainTxt) mainTxt.innerText = 'STOP';
+      if (subTxt) subTxt.innerText = 'WALK';
+
+      document.getElementById('kmDisplay').innerText = "0.00";
+      document.getElementById('calDisplay').innerText = "0";
+
+      if (navigator.geolocation) {
+        geoWatchId = navigator.geolocation.watchPosition((pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          if (lastPosition) {
+            const distMeters = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
+            
+            // סופר מרחק רק אם זו זרימת תנועה ממשית (מעל 3 מטרים למניעת קפיצות GPS במקום)
+            if (distMeters > 3) {
+              totalDistanceMeters += distMeters;
+              
+              const km = (totalDistanceMeters / 1000).toFixed(2);
+              const cal = Math.floor((totalDistanceMeters / 1000) * 60);
+
+              const kmEl = document.getElementById('kmDisplay');
+              const calEl = document.getElementById('calDisplay');
+              if (kmEl) kmEl.innerText = km;
+              if (calEl) calEl.innerText = cal;
+
+              lastPosition = { lat, lng };
+            }
+          } else {
+            lastPosition = { lat, lng };
+          }
+        }, (err) => console.log(err), { enableHighAccuracy: true });
+      }
+    }
+
+    function stopWalkTracking() {
+      isWalkActive = false;
+      if (geoWatchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+      }
+
+      const btn = document.getElementById('startWalkCircleBtn');
+      const mainTxt = document.getElementById('walkBtnTextMain');
+      const subTxt = document.getElementById('walkBtnTextSub');
+
+      if (btn) btn.classList.remove('active-walk');
+      if (mainTxt) mainTxt.innerText = 'START';
+      if (subTxt) subTxt.innerText = 'WALK';
+
+      alert(`🛑 הצעידה הסתיימה!\nצעדת: ${document.getElementById('kmDisplay').innerText} ק"מ\nשרפת: ${document.getElementById('calDisplay').innerText} קלוריות🔥`);
     }
 
     function startApp(targetScreen) {
@@ -1165,7 +1260,7 @@
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function switchTab(screenId) {
-      sessionStorage.setItem('activeTab', screenId);
+      localStorage.setItem('activeTab', screenId);
 
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
@@ -1211,6 +1306,9 @@
     window.closeReportModal = closeReportModal;
     window.openSpotifyDirect = openSpotifyDirect;
     window.dismissAlertBanner = dismissAlertBanner;
+    window.handleWalkBtnClick = handleWalkBtnClick;
+    window.startWalkTracking = startWalkTracking;
+    window.stopWalkTracking = stopWalkTracking;
   </script>
 </body>
 </html>
