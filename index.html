@@ -8,7 +8,7 @@
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <!-- EmailJS SDK (שליחת התראות מייל ל-weingram.ziv@gmail.com) -->
+  <!-- EmailJS SDK -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script type="text/javascript">
     (function(){
@@ -638,7 +638,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -700,22 +700,12 @@
       if (incomingChatUnsub) incomingChatUnsub();
       if (chatUnsub) chatUnsub();
       
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('activeTab');
       window.liveUsers = [];
       window.activeChatPartner = null;
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
     }
-
-    onAuthStateChanged(auth, (user) => {
-      if (user && localStorage.getItem('isLoggedIn') === 'true') {
-        handleUserLogin(user, !user.isAnonymous);
-      } else if (!user && localStorage.getItem('isLoggedIn') !== 'true') {
-        resetAppState();
-      }
-    });
 
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
@@ -724,7 +714,6 @@
       let finalName = isGoogle ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
 
       localStorage.setItem('customGuestName', finalName);
-      localStorage.setItem('isLoggedIn', 'true');
       window.currentUserCustomName = finalName;
 
       document.getElementById('authUserName').innerText = finalName + (!isGoogle ? ' (אורח)' : '');
@@ -754,9 +743,7 @@
         listenToScheduledWalks();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        
-        const lastActiveTab = localStorage.getItem('activeTab') || 'mainScreen';
-        window.startApp(lastActiveTab);
+        window.startApp('mainScreen');
       }).catch(() => {
         startHeartbeat();
         listenToLiveUsers();
@@ -764,9 +751,7 @@
         listenToScheduledWalks();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        
-        const lastActiveTab = localStorage.getItem('activeTab') || 'mainScreen';
-        window.startApp(lastActiveTab);
+        window.startApp('mainScreen');
       });
     }
 
@@ -790,7 +775,6 @@
         return;
       }
       if (nameVal) localStorage.setItem('customGuestName', nameVal);
-      localStorage.setItem('isLoggedIn', 'true');
       signInAnonymously(auth).then((res) => handleUserLogin(res.user, false));
     };
 
@@ -800,13 +784,10 @@
         return;
       }
       const provider = new GoogleAuthProvider();
-      localStorage.setItem('isLoggedIn', 'true');
       signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true));
     };
 
     window.logoutUser = function() {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('activeTab');
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true }).then(() => {
           signOut(auth).then(() => resetAppState());
@@ -1051,7 +1032,7 @@
           window.startWalkTracking();
         });
       } else {
-        alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצועדים אחרים).");
+        alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצצועדים אחרים).");
         closeBroadcastModal();
         window.startWalkTracking();
       }
@@ -1156,7 +1137,7 @@
       });
     }
 
-    // שליחת דיווח דיסקרטי - שמירה ב-Firebase + התראת אימייל בלייב ל-weingram.ziv@gmail.com
+    // שליחת דיווח דיסקרטי - שמירה ב-Firebase + התראת אימייל מלאה ל-weingram.ziv@gmail.com
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
       const activeUser = auth.currentUser;
@@ -1165,7 +1146,6 @@
 
       if (!reason) return;
 
-      // 1. שמירה בדאטהבייס Firestore
       addDoc(collection(db, "reports"), { 
         reporterUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
         reporterName: reporterName, 
@@ -1173,8 +1153,10 @@
         timestamp: Date.now() 
       }).then(() => {
         
-        // 2. שליחת התראת אימייל אוטומטית ל-weingram.ziv@gmail.com באמצעות EmailJS
+        // שליחת כל המשתנים האפשריים לתבנית EmailJS לקבלת תוכן מלא במייל
         emailjs.send("service_3sikbvo", "template_a8djdvl", {
+          message: reason,
+          from_name: reporterName,
           reporter_name: reporterName,
           report_reason: reason,
           date_time: dateTimeStr
@@ -1459,8 +1441,6 @@
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function switchTab(screenId) {
-      localStorage.setItem('activeTab', screenId);
-
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('activeWalkersScreen').classList.add('hidden');
