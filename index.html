@@ -498,7 +498,7 @@
         </div>
       </div>
 
-      <button class="btn-logout" onclick="logoutUser()">🚪 התנתק</button>
+      <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחלף משתמש</button>
     </div>
 
     <!-- מודאל הגדרות ⚙️ -->
@@ -642,7 +642,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -704,12 +704,23 @@
       if (incomingChatUnsub) incomingChatUnsub();
       if (chatUnsub) chatUnsub();
       
+      localStorage.removeItem('appLoggedIn');
+      localStorage.removeItem('activeTab');
       window.liveUsers = [];
       window.activeChatPartner = null;
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
     }
+
+    // זיהוי סשן פעיל בעת מעבר בין אפליקציות/לשוניות
+    onAuthStateChanged(auth, (user) => {
+      if (user && localStorage.getItem('appLoggedIn') === 'true') {
+        handleUserLogin(user, !user.isAnonymous);
+      } else if (!user && localStorage.getItem('appLoggedIn') !== 'true') {
+        resetAppState();
+      }
+    });
 
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
@@ -726,6 +737,7 @@
 
       localStorage.setItem('customGuestName', finalName);
       if (savedPhone) localStorage.setItem('customGuestPhone', savedPhone);
+      localStorage.setItem('appLoggedIn', 'true');
       
       window.currentUserCustomName = finalName;
       window.currentUserContactInfo = finalContact;
@@ -758,7 +770,9 @@
         listenToScheduledWalks();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastTab = localStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastTab);
       }).catch(() => {
         startHeartbeat();
         listenToLiveUsers();
@@ -766,7 +780,9 @@
         listenToScheduledWalks();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastTab = localStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastTab);
       });
     }
 
@@ -779,7 +795,6 @@
       }, 5000);
     }
 
-    // בדיקת תקינות מבנית חינמית בלבד (0 ₪)
     window.startAppAsGuest = function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון!");
@@ -802,6 +817,7 @@
 
       if (nameVal) localStorage.setItem('customGuestName', nameVal);
       if (phoneVal) localStorage.setItem('customGuestPhone', phoneVal);
+      localStorage.setItem('appLoggedIn', 'true');
 
       signInAnonymously(auth).then((res) => handleUserLogin(res.user, false));
     };
@@ -812,10 +828,13 @@
         return;
       }
       const provider = new GoogleAuthProvider();
+      localStorage.setItem('appLoggedIn', 'true');
       signInWithPopup(auth, provider).then((result) => handleUserLogin(result.user, true));
     };
 
     window.logoutUser = function() {
+      localStorage.removeItem('appLoggedIn');
+      localStorage.removeItem('activeTab');
       if (currentUserDoc) {
         setDoc(currentUserDoc, { isOnline: false }, { merge: true }).then(() => {
           signOut(auth).then(() => resetAppState());
@@ -1166,7 +1185,7 @@
       });
     }
 
-    // שליחת דיווח דיסקרטי בחינם
+    // שליחת דיווח דיסקרטי
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
       const activeUser = auth.currentUser;
@@ -1503,6 +1522,8 @@
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function switchTab(screenId) {
+      localStorage.setItem('activeTab', screenId);
+
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('activeWalkersScreen').classList.add('hidden');
