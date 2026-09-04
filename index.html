@@ -606,8 +606,9 @@
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#ef4444;">🚨 דיווח דיסקרטי</h3>
-        <textarea id="reportReasonInput" placeholder="פרט בקצרה..." rows="3"></textarea>
-        <button onclick="submitDiscreteReport()" style="background:#ef4444; color:#fff;">שלח דיווח</button>
+        <p style="font-size:11px; color:#94a3b8; margin:2px 0;" id="reportTargetDisplay">מדווח על: כללי / צ'אט פעיל</p>
+        <textarea id="reportReasonInput" placeholder="פרט בקצרה את סיבת הדיווח..." rows="3"></textarea>
+        <button onclick="submitDiscreteReport()" style="background:#ef4444; color:#fff;">שלח דיווח מוצפן</button>
         <button onclick="closeReportModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
       </div>
     </div>
@@ -1032,7 +1033,7 @@
           window.startWalkTracking();
         });
       } else {
-        alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצצועדים אחרים).");
+        alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצועדים אחרים).");
         closeBroadcastModal();
         window.startWalkTracking();
       }
@@ -1137,36 +1138,44 @@
       });
     }
 
-    // שליחת דיווח דיסקרטי - שמירה ב-Firebase + התראת אימייל מלאה ל-weingram.ziv@gmail.com
+    // שליחת דיווח דיסקרטי עם כל הפרטים המזהים ב-Firebase ובאימייל
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
       const activeUser = auth.currentUser;
       const reporterName = window.currentUserCustomName || 'צועד';
+      const reporterUid = activeUser ? activeUser.uid : 'anon_' + Date.now();
+      
+      const targetUser = window.activeChatPartner;
+      const reportedName = targetUser ? targetUser.name : 'כללי / ללא צ\'אט';
+      const reportedUid = targetUser ? targetUser.uid : 'general';
       const dateTimeStr = new Date().toLocaleString('he-IL');
 
       if (!reason) return;
 
       addDoc(collection(db, "reports"), { 
-        reporterUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
-        reporterName: reporterName, 
+        reporterUid: reporterUid,
+        reporterName: reporterName,
+        reportedUid: reportedUid,
+        reportedName: reportedName, 
         reason: reason, 
         timestamp: Date.now() 
       }).then(() => {
         
-        // שליחת כל המשתנים האפשריים לתבנית EmailJS לקבלת תוכן מלא במייל
         emailjs.send("service_3sikbvo", "template_a8djdvl", {
           message: reason,
-          from_name: reporterName,
           reporter_name: reporterName,
+          reporter_uid: reporterUid,
+          reported_user: reportedName,
+          reported_uid: reportedUid,
           report_reason: reason,
           date_time: dateTimeStr
         }).then(function() {
-          console.log('SUCCESS! Email sent to admin.');
+          console.log('SUCCESS! Detailed email sent to admin.');
         }, function(error) {
           console.log('FAILED...', error);
         });
 
-        alert("✅ הדיווח התקבל ונרשם במערכת הניהול הדיסקרטית (נשלחה התראה למנהל).");
+        alert("✅ הדיווח המאובטח נשלח ישירות למנהל המערכת לטיפול.");
         closeReportModal();
       });
     };
@@ -1430,6 +1439,12 @@
     function openChatWithUser(partner) {
       if (!partner) return;
       document.getElementById('chatTitle').innerText = `💬 שיחה עם ${partner.name}`;
+      
+      const displayEl = document.getElementById('reportTargetDisplay');
+      if (displayEl) {
+        displayEl.innerText = `מדווח על המשתמש: ${partner.name} (UID: ${partner.uid})`;
+      }
+
       switchTab('chatScreen');
       if (window.listenToChatMessages) {
         window.listenToChatMessages(partner);
@@ -1437,7 +1452,20 @@
     }
 
     function updateDistVal() { document.getElementById('distVal').innerText = document.getElementById('distFilter').value; }
-    function openReportModal() { document.getElementById('reportModal').classList.remove('hidden'); }
+    
+    function openReportModal() { 
+      const targetUser = window.activeChatPartner;
+      const displayEl = document.getElementById('reportTargetDisplay');
+      if (displayEl) {
+        if (targetUser) {
+          displayEl.innerText = `מדווח על המשתמש: ${targetUser.name} (UID: ${targetUser.uid})`;
+        } else {
+          displayEl.innerText = `מדווח על: כללי / תקלה באפליקציה`;
+        }
+      }
+      document.getElementById('reportModal').classList.remove('hidden'); 
+    }
+    
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function switchTab(screenId) {
