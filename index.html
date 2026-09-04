@@ -61,7 +61,7 @@
     .btn-logout { background: #ef4444; color: #fff; margin-top: 15px; }
     .hidden { display: none !important; }
 
-    /* כפתור SOS קטן עגול */
+    /* כפתור SOS קטן עגול בצד ימין */
     .btn-sos-circle {
       position: absolute;
       top: 12px;
@@ -84,7 +84,29 @@
       margin: 0;
     }
 
-    /* דשבורד ספורטיבי מרכזי */
+    /* כפתור הגדרות ⚙️ בצד שמאל */
+    .btn-settings-circle {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #0284c7;
+      color: #fff;
+      font-size: 18px;
+      border: 2px solid #1e293b;
+      box-shadow: 0 2px 8px rgba(2,132,199,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* דשבורד ספורטיבי */
     .sport-dashboard {
       background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
       border-radius: 16px;
@@ -143,8 +165,6 @@
 
     .user-auth-badge { background: #0f172a; color: #38bdf8; padding: 10px; border-radius: 10px; font-size: 12px; margin-bottom: 8px; text-align: center; display: flex; justify-content: space-between; align-items: center; font-weight: 600; border: 1px solid #334155; }
 
-    .accessibility-btn { position: fixed; top: 12px; left: 12px; z-index: 9999; background: #0284c7; color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
-
     .live-users-bar { display: flex; gap: 12px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid #334155; direction: rtl; }
     .live-user-avatar { display: flex; flex-direction: column; align-items: center; min-width: 58px; cursor: pointer; position: relative; }
     .avatar-circle { width: 46px; height: 46px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #0f172a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 17px; position: relative; border: 2px solid #38bdf8; box-shadow: 0 3px 6px rgba(0,0,0,0.3); overflow: hidden; }
@@ -185,9 +205,6 @@
   </style>
 </head>
 <body>
-
-  <!-- כפתור נגישות -->
-  <button class="accessibility-btn" title="תפריט נגישות" onclick="openAccessibilityModal()">♿</button>
 
   <div class="app-container">
 
@@ -237,7 +254,9 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
+      <!-- כפתור SOS מימין, הגדרות משמאל -->
       <button class="btn-sos-circle" title="לחצן מצוקה חירום (SOS)" onclick="triggerSOS()">SOS</button>
+      <button class="btn-settings-circle" title="הגדרות האפליקציה" onclick="openSettingsModal()">⚙️</button>
 
       <div class="alert-banner hidden" id="liveAlertBanner" onclick="handleBannerClick()">
         <span id="alertBannerText">🔔 התראה חדשה!</span>
@@ -398,15 +417,34 @@
         </div>
       </div>
 
-      <div class="filter-box" style="margin-top:10px;">
-        <b>🚨 אנשי קשר לשעת חירום (SOS):</b>
-        <input type="tel" id="emergencyContact1" placeholder="איש קשר 1 (למשל: 0501234567)">
-        <input type="tel" id="emergencyContact2" placeholder="איש קשר 2">
-        <input type="tel" id="emergencyContact3" placeholder="איש קשר 3">
-        <button style="padding:6px; font-size:12px; margin-top:4px; background:#0284c7; color:#fff;" onclick="saveEmergencyContacts()">💾 שמור אנשי קשר</button>
-      </div>
-
       <button class="btn-logout" onclick="logoutUser()">🚪 התנתק</button>
+    </div>
+
+    <!-- מודאל הגדרות ⚙️ -->
+    <div class="modal hidden" id="settingsModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#38bdf8;">⚙️ הגדרות האפליקציה</h3>
+
+        <div style="margin-bottom:12px;">
+          <b>🚨 אנשי קשר לשעת חירום (SOS):</b>
+          <p style="font-size:11px; color:#94a3b8; margin:2px 0;">הגדר מספרי טלפון לשליחת הודעת מצוקה בלחיצה על SOS:</p>
+          <input type="tel" id="emergencyContact1" placeholder="איש קשר 1 (למשל: 0501234567)">
+          <input type="tel" id="emergencyContact2" placeholder="איש קשר 2">
+          <input type="tel" id="emergencyContact3" placeholder="איש קשר 3">
+          <button style="padding:8px; font-size:12px; margin-top:4px; background:#0284c7; color:#fff;" onclick="saveEmergencyContacts()">💾 שמור אנשי קשר</button>
+        </div>
+
+        <div style="border-top:1px solid #334155; padding-top:8px; margin-top:8px;">
+          <b>🛡️ פרטיות ונגישות:</b>
+          <div style="margin-top:6px; font-size:12px;">
+            <input type="checkbox" id="settingsGhostToggle" style="width:auto; vertical-align:middle;" onchange="toggleGhostMode(this.checked)">
+            <label for="settingsGhostToggle" style="vertical-align:middle; font-weight:bold;">👻 מצב סמוי (הסתר אותי מהמפה)</label>
+          </div>
+          <button onclick="toggleHighContrast()" style="background:#334155; color:#fff; font-size:12px; padding:8px; margin-top:6px;">🌓 מצב ניגודיות גבוהה</button>
+        </div>
+
+        <button onclick="closeSettingsModal()" class="btn-secondary" style="margin-top:12px;">סגור</button>
+      </div>
     </div>
 
     <!-- מודאל דיווח/התחלת הליכה -->
@@ -445,14 +483,6 @@
       </div>
     </div>
 
-    <div class="modal hidden" id="accessibilityModal">
-      <div class="modal-content">
-        <h3 style="margin-top:0; color:#0284c7;">♿ תפריט נגישות</h3>
-        <button onclick="toggleHighContrast()" style="background:#334155; color:#fff;">🌓 ניגודיות גבוהה</button>
-        <button onclick="closeAccessibilityModal()" class="btn-secondary" style="margin-top:6px;">סגור</button>
-      </div>
-    </div>
-
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#ef4444;">🚨 דיווח דיסקרטי</h3>
@@ -488,7 +518,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -519,17 +549,23 @@
 
     const pageLoadTime = Date.now();
 
-    window.loadEmergencyContacts = function() {
+    window.openSettingsModal = function() {
       document.getElementById('emergencyContact1').value = localStorage.getItem('emergency1') || '';
       document.getElementById('emergencyContact2').value = localStorage.getItem('emergency2') || '';
       document.getElementById('emergencyContact3').value = localStorage.getItem('emergency3') || '';
+      document.getElementById('settingsModal').classList.remove('hidden');
+    };
+
+    window.closeSettingsModal = function() {
+      document.getElementById('settingsModal').classList.add('hidden');
     };
 
     window.saveEmergencyContacts = function() {
       localStorage.setItem('emergency1', document.getElementById('emergencyContact1').value.trim());
       localStorage.setItem('emergency2', document.getElementById('emergencyContact2').value.trim());
       localStorage.setItem('emergency3', document.getElementById('emergencyContact3').value.trim());
-      alert("✅ אנשי הקשר נשמרו!");
+      alert("✅ אנשי הקשר נשמרו בהצלחה!");
+      closeSettingsModal();
     };
 
     function resetAppState() {
@@ -538,12 +574,21 @@
       if (incomingChatUnsub) incomingChatUnsub();
       if (chatUnsub) chatUnsub();
       
+      sessionStorage.removeItem('activeTab');
       window.liveUsers = [];
       window.activeChatPartner = null;
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
     }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        handleUserLogin(user, !user.isAnonymous);
+      } else {
+        resetAppState();
+      }
+    });
 
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
@@ -580,9 +625,10 @@
         listenToLiveUsers();
         listenToWalkAlerts();
         listenToIncomingMessages();
-        loadEmergencyContacts();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastActiveTab = sessionStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastActiveTab);
       }).catch(() => {
         startHeartbeat();
         listenToLiveUsers();
@@ -590,7 +636,9 @@
         listenToIncomingMessages();
         loadEmergencyContacts();
         document.getElementById('bottomNav').classList.remove('hidden');
-        window.startApp('mainScreen');
+        
+        const lastActiveTab = sessionStorage.getItem('activeTab') || 'mainScreen';
+        window.startApp(lastActiveTab);
       });
     }
 
@@ -781,29 +829,37 @@
       }
     };
 
+    // SOS - בדיקת אנשי קשר + שידור בלייב
     window.triggerSOS = function() {
       const activeUser = auth.currentUser;
       const finalSenderName = window.currentUserCustomName || 'צועד';
-      
-      if (confirm("🚨 לשלוח התראת מצוקה SOS בלייב?")) {
+      const c1 = localStorage.getItem('emergency1');
+      const c2 = localStorage.getItem('emergency2');
+      const c3 = localStorage.getItem('emergency3');
+      const contacts = [c1, c2, c3].filter(c => c && c.trim() !== '');
+
+      if (contacts.length === 0) {
+        alert("⚠️ טרם הגדרת אנשי קשר לשעת חירום! מועבר לחלון ההגדרות להגדרת אנשי קשר.");
+        openSettingsModal();
+        return;
+      }
+
+      if (confirm("🚨 לשלוח התראת מצוקה SOS בלייב לאנשי הקשר ולרשת?")) {
         addDoc(collection(db, "walk_alerts"), {
           senderUid: activeUser ? activeUser.uid : 'user_' + Date.now(),
           senderName: `🚨 מצוקה (SOS): ${finalSenderName}`,
           timestamp: Date.now()
         });
 
-        const c1 = localStorage.getItem('emergency1');
-        if (c1) {
-          const mapUrl = `https://maps.google.com/?q=${window.userPos.lat},${window.userPos.lng}`;
-          window.location.href = `sms:${c1}?body=${encodeURIComponent(`🚨 מצוקה מ-${finalSenderName}! מיקום: ${mapUrl}`)}`;
-        }
+        const mapUrl = `https://maps.google.com/?q=${window.userPos.lat},${window.userPos.lng}`;
+        const sosText = encodeURIComponent(`🚨 הודעת מצוקה SOS מ-${finalSenderName}! אני זקוק/ה לעזרה בהליכה. מיקום: ${mapUrl}`);
+        window.location.href = `sms:${contacts[0]}?body=${sosText}`;
       }
     };
 
     window.openBroadcastModal = function() { document.getElementById('broadcastModal').classList.remove('hidden'); };
     window.closeBroadcastModal = function() { document.getElementById('broadcastModal').classList.add('hidden'); };
 
-    // עדכון: אפשרות יציאה פומבית (shouldBroadcast=true) או אישית בלבד (shouldBroadcast=false)
     window.confirmBroadcastWalk = function(shouldBroadcast) {
       const activeUser = auth.currentUser;
       const finalSenderName = window.currentUserCustomName || 'צועד אורח';
@@ -941,6 +997,7 @@
     let userGender = "גבר";
     let userPos = { lat: 32.835, lng: 35.076 };
     let map = null, userMarker = null;
+    let mapMarkersGroup = null;
     let liveUsers = [];
 
     function toggleAuthButtons() {
@@ -952,15 +1009,12 @@
     function openTermsModal() { document.getElementById('termsModal').classList.remove('hidden'); }
     function acceptTermsFromModal() { document.getElementById('termsCheckbox').checked = true; toggleAuthButtons(); document.getElementById('termsModal').classList.add('hidden'); }
 
-    function openAccessibilityModal() { document.getElementById('accessibilityModal').classList.remove('hidden'); }
-    function closeAccessibilityModal() { document.getElementById('accessibilityModal').classList.add('hidden'); }
     function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
-
     function openSpotifyDirect() { window.open("https://open.spotify.com", "_blank"); }
     function dismissAlertBanner() { document.getElementById('liveAlertBanner').classList.add('hidden'); }
 
     function startApp(targetScreen) {
-      userGender = document.getElementById('userGenderInput').value;
+      userGender = document.getElementById('userGenderInput') ? document.getElementById('userGenderInput').value : 'גבר';
       window.userGender = userGender;
       switchTab(targetScreen || 'mainScreen');
 
@@ -971,6 +1025,7 @@
       }, 300);
     }
 
+    // מאתחל את המפה ומגדיר קבוצת סמנים (LayerGroup) למניעת הצטברות נקודות
     function initMap() {
       try {
         if (map || typeof L === 'undefined') return;
@@ -979,6 +1034,10 @@
 
         map = L.map('map').setView([userPos.lat, userPos.lng], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        
+        // קבוצה יעודית לסמני משתמשים כדי לנקות בכל עדכון
+        mapMarkersGroup = L.layerGroup().addTo(map);
+        
         userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.8 }).addTo(map);
         map.invalidateSize();
       } catch (e) { console.log(e); }
@@ -1023,6 +1082,7 @@
       });
     }
 
+    // מציג את המשתמשים ומנקה סמנים ישנים מהמפה
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
@@ -1030,14 +1090,21 @@
       const usersToRender = window.liveUsers || [];
       listContainer.innerHTML = '';
 
+      // ניקוי סמנים קודמים מהמפה
+      if (mapMarkersGroup) {
+        mapMarkersGroup.clearLayers();
+      }
+
       if (usersToRender.length === 0) {
         listContainer.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בלייב...</p>`;
         return;
       }
 
       usersToRender.forEach(partner => {
-        if (map && partner.lat && partner.lng) {
-          L.marker([partner.lat, partner.lng]).addTo(map).bindPopup(`<b>${partner.name}</b> 🟢`);
+        if (map && mapMarkersGroup && partner.lat && partner.lng) {
+          L.marker([partner.lat, partner.lng])
+            .addTo(mapMarkersGroup)
+            .bindPopup(`<b>${partner.name}</b> 🟢`);
         }
 
         const item = document.createElement('div');
@@ -1068,6 +1135,8 @@
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function switchTab(screenId) {
+      sessionStorage.setItem('activeTab', screenId);
+
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('activeWalkersScreen').classList.add('hidden');
@@ -1105,8 +1174,6 @@
     window.toggleAuthButtons = toggleAuthButtons;
     window.openTermsModal = openTermsModal;
     window.acceptTermsFromModal = acceptTermsFromModal;
-    window.openAccessibilityModal = openAccessibilityModal;
-    window.closeAccessibilityModal = closeAccessibilityModal;
     window.toggleHighContrast = toggleHighContrast;
     window.locateUser = locateUser;
     window.updateDistVal = updateDistVal;
