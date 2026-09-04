@@ -647,7 +647,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGAQZznuLoKmq_q1qXgEsWpJZhKXCaVcg",
@@ -716,7 +716,6 @@
 
       closeSettingsModal();
 
-      // הסתרת כל המסכים והצגת מסך הכניסה בלבד
       document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
@@ -803,7 +802,8 @@
       }, 5000);
     }
 
-    window.startAppAsGuest = function() {
+    // בדיקת כפילות טלפון לפני הרשמה
+    window.startAppAsGuest = async function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון!");
         return;
@@ -823,8 +823,24 @@
         return;
       }
 
+      // בדיקה בענן האם הטלפון כבר רשום בשם אחר
+      try {
+        const q = query(collection(db, "users"), where("contactInfo", "==", cleanPhone));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          let existingDoc = querySnapshot.docs[0].data();
+          if (existingDoc.name && existingDoc.name !== nameVal) {
+            if (!confirm(`⚠️ מספר הטלפון ${cleanPhone} כבר רשום במערכת תחת השם "${existingDoc.name}". האם ברצונך לעדכן את השם ל-"${nameVal}"?`)) {
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.log("Check phone err", err);
+      }
+
       if (nameVal) localStorage.setItem('customGuestName', nameVal);
-      if (phoneVal) localStorage.setItem('customGuestPhone', phoneVal);
+      if (phoneVal) localStorage.setItem('customGuestPhone', cleanPhone);
       localStorage.setItem('appLoggedIn', 'true');
 
       signInAnonymously(auth).then((res) => handleUserLogin(res.user, false));
