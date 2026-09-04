@@ -66,7 +66,7 @@
     .btn-report { background: #64748b; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
     .btn-block { background: #f97316; color: #fff; font-size: 11px; padding: 6px; margin-top: 4px; box-shadow: none; }
     .btn-group { background: #0284c7; color: #fff; }
-    .btn-logout { background: #ef4444; color: #fff; margin-top: 15px; }
+    .btn-logout { background: #ef4444; color: #fff; margin-top: 15px; font-weight: bold; }
     .hidden { display: none !important; }
 
     .google-benefits-card {
@@ -349,13 +349,13 @@
         <div style="font-size:11px; color:#64748b;">מחפש צועדים בסביבה...</div>
       </div>
 
-      <!-- פילטור תצוגת צועדים בלבד -->
+      <!-- פילטור תצוגת צועדים מעודכן עם כפתור "החל סינון" -->
       <div class="filter-box" style="margin-top:8px;">
         <b style="color:#38bdf8; font-size:12px;">🔍 סינון צועדים המוצגים במפה:</b>
         <div class="filter-row">
           <div style="flex:1;">
             <label for="paceFilter">🏃‍♂️ קצב צועדים:</label>
-            <select id="paceFilter" onchange="renderLivePartners()">
+            <select id="paceFilter">
               <option value="all">הכל</option>
               <option value="איטי">איטי</option>
               <option value="בינוני">בינוני</option>
@@ -364,7 +364,7 @@
           </div>
           <div style="flex:1;">
             <label for="dogFilter">🐶 חיות מחמד:</label>
-            <select id="dogFilter" onchange="renderLivePartners()">
+            <select id="dogFilter">
               <option value="all">הכל</option>
               <option value="כן">עם כלב 🐶</option>
               <option value="לא">ללא כלב 🚫</option>
@@ -373,7 +373,9 @@
         </div>
 
         <label>📍 מרחק סינון מרבי: <span id="distVal">10</span> ק"מ</label>
-        <input type="range" id="distFilter" min="1" max="50" value="10" oninput="updateDistVal(); renderLivePartners(); renderLiveBar();">
+        <input type="range" id="distFilter" min="1" max="50" value="10" oninput="updateDistVal();">
+
+        <button onclick="applyPartnersFilter()" style="margin-top:8px; padding:8px; background:#0284c7; color:#fff; font-size:12px; font-weight:bold;">🔍 החל סינון צועדים</button>
       </div>
 
       <div style="display:flex; gap:5px; margin-top:4px;">
@@ -499,11 +501,9 @@
           <label for="ghostModeToggle" style="vertical-align:middle; font-weight:bold;">👻 מצב סמוי (הסתר אותי מהמפה)</label>
         </div>
       </div>
-
-      <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחלף משתמש</button>
     </div>
 
-    <!-- מודאל הגדרות ⚙️ -->
+    <!-- מודאל הגדרות ⚙️ (כולל כפתור התנתקות מועבר) -->
     <div class="modal hidden" id="settingsModal">
       <div class="modal-content">
         <h3 style="margin-top:0; color:#38bdf8;">⚙️ הגדרות האפליקציה</h3>
@@ -537,7 +537,9 @@
           <button onclick="toggleHighContrast()" style="background:#334155; color:#fff; font-size:12px; padding:8px; margin-top:6px;">🌓 מצב ניגודיות גבוהה</button>
         </div>
 
-        <button onclick="closeSettingsModal()" class="btn-secondary" style="margin-top:12px;">סגור</button>
+        <!-- כפתור התנתקות מועבר להגדרות -->
+        <button class="btn-logout" onclick="logoutUser()">🚪 התנתק והחלף משתמש</button>
+        <button onclick="closeSettingsModal()" class="btn-secondary" style="margin-top:8px;">סגור</button>
       </div>
     </div>
 
@@ -700,6 +702,7 @@
       closeSettingsModal();
     };
 
+    // איפוס תצוגה נקי בעת התנתקות
     function resetAppState() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       if (liveUnsubUsers) liveUnsubUsers();
@@ -710,8 +713,12 @@
       localStorage.removeItem('activeTab');
       window.liveUsers = [];
       window.activeChatPartner = null;
+
+      closeSettingsModal();
+
+      // הסתרת כל המסכים והצגת מסך הכניסה בלבד
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
       document.getElementById('welcomeScreen').classList.remove('hidden');
-      document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
     }
 
@@ -883,9 +890,8 @@
           }
         });
 
-        window.liveUsers = Array.from(liveUsersMap.values());
-        if (window.renderLivePartners) window.renderLivePartners();
-        if (window.renderLiveBar) window.renderLiveBar();
+        window.rawLiveUsers = Array.from(liveUsersMap.values());
+        window.applyPartnersFilter();
       });
     }
 
@@ -1241,6 +1247,7 @@
     let map = null, userMarker = null;
     let mapMarkersGroup = null;
     let liveUsers = [];
+    let rawLiveUsers = [];
     let remainingSeconds = 120 * 60;
     let usageTimerInterval = null;
 
@@ -1453,6 +1460,30 @@
       });
     }
 
+    function applyPartnersFilter() {
+      const paceVal = document.getElementById('paceFilter') ? document.getElementById('paceFilter').value : 'all';
+      const dogVal = document.getElementById('dogFilter') ? document.getElementById('dogFilter').value : 'all';
+      const maxDist = document.getElementById('distFilter') ? parseFloat(document.getElementById('distFilter').value) : 50;
+
+      const sourceList = window.rawLiveUsers || [];
+
+      window.liveUsers = sourceList.filter(u => {
+        const matchesPace = (paceVal === 'all') || (u.pace === paceVal);
+        const matchesDog = (dogVal === 'all') || (u.dog === dogVal);
+        
+        let matchesDist = true;
+        if (u.lat && u.lng && window.userPos) {
+          const distKm = calculateDistanceMeters(window.userPos.lat, window.userPos.lng, u.lat, u.lng) / 1000;
+          matchesDist = distKm <= maxDist;
+        }
+
+        return matchesPace && matchesDog && matchesDist;
+      });
+
+      renderLivePartners();
+      renderLiveBar();
+    }
+
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
@@ -1465,7 +1496,7 @@
       }
 
       if (usersToRender.length === 0) {
-        listContainer.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:10px;">מחפש צועדים נוספים בסביבה בלייב...</p>`;
+        listContainer.innerHTML = `<p style="text-align:center; color:#64748b; font-size:12px; margin-top:10px;">אין צועדים בסביבה התואמים את הסינון הנבחר.</p>`;
         return;
       }
 
@@ -1525,14 +1556,7 @@
     function switchTab(screenId) {
       localStorage.setItem('activeTab', screenId);
 
-      document.getElementById('welcomeScreen').classList.add('hidden');
-      document.getElementById('mainScreen').classList.add('hidden');
-      document.getElementById('activeWalkersScreen').classList.add('hidden');
-      document.getElementById('groupsScreen').classList.add('hidden');
-      document.getElementById('favScreen').classList.add('hidden');
-      document.getElementById('profileScreen').classList.add('hidden');
-      document.getElementById('chatScreen').classList.add('hidden');
-      
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
       document.getElementById(screenId).classList.remove('hidden');
 
       document.getElementById('navMap').classList.remove('active');
@@ -1558,6 +1582,7 @@
     window.switchTab = switchTab;
     window.renderLiveBar = renderLiveBar;
     window.renderLivePartners = renderLivePartners;
+    window.applyPartnersFilter = applyPartnersFilter;
     window.openChatWithUser = openChatWithUser;
     window.toggleAuthButtons = toggleAuthButtons;
     window.openTermsModal = openTermsModal;
