@@ -61,7 +61,6 @@
     .btn-logout { background: #ef4444; color: #fff; margin-top: 15px; }
     .hidden { display: none !important; }
 
-    /* כפתור SOS קטן עגול בצד ימין */
     .btn-sos-circle {
       position: absolute;
       top: 12px;
@@ -84,7 +83,6 @@
       margin: 0;
     }
 
-    /* כפתור הגדרות ⚙️ בצד שמאל */
     .btn-settings-circle {
       position: absolute;
       top: 12px;
@@ -106,7 +104,6 @@
       margin: 0;
     }
 
-    /* דשבורד ספורטיבי */
     .sport-dashboard {
       background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
       border-radius: 16px;
@@ -208,7 +205,7 @@
 
   <div class="app-container">
 
-    <!-- מסך פתיחה -->
+    <!-- מסך פתיחה (יוצג תמיד כברירת מחדל) -->
     <div class="screen" id="welcomeScreen">
       <div style="text-align: center; margin-top: 20px;">
         <h1 style="font-size: 28px; color: #22c55e;">🚶‍♂️ OK, Let's Go!</h1>
@@ -254,7 +251,6 @@
 
     <!-- מסך ראשי -->
     <div class="screen hidden" id="mainScreen">
-      <!-- כפתור SOS מימין, הגדרות משמאל -->
       <button class="btn-sos-circle" title="לחצן מצוקה חירום (SOS)" onclick="triggerSOS()">SOS</button>
       <button class="btn-settings-circle" title="הגדרות האפליקציה" onclick="openSettingsModal()">⚙️</button>
 
@@ -518,7 +514,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -574,21 +570,12 @@
       if (incomingChatUnsub) incomingChatUnsub();
       if (chatUnsub) chatUnsub();
       
-      sessionStorage.removeItem('activeTab');
       window.liveUsers = [];
       window.activeChatPartner = null;
       document.getElementById('welcomeScreen').classList.remove('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('bottomNav').classList.add('hidden');
     }
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        handleUserLogin(user, !user.isAnonymous);
-      } else {
-        resetAppState();
-      }
-    });
 
     function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
@@ -626,19 +613,14 @@
         listenToWalkAlerts();
         listenToIncomingMessages();
         document.getElementById('bottomNav').classList.remove('hidden');
-        
-        const lastActiveTab = sessionStorage.getItem('activeTab') || 'mainScreen';
-        window.startApp(lastActiveTab);
+        window.startApp('mainScreen');
       }).catch(() => {
         startHeartbeat();
         listenToLiveUsers();
         listenToWalkAlerts();
         listenToIncomingMessages();
-        loadEmergencyContacts();
         document.getElementById('bottomNav').classList.remove('hidden');
-        
-        const lastActiveTab = sessionStorage.getItem('activeTab') || 'mainScreen';
-        window.startApp(lastActiveTab);
+        window.startApp('mainScreen');
       });
     }
 
@@ -829,7 +811,6 @@
       }
     };
 
-    // SOS - בדיקת אנשי קשר + שידור בלייב
     window.triggerSOS = function() {
       const activeUser = auth.currentUser;
       const finalSenderName = window.currentUserCustomName || 'צועד';
@@ -1025,7 +1006,6 @@
       }, 300);
     }
 
-    // מאתחל את המפה ומגדיר קבוצת סמנים (LayerGroup) למניעת הצטברות נקודות
     function initMap() {
       try {
         if (map || typeof L === 'undefined') return;
@@ -1035,9 +1015,7 @@
         map = L.map('map').setView([userPos.lat, userPos.lng], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         
-        // קבוצה יעודית לסמני משתמשים כדי לנקות בכל עדכון
         mapMarkersGroup = L.layerGroup().addTo(map);
-        
         userMarker = L.circleMarker([userPos.lat, userPos.lng], { radius: 9, color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.8 }).addTo(map);
         map.invalidateSize();
       } catch (e) { console.log(e); }
@@ -1082,7 +1060,6 @@
       });
     }
 
-    // מציג את המשתמשים ומנקה סמנים ישנים מהמפה
     function renderLivePartners() {
       const listContainer = document.getElementById('partnersList');
       if (!listContainer) return;
@@ -1090,7 +1067,6 @@
       const usersToRender = window.liveUsers || [];
       listContainer.innerHTML = '';
 
-      // ניקוי סמנים קודמים מהמפה
       if (mapMarkersGroup) {
         mapMarkersGroup.clearLayers();
       }
@@ -1135,8 +1111,6 @@
     function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
 
     function switchTab(screenId) {
-      sessionStorage.setItem('activeTab', screenId);
-
       document.getElementById('welcomeScreen').classList.add('hidden');
       document.getElementById('mainScreen').classList.add('hidden');
       document.getElementById('activeWalkersScreen').classList.add('hidden');
