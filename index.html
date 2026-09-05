@@ -974,7 +974,7 @@
       });
     }
 
-    // פונקציית פרסום עמידה
+    // פונקציית פרסום צעידה מתוכננת
     window.submitScheduledWalk = function() {
       const time = document.getElementById('scheduleTimeInput').value.trim();
       const loc = document.getElementById('scheduleLocInput').value.trim();
@@ -999,7 +999,7 @@
         closeScheduleWalkModal();
       }).catch(err => {
         console.error("Schedule walk error:", err);
-        alert("⚠️ השמירה בענן נחסמה בגלל חוקי גישה. אנא קרא את ההנחיות לתיקון ב-Firebase.");
+        alert("⚠️ השמירה בענן נחסמה בגלל חוקי גישה. אנא ודא שהחוקים ב-Firebase מעודכנים.");
       });
     };
 
@@ -1016,8 +1016,10 @@
         if (groups.length === 0) {
           groupsList.innerHTML = `
             <div class="partner-item">
-              <b>👟 קבוצת הליכת בוקר שכונתית</b><br>
-              <span style="color:#94a3b8;">ימים א'-ה' בשעה 07:00 | בפארק המרכזי</span>
+              <div>
+                <b>👟 קבוצת הליכת בוקר שכונתית</b><br>
+                <span style="color:#94a3b8;">ימים א'-ה' בשעה 07:00 | בפארק המרכזי</span>
+              </div>
             </div>
           `;
           return;
@@ -1043,7 +1045,7 @@
     window.openCreateGroupModal = function() { document.getElementById('createGroupModal').classList.remove('hidden'); };
     window.closeCreateGroupModal = function() { document.getElementById('createGroupModal').classList.add('hidden'); };
 
-    // פונקציית יצירת קבוצה עמידה
+    // פונקציית יצירת קבוצה
     window.submitCreateGroup = function() {
       const gName = document.getElementById('groupNameInput').value.trim();
       const gSchedule = document.getElementById('groupScheduleInput').value.trim();
@@ -1070,7 +1072,7 @@
         closeCreateGroupModal();
       }).catch(err => {
         console.error("Create group error:", err);
-        alert("⚠️ השמירה בענן נחסמה בגלל חוקי גישה. אנא קרא את ההנחיות לתיקון ב-Firebase.");
+        alert("⚠️ השמירה בענן נחסמה בגלל חוקי גישה. אנא ודא שהחוקים ב-Firebase מעודכנים.");
       });
     };
 
