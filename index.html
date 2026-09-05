@@ -1504,6 +1504,8 @@
     let isWalkActive = false;
     let geoWatchId = null;
     let lastPosition = null;
+    let wakeLock = null;
+    let keepAliveInterval = null;
 
     // מרחק בהליכה הנוכחית בלבד
     let currentWalkDistanceMeters = 0;
@@ -1583,7 +1585,6 @@
     }
 
     function updateDashboardDisplay() {
-      // מקדם המרה מדויק של 1.35 צעדים למטר (בממוצע פסיעה אנושית תקנית)
       const currentSteps = Math.round((currentWalkDistanceMeters / 1000) * 1350);
       const currentCal = Math.floor((currentWalkDistanceMeters / 1000) * 60);
 
@@ -1668,10 +1669,37 @@
       return R * c;
     }
 
+    // מנגנון שמירת מסך ורכיבים פתוחים ברקע (Keep Alive)
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log('Wake Lock Error:', err);
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release().then(() => { wakeLock = null; });
+      }
+    }
+
     function startWalkTracking() {
       isWalkActive = true;
       lastPosition = null;
       currentWalkDistanceMeters = 0;
+
+      requestWakeLock();
+
+      // הפעלת פעימת רקע כל 10 שניות למניעת הקפאת ה-GPS ע"י מערכת ההפעלה
+      if (keepAliveInterval) clearInterval(keepAliveInterval);
+      keepAliveInterval = setInterval(() => {
+        if (isWalkActive && navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(()=>{}, ()=>{}, { enableHighAccuracy: true, maximumAge: 0 });
+        }
+      }, 10000);
 
       const btn = document.getElementById('startWalkCircleBtn');
       const mainTxt = document.getElementById('walkBtnTextMain');
@@ -1694,7 +1722,6 @@
             const timeDiffSec = (timestamp - lastPosition.timestamp) / 1000;
             const speedKmh = timeDiffSec > 0 ? (distMeters / timeDiffSec) * 3.6 : 0;
 
-            // סינון עדין ומדויק: ספור צעדים החל מ-2 מטרים של התקדמות
             if (distMeters >= 2 && speedKmh <= 15) {
               currentWalkDistanceMeters += distMeters;
               window.totalDistanceMeters += distMeters;
@@ -1706,12 +1733,19 @@
           } else {
             lastPosition = { lat, lng, timestamp };
           }
-        }, (err) => console.log(err), { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+        }, (err) => console.log(err), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
       }
     }
 
     function stopWalkTracking() {
       isWalkActive = false;
+      releaseWakeLock();
+
+      if (keepAliveInterval) {
+        clearInterval(keepAliveInterval);
+        keepAliveInterval = null;
+      }
+
       if (geoWatchId !== null && navigator.geolocation) {
         navigator.geolocation.clearWatch(geoWatchId);
         geoWatchId = null;
