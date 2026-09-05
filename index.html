@@ -807,6 +807,7 @@
       }, 5000);
     }
 
+    // בדיקת כפילות טלפון קשיחה והרמטית
     window.startAppAsGuest = async function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון!");
@@ -968,10 +969,12 @@
           item.innerHTML = `<b>👟 ${s.userName}:</b> ${s.timeText} ב-${s.locationText}`;
           list.appendChild(item);
         });
+      }, (error) => {
+        console.error("Scheduled walks error:", error);
       });
     }
 
-    // פונקציית פרסום בלוח הצעידות המתוכננות (מתוקנת לחלוטין גם לאורחים)
+    // פונקציית פרסום עמידה
     window.submitScheduledWalk = function() {
       const time = document.getElementById('scheduleTimeInput').value.trim();
       const loc = document.getElementById('scheduleLocInput').value.trim();
@@ -982,8 +985,8 @@
         return;
       }
 
-      const activeName = window.currentUserCustomName || 'צועד אורח';
-      const activeUid = activeUser ? activeUser.uid : 'anon_' + Date.now();
+      const activeName = window.currentUserCustomName || localStorage.getItem('customGuestName') || 'צועד אורח';
+      const activeUid = activeUser ? activeUser.uid : ('guest_' + Date.now());
 
       addDoc(collection(db, "scheduled_walks"), {
         senderUid: activeUid,
@@ -992,15 +995,14 @@
         locationText: loc,
         timestamp: Date.now()
       }).then(() => {
-        alert("📢 הצעידה המתוכננת פורסמה בהצלחה בלוח השכונתי בענן!");
+        alert("📢 הצעידה המתוכננת פורסמה בהצלחה בלוח השכונתי!");
         closeScheduleWalkModal();
       }).catch(err => {
         console.error("Schedule walk error:", err);
-        alert("❌ שגיאה בפרסום. נסה שוב.");
+        alert("⚠️ השמירה בענן נחסמה בגלל חוקי גישה. אנא קרא את ההנחיות לתיקון ב-Firebase.");
       });
     };
 
-    // הקשבה וטעינה בזמן אמת של קבוצות הליכה
     function listenToGroups() {
       onSnapshot(collection(db, "walking_groups"), (snapshot) => {
         const groupsList = document.getElementById('groupsList');
@@ -1033,13 +1035,15 @@
           `;
           groupsList.appendChild(item);
         });
+      }, (error) => {
+        console.error("Groups snapshot error:", error);
       });
     }
 
     window.openCreateGroupModal = function() { document.getElementById('createGroupModal').classList.remove('hidden'); };
     window.closeCreateGroupModal = function() { document.getElementById('createGroupModal').classList.add('hidden'); };
 
-    // יצירת קבוצת הליכה חדשה בענן
+    // פונקציית יצירת קבוצה עמידה
     window.submitCreateGroup = function() {
       const gName = document.getElementById('groupNameInput').value.trim();
       const gSchedule = document.getElementById('groupScheduleInput').value.trim();
@@ -1051,8 +1055,8 @@
         return;
       }
 
-      const activeName = window.currentUserCustomName || 'צועד אורח';
-      const activeUid = activeUser ? activeUser.uid : 'anon_' + Date.now();
+      const activeName = window.currentUserCustomName || localStorage.getItem('customGuestName') || 'צועד אורח';
+      const activeUid = activeUser ? activeUser.uid : ('guest_' + Date.now());
 
       addDoc(collection(db, "walking_groups"), {
         creatorUid: activeUid,
@@ -1066,7 +1070,7 @@
         closeCreateGroupModal();
       }).catch(err => {
         console.error("Create group error:", err);
-        alert("❌ שגיאה בפתיחת הקבוצה. נסה שוב.");
+        alert("⚠️ השמירה בענן נחסמה בגלל חוקי גישה. אנא קרא את ההנחיות לתיקון ב-Firebase.");
       });
     };
 
