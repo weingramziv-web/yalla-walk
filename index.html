@@ -1687,20 +1687,26 @@
         geoWatchId = navigator.geolocation.watchPosition((pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
+          const timestamp = pos.timestamp || Date.now();
 
           if (lastPosition) {
             const distMeters = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
+            const timeDiffSec = (timestamp - lastPosition.timestamp) / 1000;
             
-            if (distMeters > 3) {
+            // חישוב מהירות במטרים לשנייה (המרת קמ"ש)
+            const speedKmh = timeDiffSec > 0 ? (distMeters / timeDiffSec) * 3.6 : 0;
+
+            // פילטר הדוק: ספור צעדים רק אם המרחק גדול מ-8 מטרים והמהירות בין 1.5 ל-15 קמ"ש (הליכה/ריצה הגיונית)
+            if (distMeters >= 8 && speedKmh >= 1.5 && speedKmh <= 15) {
               currentWalkDistanceMeters += distMeters;
               window.totalDistanceMeters += distMeters;
               localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
               
               updateDashboardDisplay();
-              lastPosition = { lat, lng };
+              lastPosition = { lat, lng, timestamp };
             }
           } else {
-            lastPosition = { lat, lng };
+            lastPosition = { lat, lng, timestamp };
           }
         }, (err) => console.log(err), { enableHighAccuracy: true });
       }
