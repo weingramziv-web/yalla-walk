@@ -153,22 +153,6 @@
       box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
     }
 
-    .progress-bar-container {
-      width: 100%;
-      background: #0b1329;
-      border-radius: 10px;
-      height: 12px;
-      overflow: hidden;
-      margin-top: 8px;
-      border: 1px solid #1e293b;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #38bdf8, #22c55e);
-      width: 0%;
-      transition: width 0.4s ease;
-    }
-
     .start-walk-btn-circle {
       width: 130px;
       height: 130px;
@@ -342,17 +326,6 @@
         <span style="font-size:11px; color:#f59e0b; font-weight:bold;" id="usageTimerDisplay">⏱️ 120:00</span>
       </div>
 
-      <!-- מד התקדמות יעד שבועי אישי -->
-      <div style="background: linear-gradient(135deg, #0284c7, #0b1329); border-radius:12px; padding:10px 12px; margin-bottom:10px; font-size:11px; border:1px solid #38bdf8; cursor:pointer;" onclick="promptWeeklyGoalChange()" title="לחץ לשינוי היעד השבועי">
-        <div style="display:flex; justify-content:space-between; font-weight:bold;">
-          <span>🎯 יעד הליכה שבועי אישי: <b style="color:#22c55e;" id="weeklyGoalText">0 / 15 ק"מ</b> <span style="font-size:10px; color:#cbd5e1;">(לחץ לשינוי ✏️)</span></span>
-          <span style="color:#38bdf8;" id="weeklyGoalPercent">0%</span>
-        </div>
-        <div class="progress-bar-container">
-          <div class="progress-bar-fill" id="weeklyProgressBar"></div>
-        </div>
-      </div>
-
       <div class="sport-dashboard">
         <div class="start-walk-btn-circle" id="startWalkCircleBtn" onclick="handleWalkBtnClick()">
           <span id="walkBtnTextMain">START</span>
@@ -370,9 +343,10 @@
           </div>
         </div>
 
-        <!-- גרף הישגים שבועי Chart.js -->
-        <div style="width:100%; margin-top:12px; background:#0b1329; padding:8px; border-radius:10px; border:1px solid #1e293b;">
-          <div style="font-size:10px; color:#38bdf8; font-weight:bold; margin-bottom:4px; text-align:center;">📊 הישגי הליכה שבועיים (ק"מ):</div>
+        <!-- גרף הישגים שבועי במספר צעדים עם תאריכים דינמיים -->
+        <div style="width:100%; margin-top:12px; background:#0b1329; padding:10px; border-radius:10px; border:1px solid #1e293b;">
+          <div style="font-size:11px; color:#38bdf8; font-weight:bold; margin-bottom:2px; text-align:center;">📊 הישגי הליכה שבועיים (מספר צעדים):</div>
+          <div style="font-size:10px; color:#94a3b8; text-align:center; margin-bottom:6px;" id="currentWeekDatesDisplay">תאריכי השבוע: מחשב...</div>
           <canvas id="weeklyChart" style="max-height:120px;"></canvas>
         </div>
       </div>
@@ -454,7 +428,7 @@
         <div id="scheduledWalksList">
           <div style="font-size:11px; color:#64748b; text-align:center;">טוען צעידות מתוכננות...</div>
         </div>
-        <button style="padding:6px; font-size:11px; background:#eab308; color:#0f172a; margin-top:6px; font-weight:bold;" onclick="openScheduleWalkModal()">➕ פרסם צעידה מתוכננת מראש</button>
+        <button style="padding:6px; font-size:11px; background:#eab308; color:#0b1329; margin-top:6px; font-weight:bold;" onclick="openScheduleWalkModal()">➕ פרסם צעידה מתוכננת מראש</button>
       </div>
 
       <p style="font-weight:bold; margin-top:8px;">התראות יציאה לדרך ב-24 השעות האחרונות:</p>
@@ -542,11 +516,6 @@
           <span class="badge-chip">🏃‍♂️ קצב מצוין</span>
           <span class="badge-chip">🤝 פרטנר/ית אדיב/ה</span>
         </div>
-      </div>
-
-      <div class="filter-box" style="margin-bottom:10px;">
-        <b style="color:#38bdf8;">🎯 הגדרת יעד שבועי (ק"מ):</b>
-        <input type="number" id="weeklyGoalInput" value="15" min="1" max="100" style="margin-top:4px;" onchange="updateWeeklyGoal(this.value)">
       </div>
 
       <div class="filter-box" style="margin-bottom:10px;">
@@ -1029,7 +998,6 @@
               textSpan.innerHTML = `💬 <b>${msg.senderName}:</b> "${msg.text}"`;
               banner.classList.remove('hidden');
 
-              // שליחת התראת דפדפן (Browser Push Notification)
               if (Notification.permission === "granted") {
                 new Notification(`💬 הודעה חדשה מ-${msg.senderName}`, {
                   body: msg.text,
@@ -1568,7 +1536,31 @@
       }
     }
 
+    // פונקציית חישוב דינמית לתאריכי ראשון-שבת של השבוע הנוכחי
+    function updateCurrentWeekDatesText() {
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 = ראשון
+      
+      const sunday = new Date(now);
+      sunday.setDate(now.getDate() - currentDay);
+
+      const saturday = new Date(sunday);
+      saturday.setDate(sunday.getDate() + 6);
+
+      const formatDate = (d) => {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        return `${day}.${month}`;
+      };
+
+      const dateStr = `תאריכי השבוע: ${formatDate(sunday)} - ${formatDate(saturday)}`;
+      const el = document.getElementById('currentWeekDatesDisplay');
+      if (el) el.innerText = dateStr;
+    }
+
     function initWeeklyChart() {
+      updateCurrentWeekDatesText();
+
       const ctx = document.getElementById('weeklyChart');
       if (!ctx) return;
 
@@ -1576,15 +1568,16 @@
         weeklyChartInstance.destroy();
       }
 
-      const currentKm = (totalDistanceMeters / 1000).toFixed(1);
+      // חישוב צעדים לפי ממוצע (~1300 צעדים לקילומטר)
+      const currentSteps = Math.round((totalDistanceMeters / 1000) * 1300);
 
       weeklyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ש\''],
           datasets: [{
-            label: 'ק"מ',
-            data: [2.1, 3.5, 1.8, 4.0, 2.9, 0.0, currentKm],
+            label: 'צעדים',
+            data: [2800, 4500, 2300, 5200, 3800, 1200, currentSteps],
             backgroundColor: '#38bdf8',
             borderRadius: 6
           }]
@@ -1598,40 +1591,6 @@
           }
         }
       });
-    }
-
-    function updateWeeklyGoalProgress() {
-      const goalKm = parseFloat(localStorage.getItem('weeklyGoalKm') || '15');
-      const currentKm = totalDistanceMeters / 1000;
-      const percent = Math.min(100, Math.round((currentKm / goalKm) * 100));
-
-      const goalTxt = document.getElementById('weeklyGoalText');
-      const percentTxt = document.getElementById('weeklyGoalPercent');
-      const barFill = document.getElementById('weeklyProgressBar');
-      const inputEl = document.getElementById('weeklyGoalInput');
-
-      if (goalTxt) goalTxt.innerText = `${currentKm.toFixed(1)} / ${goalKm} ק"מ`;
-      if (percentTxt) percentTxt.innerText = `${percent}%`;
-      if (barFill) barFill.style.width = `${percent}%`;
-      if (inputEl) inputEl.value = goalKm;
-
-      initWeeklyChart();
-    }
-
-    function updateWeeklyGoal(val) {
-      const num = parseFloat(val);
-      if (num && num > 0) {
-        localStorage.setItem('weeklyGoalKm', num.toString());
-        updateWeeklyGoalProgress();
-      }
-    }
-
-    function promptWeeklyGoalChange() {
-      const currentGoal = localStorage.getItem('weeklyGoalKm') || '15';
-      const newGoal = prompt("הזן את יעד ההליכה השבועי שלך (בקילומטרים):", currentGoal);
-      if (newGoal !== null) {
-        updateWeeklyGoal(newGoal);
-      }
     }
 
     function startUsageTimer() {
@@ -1704,7 +1663,7 @@
               if (kmEl) kmEl.innerText = km;
               if (calEl) calEl.innerText = cal;
 
-              updateWeeklyGoalProgress();
+              initWeeklyChart();
               lastPosition = { lat, lng };
             }
           } else {
@@ -1738,7 +1697,7 @@
       switchTab(targetScreen || 'mainScreen');
       
       startUsageTimer();
-      updateWeeklyGoalProgress();
+      initWeeklyChart();
 
       setTimeout(() => { 
         initMap();
@@ -1942,8 +1901,6 @@
     window.closeVouchModal = closeVouchModal;
     window.acceptChatRequest = acceptChatRequest;
     window.declineChatRequest = declineChatRequest;
-    window.updateWeeklyGoal = updateWeeklyGoal;
-    window.promptWeeklyGoalChange = promptWeeklyGoalChange;
     window.requestNotificationPermission = requestNotificationPermission;
   </script>
 </body>
