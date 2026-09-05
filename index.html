@@ -335,7 +335,7 @@
         <div class="sport-grid">
           <div class="sport-stat-card">
             <div class="sport-stat-val" id="stepsDisplay">0</div>
-            <div class="sport-stat-lbl">מספר צעדים</div>
+            <div class="sport-stat-lbl">מספר צעדים בהליכה זו</div>
           </div>
           <div class="sport-stat-card">
             <div class="sport-stat-val" id="calDisplay">0</div>
@@ -345,7 +345,7 @@
 
         <!-- גרף הישגים שבועי במספר צעדים -->
         <div style="width:100%; margin-top:12px; background:#0b1329; padding:10px; border-radius:10px; border:1px solid #1e293b;">
-          <div style="font-size:11px; color:#38bdf8; font-weight:bold; margin-bottom:2px; text-align:center;">📊 הישגי הליכה שבועיים (מספר צעדים):</div>
+          <div style="font-size:11px; color:#38bdf8; font-weight:bold; margin-bottom:2px; text-align:center;">📊 הישגי הליכה שבועיים מצטברים (מספר צעדים):</div>
           <div style="font-size:10px; color:#94a3b8; text-align:center; margin-bottom:6px;" id="currentWeekDatesDisplay">תאריכי השבוע: מחשב...</div>
           <canvas id="weeklyChart" style="max-height:120px;"></canvas>
         </div>
@@ -1504,6 +1504,10 @@
     let isWalkActive = false;
     let geoWatchId = null;
     let lastPosition = null;
+
+    // מרחק בהליכה הנוכחית בלבד
+    let currentWalkDistanceMeters = 0;
+    // סך הכל מרחק מצטבר שנשמר בזיכרון עבור הגרף
     let totalDistanceMeters = parseFloat(localStorage.getItem('userTotalMeters') || '0');
     window.totalDistanceMeters = totalDistanceMeters;
 
@@ -1579,14 +1583,15 @@
     }
 
     function updateDashboardDisplay() {
-      const steps = Math.round((window.totalDistanceMeters / 1000) * 1300);
-      const cal = Math.floor((window.totalDistanceMeters / 1000) * 60);
+      // חישוב מדדים עבור ההליכה הנוכחית
+      const currentSteps = Math.round((currentWalkDistanceMeters / 1000) * 1300);
+      const currentCal = Math.floor((currentWalkDistanceMeters / 1000) * 60);
 
       const stepsEl = document.getElementById('stepsDisplay');
       const calEl = document.getElementById('calDisplay');
       
-      if (stepsEl) stepsEl.innerText = steps.toLocaleString();
-      if (calEl) calEl.innerText = cal.toLocaleString();
+      if (stepsEl) stepsEl.innerText = currentSteps.toLocaleString();
+      if (calEl) calEl.innerText = currentCal.toLocaleString();
 
       initWeeklyChart();
     }
@@ -1601,7 +1606,7 @@
         weeklyChartInstance.destroy();
       }
 
-      const currentSteps = Math.round((window.totalDistanceMeters / 1000) * 1300);
+      const totalStepsAccumulated = Math.round((window.totalDistanceMeters / 1000) * 1300);
 
       weeklyChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -1609,7 +1614,7 @@
           labels: ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ש\''],
           datasets: [{
             label: 'צעדים',
-            data: [2800, 4500, 2300, 5200, 3800, 1200, currentSteps],
+            data: [2800, 4500, 2300, 5200, 3800, 1200, totalStepsAccumulated],
             backgroundColor: '#38bdf8',
             borderRadius: 6
           }]
@@ -1666,6 +1671,7 @@
     function startWalkTracking() {
       isWalkActive = true;
       lastPosition = null;
+      currentWalkDistanceMeters = 0; // איפוס תחילת הליכה חדשה
 
       const btn = document.getElementById('startWalkCircleBtn');
       const mainTxt = document.getElementById('walkBtnTextMain');
@@ -1674,6 +1680,8 @@
       if (btn) btn.classList.add('active-walk');
       if (mainTxt) mainTxt.innerText = 'STOP';
       if (subTxt) subTxt.innerText = 'WALK';
+
+      updateDashboardDisplay();
 
       if (navigator.geolocation) {
         geoWatchId = navigator.geolocation.watchPosition((pos) => {
@@ -1684,6 +1692,7 @@
             const distMeters = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
             
             if (distMeters > 3) {
+              currentWalkDistanceMeters += distMeters;
               window.totalDistanceMeters += distMeters;
               localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
               
@@ -1712,10 +1721,14 @@
       if (mainTxt) mainTxt.innerText = 'START';
       if (subTxt) subTxt.innerText = 'WALK';
 
-      const steps = Math.round((window.totalDistanceMeters / 1000) * 1300);
-      const cal = Math.floor((window.totalDistanceMeters / 1000) * 60);
+      const lastSteps = Math.round((currentWalkDistanceMeters / 1000) * 1300);
+      const lastCal = Math.floor((currentWalkDistanceMeters / 1000) * 60);
 
-      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת: ${steps.toLocaleString()} צעדים\nשרפת: ${cal.toLocaleString()} קלוריות🔥`);
+      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת בהליכה זו: ${lastSteps.toLocaleString()} צעדים\nשרפת: ${lastCal.toLocaleString()} קלוריות🔥`);
+
+      // איפוס הנתונים של ההליכה הנוכחית עבור ההליכה הבאה
+      currentWalkDistanceMeters = 0;
+      updateDashboardDisplay();
     }
 
     function startApp(targetScreen) {
