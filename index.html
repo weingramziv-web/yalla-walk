@@ -1504,7 +1504,6 @@
     let isWalkActive = false;
     let geoWatchId = null;
     let lastPosition = null;
-    let walkStartTime = 0;
 
     // מרחק בהליכה הנוכחית בלבד
     let currentWalkDistanceMeters = 0;
@@ -1584,9 +1583,9 @@
     }
 
     function updateDashboardDisplay() {
-      // מקדם המרה מדויק של 1.18 צעדים למטר (במקום 1.3)
-      const currentSteps = Math.round((currentWalkDistanceMeters / 1000) * 1180);
-      const currentCal = Math.floor((currentWalkDistanceMeters / 1000) * 55);
+      // מקדם המרה מדויק של 1.35 צעדים למטר (בממוצע פסיעה אנושית תקנית)
+      const currentSteps = Math.round((currentWalkDistanceMeters / 1000) * 1350);
+      const currentCal = Math.floor((currentWalkDistanceMeters / 1000) * 60);
 
       const stepsEl = document.getElementById('stepsDisplay');
       const calEl = document.getElementById('calDisplay');
@@ -1607,7 +1606,7 @@
         weeklyChartInstance.destroy();
       }
 
-      const totalStepsAccumulated = Math.round((window.totalDistanceMeters / 1000) * 1180);
+      const totalStepsAccumulated = Math.round((window.totalDistanceMeters / 1000) * 1350);
 
       weeklyChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -1673,7 +1672,6 @@
       isWalkActive = true;
       lastPosition = null;
       currentWalkDistanceMeters = 0;
-      walkStartTime = Date.now();
 
       const btn = document.getElementById('startWalkCircleBtn');
       const mainTxt = document.getElementById('walkBtnTextMain');
@@ -1691,18 +1689,13 @@
           const lng = pos.coords.longitude;
           const timestamp = pos.timestamp || Date.now();
 
-          // להתעלם מ-3 השניות הראשונות להתייצבות הלוויין
-          if (timestamp - walkStartTime < 3000) {
-            lastPosition = { lat, lng, timestamp };
-            return;
-          }
-
           if (lastPosition) {
             const distMeters = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
             const timeDiffSec = (timestamp - lastPosition.timestamp) / 1000;
             const speedKmh = timeDiffSec > 0 ? (distMeters / timeDiffSec) * 3.6 : 0;
 
-            if (distMeters >= 5 && speedKmh >= 1.2 && speedKmh <= 15) {
+            // סינון עדין ומדויק: ספור צעדים החל מ-2 מטרים של התקדמות
+            if (distMeters >= 2 && speedKmh <= 15) {
               currentWalkDistanceMeters += distMeters;
               window.totalDistanceMeters += distMeters;
               localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
@@ -1713,7 +1706,7 @@
           } else {
             lastPosition = { lat, lng, timestamp };
           }
-        }, (err) => console.log(err), { enableHighAccuracy: true });
+        }, (err) => console.log(err), { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
       }
     }
 
@@ -1732,8 +1725,8 @@
       if (mainTxt) mainTxt.innerText = 'START';
       if (subTxt) subTxt.innerText = 'WALK';
 
-      const lastSteps = Math.round((currentWalkDistanceMeters / 1000) * 1180);
-      const lastCal = Math.floor((currentWalkDistanceMeters / 1000) * 55);
+      const lastSteps = Math.round((currentWalkDistanceMeters / 1000) * 1350);
+      const lastCal = Math.floor((currentWalkDistanceMeters / 1000) * 60);
 
       alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת בהליכה זו: ${lastSteps.toLocaleString()} צעדים\nשרפת: ${lastCal.toLocaleString()} קלוריות🔥`);
 
