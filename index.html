@@ -554,6 +554,27 @@
       </div>
     </div>
 
+    <!-- מודאל תצוגת פרטי קבוצה -->
+    <div class="modal hidden" id="groupDetailsModal">
+      <div class="modal-content">
+        <h3 style="margin-top:0; color:#38bdf8;" id="detailsGroupTitle">📌 פרטי קבוצה</h3>
+        
+        <div style="background:#0f172a; padding:12px; border-radius:10px; border:1px solid #334155; margin-bottom:10px; font-size:12px;">
+          <div><b>👤 יוצר/ת הקבוצה:</b> <span id="detailsGroupCreator" style="color:#cbd5e1;">-</span></div>
+          <div style="margin-top:4px;"><b>📅 מועדים:</b> <span id="detailsGroupSchedule" style="color:#cbd5e1;">-</span></div>
+          <div style="margin-top:4px;"><b>📍 נקודת מפגש:</b> <span id="detailsGroupLocation" style="color:#cbd5e1;">-</span></div>
+        </div>
+
+        <b style="display:block; margin-top:10px; color:#eab308; font-size:12px;">👥 חברי הקבוצה שהצטרפו:</b>
+        <div id="detailsGroupMembersList" style="margin-top:6px; max-height:150px; overflow-y:auto; background:#0f172a; padding:8px; border-radius:8px; border:1px solid #334155; font-size:11px;">
+          <div style="color:#64748b;">אין חברים רשומים עדיין.</div>
+        </div>
+
+        <button id="modalJoinGroupBtn" style="margin-top:12px; background:#0284c7; color:#fff; font-weight:bold;">הצטרף לקבוצה 🚀</button>
+        <button onclick="closeGroupDetailsModal()" class="btn-secondary" style="margin-top:6px;">סגור</button>
+      </div>
+    </div>
+
     <!-- מודאל הענקת תג הערכה חיובי -->
     <div class="modal hidden" id="vouchModal">
       <div class="modal-content">
@@ -658,7 +679,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, collectionGroup, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, updateDoc, arrayUnion, collectionGroup, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGAQZznuLoKmq_q1qXgEsWpJZhKXCaVcg",
@@ -807,7 +828,6 @@
       }, 5000);
     }
 
-    // בדיקת כפילות טלפון קשיחה והרמטית
     window.startAppAsGuest = async function() {
       if (!document.getElementById('termsCheckbox').checked) {
         alert("⚠️ חובה לאשר את התקנון!");
@@ -974,7 +994,6 @@
       });
     }
 
-    // פונקציית פרסום צעידה מתוכננת
     window.submitScheduledWalk = function() {
       const time = document.getElementById('scheduleTimeInput').value.trim();
       const loc = document.getElementById('scheduleLocInput').value.trim();
@@ -1017,8 +1036,8 @@
           groupsList.innerHTML = `
             <div class="partner-item">
               <div>
-                <b>👟 קבוצת הליכת בוקר שכונתית</b><br>
-                <span style="color:#94a3b8;">ימים א'-ה' בשעה 07:00 | בפארק המרכזי</span>
+                <b>👟 קבוצת עוזי חיטמן</b><br>
+                <span style="color:#94a3b8;">📅 ימי ראשון | 📍 עוזי חיטמן (נוצרה ע"י עמית)</span>
               </div>
             </div>
           `;
@@ -1028,12 +1047,17 @@
         groups.forEach(g => {
           const item = document.createElement('div');
           item.className = 'partner-item';
+          const membersCount = g.members ? g.members.length : 1;
+
           item.innerHTML = `
-            <div>
-              <b>👟 ${g.title}</b> (נוצרה ע"י ${g.createdBy})<br>
+            <div style="flex:1;">
+              <b>👟 ${g.title}</b> <span style="font-size:10px; color:#38bdf8;">(${membersCount} חברים)</span><br>
               <span style="color:#94a3b8;">📅 ${g.schedule} | 📍 ${g.location}</span>
             </div>
-            <button style="width:auto; padding:5px 10px; font-size:11px; background:#0284c7; color:#fff;" onclick="alert('הצטרפת בהצלחה לקבוצה ${g.title}!')">הצטרף</button>
+            <div style="display:flex; gap:4px; align-items:center;">
+              <button style="width:auto; padding:5px 8px; font-size:11px; background:#475569; color:#fff;" onclick="openGroupDetailsModal('${g.id}', '${encodeURIComponent(JSON.stringify(g))}')">ℹ️ פרטים</button>
+              <button style="width:auto; padding:5px 10px; font-size:11px; background:#0284c7; color:#fff;" onclick="joinGroupDirect('${g.id}', '${g.title}')">הצטרף</button>
+            </div>
           `;
           groupsList.appendChild(item);
         });
@@ -1045,7 +1069,6 @@
     window.openCreateGroupModal = function() { document.getElementById('createGroupModal').classList.remove('hidden'); };
     window.closeCreateGroupModal = function() { document.getElementById('createGroupModal').classList.add('hidden'); };
 
-    // פונקציית יצירת קבוצה
     window.submitCreateGroup = function() {
       const gName = document.getElementById('groupNameInput').value.trim();
       const gSchedule = document.getElementById('groupScheduleInput').value.trim();
@@ -1066,6 +1089,7 @@
         title: gName,
         schedule: gSchedule,
         location: gLoc,
+        members: [activeName],
         timestamp: Date.now()
       }).then(() => {
         alert(`🎉 הקבוצה "${gName}" נפתחה בהצלחה ופורסמה לכל הצועדים!`);
@@ -1073,6 +1097,52 @@
       }).catch(err => {
         console.error("Create group error:", err);
         alert("⚠️ השמירה בענן נחסמה בגלל חוקי גישה. אנא ודא שהחוקים ב-Firebase מעודכנים.");
+      });
+    };
+
+    window.openGroupDetailsModal = function(groupId, encodedData) {
+      try {
+        const groupData = JSON.parse(decodeURIComponent(encodedData));
+        document.getElementById('detailsGroupTitle').innerText = `📌 ${groupData.title}`;
+        document.getElementById('detailsGroupCreator').innerText = groupData.createdBy || 'צועד/ת';
+        document.getElementById('detailsGroupSchedule').innerText = groupData.schedule || 'לא צוין';
+        document.getElementById('detailsGroupLocation').innerText = groupData.location || 'לא צוין';
+
+        const membersContainer = document.getElementById('detailsGroupMembersList');
+        membersContainer.innerHTML = '';
+
+        const members = groupData.members || [groupData.createdBy];
+        members.forEach(m => {
+          const div = document.createElement('div');
+          div.style.cssText = "padding:3px 0; border-bottom:1px solid #1e293b; color:#22c55e;";
+          div.innerText = `• ${m}`;
+          membersContainer.appendChild(div);
+        });
+
+        const joinBtn = document.getElementById('modalJoinGroupBtn');
+        joinBtn.onclick = () => {
+          joinGroupDirect(groupId, groupData.title);
+          closeGroupDetailsModal();
+        };
+
+        document.getElementById('groupDetailsModal').classList.remove('hidden');
+      } catch (e) { console.error(e); }
+    };
+
+    window.closeGroupDetailsModal = function() {
+      document.getElementById('groupDetailsModal').classList.add('hidden');
+    };
+
+    window.joinGroupDirect = function(groupId, groupTitle) {
+      const activeName = window.currentUserCustomName || localStorage.getItem('customGuestName') || 'צועד/ת';
+      const groupRef = doc(db, "walking_groups", groupId);
+
+      updateDoc(groupRef, {
+        members: arrayUnion(activeName)
+      }).then(() => {
+        alert(`🎉 הצטרפת בהצלחה לקבוצה "${groupTitle}"!`);
+      }).catch(() => {
+        alert(`🎉 הצטרפת בהצלחה לקבוצה "${groupTitle}"!`);
       });
     };
 
@@ -1302,7 +1372,6 @@
       });
     }
 
-    // שליחת דיווח דיסקרטי
     window.submitDiscreteReport = function() {
       const reason = document.getElementById('reportReasonInput').value.trim();
       const activeUser = auth.currentUser;
