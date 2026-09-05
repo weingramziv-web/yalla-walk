@@ -267,7 +267,7 @@
           <b><i class="fa-solid fa-lightbulb"></i> למה כדאי להתחבר דרך Google?</b>
           <div style="margin-top:4px; line-height:1.4;">
             ✓ <b>תג צועד מאומת (VIP):</b> בונה אמון וביטחון מול צועדים אחרים.<br>
-            ✓ <b>מעקב היסטוריית כושר:</b> שמירת קילומטרים וקלוריות.<br>
+            ✓ <b>מעקב היסטוריית כושר בענן:</b> שמירת צעדים וקלוריות מכל מכשיר.<br>
             ✓ <b>סנכרון מועדפים:</b> שמירת החברים והקבוצות שלך מכל מכשיר.
           </div>
         </div>
@@ -334,8 +334,8 @@
 
         <div class="sport-grid">
           <div class="sport-stat-card">
-            <div class="sport-stat-val" id="kmDisplay">0.00</div>
-            <div class="sport-stat-lbl">קילומטרים צעדת</div>
+            <div class="sport-stat-val" id="stepsDisplay">0</div>
+            <div class="sport-stat-lbl">מספר צעדים</div>
           </div>
           <div class="sport-stat-card">
             <div class="sport-stat-val" id="calDisplay">0</div>
@@ -343,7 +343,7 @@
           </div>
         </div>
 
-        <!-- גרף הישגים שבועי במספר צעדים עם תאריכים דינמיים -->
+        <!-- גרף הישגים שבועי במספר צעדים -->
         <div style="width:100%; margin-top:12px; background:#0b1329; padding:10px; border-radius:10px; border:1px solid #1e293b;">
           <div style="font-size:11px; color:#38bdf8; font-weight:bold; margin-bottom:2px; text-align:center;">📊 הישגי הליכה שבועיים (מספר צעדים):</div>
           <div style="font-size:10px; color:#94a3b8; text-align:center; margin-bottom:6px;" id="currentWeekDatesDisplay">תאריכי השבוע: מחשב...</div>
@@ -711,7 +711,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, onSnapshot, addDoc, updateDoc, arrayUnion, collectionGroup, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, addDoc, updateDoc, arrayUnion, collectionGroup, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGAQZznuLoKmq_q1qXgEsWpJZhKXCaVcg",
@@ -785,7 +785,7 @@
       }
     });
 
-    function handleUserLogin(user, isGoogle) {
+    async function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
       let inputPhone = document.getElementById('guestPhoneInput') ? document.getElementById('guestPhoneInput').value.trim() : '';
       
@@ -811,6 +811,22 @@
       }
 
       currentUserDoc = doc(db, "users", user.uid);
+
+      // שליפת נתוני כושר שמורים מהענן במידה והמשתמש מחובר ב-Google
+      if (isGoogle) {
+        try {
+          const userSnap = await getDoc(currentUserDoc);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            if (userData.totalMeters) {
+              window.totalDistanceMeters = parseFloat(userData.totalMeters);
+              localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
+            }
+          }
+        } catch (e) {
+          console.log("Cloud sync error:", e);
+        }
+      }
       
       const baseLat = window.userPos ? window.userPos.lat : 32.835;
       const baseLng = window.userPos ? window.userPos.lng : 35.076;
@@ -828,7 +844,8 @@
         isOnline: true,
         lastSeen: Date.now(),
         pace: "בינוני",
-        dog: "לא"
+        dog: "לא",
+        totalMeters: window.totalDistanceMeters || 0
       }, { merge: true }).then(() => {
         startHeartbeat();
         listenToLiveUsers();
@@ -858,7 +875,11 @@
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       heartbeatInterval = setInterval(() => {
         if (currentUserDoc && !window.isGhostMode) {
-          setDoc(currentUserDoc, { lastSeen: Date.now(), isOnline: true }, { merge: true });
+          setDoc(currentUserDoc, { 
+            lastSeen: Date.now(), 
+            isOnline: true,
+            totalMeters: window.totalDistanceMeters || 0 
+          }, { merge: true });
         }
       }, 5000);
     }
@@ -1485,6 +1506,7 @@
     let geoWatchId = null;
     let lastPosition = null;
     let totalDistanceMeters = parseFloat(localStorage.getItem('userTotalMeters') || '0');
+    window.totalDistanceMeters = totalDistanceMeters;
 
     function toggleAuthButtons() {
       const isChecked = document.getElementById('termsCheckbox').checked;
@@ -1536,10 +1558,9 @@
       }
     }
 
-    // פונקציית חישוב דינמית לתאריכי ראשון-שבת של השבוע הנוכחי
     function updateCurrentWeekDatesText() {
       const now = new Date();
-      const currentDay = now.getDay(); // 0 = ראשון
+      const currentDay = now.getDay();
       
       const sunday = new Date(now);
       sunday.setDate(now.getDate() - currentDay);
@@ -1558,6 +1579,19 @@
       if (el) el.innerText = dateStr;
     }
 
+    function updateDashboardDisplay() {
+      const steps = Math.round((window.totalDistanceMeters / 1000) * 1300);
+      const cal = Math.floor((window.totalDistanceMeters / 1000) * 60);
+
+      const stepsEl = document.getElementById('stepsDisplay');
+      const calEl = document.getElementById('calDisplay');
+      
+      if (stepsEl) stepsEl.innerText = steps.toLocaleString();
+      if (calEl) calEl.innerText = cal.toLocaleString();
+
+      initWeeklyChart();
+    }
+
     function initWeeklyChart() {
       updateCurrentWeekDatesText();
 
@@ -1568,8 +1602,7 @@
         weeklyChartInstance.destroy();
       }
 
-      // חישוב צעדים לפי ממוצע (~1300 צעדים לקילומטר)
-      const currentSteps = Math.round((totalDistanceMeters / 1000) * 1300);
+      const currentSteps = Math.round((window.totalDistanceMeters / 1000) * 1300);
 
       weeklyChartInstance = new Chart(ctx, {
         type: 'bar',
@@ -1652,18 +1685,10 @@
             const distMeters = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
             
             if (distMeters > 3) {
-              totalDistanceMeters += distMeters;
-              localStorage.setItem('userTotalMeters', totalDistanceMeters.toString());
+              window.totalDistanceMeters += distMeters;
+              localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
               
-              const km = (totalDistanceMeters / 1000).toFixed(2);
-              const cal = Math.floor((totalDistanceMeters / 1000) * 60);
-
-              const kmEl = document.getElementById('kmDisplay');
-              const calEl = document.getElementById('calDisplay');
-              if (kmEl) kmEl.innerText = km;
-              if (calEl) calEl.innerText = cal;
-
-              initWeeklyChart();
+              updateDashboardDisplay();
               lastPosition = { lat, lng };
             }
           } else {
@@ -1688,7 +1713,10 @@
       if (mainTxt) mainTxt.innerText = 'START';
       if (subTxt) subTxt.innerText = 'WALK';
 
-      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת: ${document.getElementById('kmDisplay').innerText} ק"מ\nשרפת: ${document.getElementById('calDisplay').innerText} קלוריות🔥`);
+      const steps = Math.round((window.totalDistanceMeters / 1000) * 1300);
+      const cal = Math.floor((window.totalDistanceMeters / 1000) * 60);
+
+      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת: ${steps.toLocaleString()} צעדים\nשרפת: ${cal.toLocaleString()} קלוריות🔥`);
     }
 
     function startApp(targetScreen) {
@@ -1697,7 +1725,7 @@
       switchTab(targetScreen || 'mainScreen');
       
       startUsageTimer();
-      initWeeklyChart();
+      updateDashboardDisplay();
 
       setTimeout(() => { 
         initMap();
@@ -1902,6 +1930,7 @@
     window.acceptChatRequest = acceptChatRequest;
     window.declineChatRequest = declineChatRequest;
     window.requestNotificationPermission = requestNotificationPermission;
+    window.updateDashboardDisplay = updateDashboardDisplay;
   </script>
 </body>
 </html>
