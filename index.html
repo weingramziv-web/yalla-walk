@@ -147,6 +147,22 @@
       box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
     }
 
+    .progress-bar-container {
+      width: 100%;
+      background: #0f172a;
+      border-radius: 10px;
+      height: 12px;
+      overflow: hidden;
+      margin-top: 8px;
+      border: 1px solid #334155;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
     .start-walk-btn-circle {
       width: 130px;
       height: 130px;
@@ -251,9 +267,9 @@
 
       <div style="background: #0f172a; padding: 12px; border-radius: 12px; margin: 12px 0; text-align: right; font-size: 11px; border: 1px solid #334155;">
         <p style="margin:0; color:#cbd5e1;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
-        • הגנת פרטיות: מיקומים מוצגים ברדיוס כללי בלבד.<br>
-        • דירוגים חיוביים בלבד – אפס סובלנות לבריונות.<br>
-        • כפתור מצוקה SOS דיסקרטי ואפשרויות חסימה.</p>
+        • הגנת פרטיות: מיקומים מוצגים ברדיוס כללי בלבד לשמירת בטיחות המשתמשים.<br>
+        • דירוגים חיוביים בלבד – אפס סובלנות לבריונות ולמצבי הטרדה.<br>
+        • כפתור מצוקה SOS דיסקרטי ואפשרויות חסימה מידיות.</p>
       </div>
 
       <div style="margin-top: auto;">
@@ -292,7 +308,7 @@
           <div style="background:#0f172a; border:1px solid #334155; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
             <input type="checkbox" id="termsCheckbox" style="width:auto; vertical-align:middle;" onchange="toggleAuthButtons()">
             <label for="termsCheckbox" style="vertical-align:middle; color:#cbd5e1;">
-              אני מסכים/ה ל<a href="javascript:void(0)" onclick="openTermsModal()" style="color:#38bdf8; font-weight:bold;">תקנון האפליקציה ותנאי השימוש (18+)</a>.
+              אני מסכים/ה ל<a href="javascript:void(0)" onclick="openTermsModal()" style="color:#38bdf8; font-weight:bold;">תקנון, הצהרת בריאות ותנאי השימוש (18+)</a>.
             </label>
           </div>
 
@@ -320,8 +336,15 @@
         <span style="font-size:11px; color:#f59e0b; font-weight:bold;" id="usageTimerDisplay">⏱️ 120:00</span>
       </div>
 
-      <div style="background: linear-gradient(135deg, #0284c7, #0f172a); border-radius:12px; padding:8px 12px; margin-bottom:10px; font-size:11px; text-align:center; border:1px solid #38bdf8;">
-        🔥 <b>האתגר הקהילתי השבועי:</b> צועדי השכונה צעדו השבוע יחד <b style="color:#22c55e; font-size:13px;">1,240 ק"מ!</b>
+      <!-- מד התקדמות יעד שבועי אישי -->
+      <div style="background: linear-gradient(135deg, #0284c7, #0f172a); border-radius:12px; padding:10px 12px; margin-bottom:10px; font-size:11px; border:1px solid #38bdf8;">
+        <div style="display:flex; justify-content:space-between; font-weight:bold;">
+          <span>🎯 יעד הליכה שבועי אישי: <b style="color:#22c55e;" id="weeklyGoalText">0 / 15 ק"מ</b></span>
+          <span style="color:#38bdf8;" id="weeklyGoalPercent">0%</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="weeklyProgressBar"></div>
+        </div>
       </div>
 
       <div class="sport-dashboard">
@@ -492,6 +515,11 @@
       </div>
 
       <div class="filter-box" style="margin-bottom:10px;">
+        <b style="color:#38bdf8;">🎯 הגדרת יעד שבועי (ק"מ):</b>
+        <input type="number" id="weeklyGoalInput" value="15" min="1" max="100" style="margin-top:4px;" onchange="updateWeeklyGoal(this.value)">
+      </div>
+
+      <div class="filter-box" style="margin-bottom:10px;">
         <b style="color:#38bdf8;">🛡️ פילטור פניות ופניות בצ'אט:</b>
         <p style="font-size:10px; color:#cbd5e1; margin:2px 0;">בחר ממי ברצונך לקבל פניות בצ'אט:</p>
         <select id="chatFilterSetting" onchange="localStorage.setItem('chatFilterSetting', this.value);">
@@ -633,21 +661,26 @@
       </div>
     </div>
 
-    <!-- מודאלים נוספים -->
+    <!-- מודאל תקנון ותנאי שימוש כולל הצהרת בריאות -->
     <div class="modal hidden" id="termsModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#22c55e;">📜 תקנון ותנאי שימוש</h3>
-        <p style="font-size:11px; color:#cbd5e1;">אפליקציה למבוגרים (18+) לשימושי הליכה בטוחה בסביבה.</p>
-        <button onclick="acceptTermsFromModal()" style="margin-top:10px;">אני מאשר/ת</button>
+        <h3 style="margin-top:0; color:#22c55e;">📜 תקנון, הצהרת בריאות ותנאי שימוש</h3>
+        <div style="font-size:11px; color:#cbd5e1; line-height:1.4; max-height:220px; overflow-y:auto; background:#0f172a; padding:10px; border-radius:8px; border:1px solid #334155; margin-bottom:10px;">
+          <b>1. כללי וגיל המשתתפים:</b> האפליקציה מיועדת למשתמשים מגיל 18 ומעלה בלבד. השימוש באפליקציה מהווה אישור לכל התנאים.<br><br>
+          <b>2. הצהרת בריאות וכשירות גופנית:</b> המשתמש מצהיר בזאת כי הוא בריא וכשיר מבחינה גופנית ורפואית לבצע פעילות ספורטיבית והליכות. השימוש באפליקציה וההשתתפות במפגשים הם באחריותו הבלעדית של המשתמש.<br><br>
+          <b>3. הסרת אחריות משפטית (Disclaimer):</b> האפליקציה והנהלתה משמשות כפלטפורמה טכנולוגית בלבד לחיבור בין צועדים. האפליקציה אינה אחראית לכל נזק גוף, פציעה, תאונה, אובדן רכוש או אירוע בטיחותי מכל סוג שהוא שיתרחש במהלך צעידה או מפגש.<br><br>
+          <b>4. פרטיות ובטיחות:</b> המיקומים מוצגים ברדיוס מקורב (Location Fuzzying) להגנת הפרטיות. חל איסור מוחלט על הטרדה, בריונות או שימוש לרעה במערכת.
+        </div>
+        <button onclick="acceptTermsFromModal()" style="margin-top:5px; background:#22c55e; color:#0f172a; font-weight:bold;">אני מאשר/ת ומצהיר/ה על כשירות רפואית</button>
       </div>
     </div>
 
     <div class="modal hidden" id="reportModal">
       <div class="modal-content">
-        <h3 style="margin-top:0; color:#ef4444;">🚨 דיווח דיסקרטי</h3>
+        <h3 style="margin-top:0; color:#ef4444;">🚨 דיווח דיסקרטי וחסימה</h3>
         <p style="font-size:12px; font-weight:bold; color:#cbd5e1; margin:2px 0;" id="reportTargetDisplay">מדווח על המשתמש: עמית</p>
         <textarea id="reportReasonInput" placeholder="פרט בקצרה את סיבת הדיווח..." rows="3"></textarea>
-        <button onclick="submitDiscreteReport()" style="background:#ef4444; color:#fff;">שלח דיווח מוצפן</button>
+        <button onclick="submitDiscreteReport()" style="background:#ef4444; color:#fff;">שלח דיווח מוצפן וחסום משתמש זה</button>
         <button onclick="closeReportModal()" class="btn-secondary" style="margin-top:6px;">ביטול</button>
       </div>
     </div>
@@ -783,13 +816,17 @@
       const baseLat = window.userPos ? window.userPos.lat : 32.835;
       const baseLng = window.userPos ? window.userPos.lng : 35.076;
 
+      // טשטוש מיקום קל (Location Fuzzying - כ-100-200 מטרים) להגנת הפרטיות
+      const fuzzedLat = baseLat + (Math.random() - 0.5) * 0.003;
+      const fuzzedLng = baseLng + (Math.random() - 0.5) * 0.003;
+
       setDoc(currentUserDoc, {
         uid: user.uid,
         name: finalName,
         contactInfo: finalContact,
         isGuest: !isGoogle,
-        lat: baseLat + (Math.random() - 0.5) * 0.003,
-        lng: baseLng + (Math.random() - 0.5) * 0.003,
+        lat: fuzzedLat,
+        lng: fuzzedLng,
         isOnline: true,
         lastSeen: Date.now(),
         pace: "בינוני",
@@ -830,7 +867,7 @@
 
     window.startAppAsGuest = async function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון!");
+        alert("⚠️ חובה לאשר את התקנון והצהרת הבריאות!");
         return;
       }
       const nameVal = document.getElementById('guestNameInput').value.trim();
@@ -880,7 +917,7 @@
 
     window.loginWithGoogle = function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון!");
+        alert("⚠️ חובה לאשר את התקנון והצהרת הבריאות!");
         return;
       }
       const provider = new GoogleAuthProvider();
@@ -927,8 +964,8 @@
                   contactInfo: data.contactInfo || 'לא הוזן פרטי קשר',
                   age: data.age || '30',
                   gender: data.gender || 'גבר',
-                  lat: rawLat + (Math.random() - 0.5) * 0.004,
-                  lng: rawLng + (Math.random() - 0.5) * 0.004,
+                  lat: rawLat,
+                  lng: rawLng,
                   pace: data.pace || 'בינוני',
                   dog: data.dog || 'לא',
                   lastSeen: data.lastSeen || 0
@@ -1203,7 +1240,7 @@
       if (confirm(`לחסום את ${partner.name}?`)) {
         blockedUsers.push(partner.uid);
         localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
-        alert("✅ נחסם.");
+        alert("✅ המשתמש נחסם בהצלחה ולא יוכל לפנות אליך יותר.");
         switchTab('mainScreen');
         listenToLiveUsers();
       }
@@ -1389,6 +1426,14 @@
 
       if (!reason) return;
 
+      // חסימה אוטומטית בעת דיווח
+      if (targetUser && targetUser.uid) {
+        if (!blockedUsers.includes(targetUser.uid)) {
+          blockedUsers.push(targetUser.uid);
+          localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
+        }
+      }
+
       addDoc(collection(db, "reports"), { 
         reporterUid: reporterUid,
         reporterName: reporterName,
@@ -1399,7 +1444,6 @@
         reason: reason, 
         timestamp: Date.now() 
       }).then(() => {
-        
         emailjs.send("service_3sikbvo", "template_a8djdvl", {
           message: reason,
           reporter_name: `${reporterName} (${reporterContact})`,
@@ -1409,13 +1453,15 @@
           report_reason: reason,
           date_time: dateTimeStr
         }).then(function() {
-          console.log('SUCCESS! Detailed email sent to admin.');
+          console.log('SUCCESS! Email sent to admin.');
         }, function(error) {
           console.log('FAILED...', error);
         });
 
-        alert("✅ הדיווח המאובטח נשלח ישירות למנהל המערכת לטיפול.");
+        alert("✅ הדיווח נשלח למנהל המערכת, והמשתמש נחסם מהחשבון שלך בהצלחה.");
         closeReportModal();
+        switchTab('mainScreen');
+        listenToLiveUsers();
       });
     };
   </script>
@@ -1433,7 +1479,7 @@
     let isWalkActive = false;
     let geoWatchId = null;
     let lastPosition = null;
-    let totalDistanceMeters = 0;
+    let totalDistanceMeters = parseFloat(localStorage.getItem('userTotalMeters') || '0');
 
     function toggleAuthButtons() {
       const isChecked = document.getElementById('termsCheckbox').checked;
@@ -1469,6 +1515,25 @@
       document.getElementById('chatRequestBanner').classList.add('hidden');
       alert("❌ דחית את בקשת השיחה.");
       switchTab('mainScreen');
+    }
+
+    function updateWeeklyGoalProgress() {
+      const goalKm = parseFloat(localStorage.getItem('weeklyGoalKm') || '15');
+      const currentKm = totalDistanceMeters / 1000;
+      const percent = Math.min(100, Math.round((currentKm / goalKm) * 100));
+
+      const goalTxt = document.getElementById('weeklyGoalText');
+      const percentTxt = document.getElementById('weeklyGoalPercent');
+      const barFill = document.getElementById('weeklyProgressBar');
+
+      if (goalTxt) goalTxt.innerText = `${currentKm.toFixed(1)} / ${goalKm} ק"מ`;
+      if (percentTxt) percentTxt.innerText = `${percent}%`;
+      if (barFill) barFill.style.width = `${percent}%`;
+    }
+
+    function updateWeeklyGoal(val) {
+      localStorage.setItem('weeklyGoalKm', val);
+      updateWeeklyGoalProgress();
     }
 
     function startUsageTimer() {
@@ -1511,7 +1576,6 @@
 
     function startWalkTracking() {
       isWalkActive = true;
-      totalDistanceMeters = 0;
       lastPosition = null;
 
       const btn = document.getElementById('startWalkCircleBtn');
@@ -1521,9 +1585,6 @@
       if (btn) btn.classList.add('active-walk');
       if (mainTxt) mainTxt.innerText = 'STOP';
       if (subTxt) subTxt.innerText = 'WALK';
-
-      document.getElementById('kmDisplay').innerText = "0.00";
-      document.getElementById('calDisplay').innerText = "0";
 
       if (navigator.geolocation) {
         geoWatchId = navigator.geolocation.watchPosition((pos) => {
@@ -1535,6 +1596,7 @@
             
             if (distMeters > 3) {
               totalDistanceMeters += distMeters;
+              localStorage.setItem('userTotalMeters', totalDistanceMeters.toString());
               
               const km = (totalDistanceMeters / 1000).toFixed(2);
               const cal = Math.floor((totalDistanceMeters / 1000) * 60);
@@ -1544,6 +1606,7 @@
               if (kmEl) kmEl.innerText = km;
               if (calEl) calEl.innerText = cal;
 
+              updateWeeklyGoalProgress();
               lastPosition = { lat, lng };
             }
           } else {
@@ -1577,6 +1640,7 @@
       switchTab(targetScreen || 'mainScreen');
       
       startUsageTimer();
+      updateWeeklyGoalProgress();
 
       setTimeout(() => { 
         initMap();
@@ -1780,6 +1844,7 @@
     window.closeVouchModal = closeVouchModal;
     window.acceptChatRequest = acceptChatRequest;
     window.declineChatRequest = declineChatRequest;
+    window.updateWeeklyGoal = updateWeeklyGoal;
   </script>
 </body>
 </html>
