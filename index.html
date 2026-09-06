@@ -1502,9 +1502,10 @@
     let weeklyChartInstance = null;
 
     let isWalkActive = false;
+    let geoWatchId = null;
+    let lastPosition = null;
     let wakeLock = null;
 
-    // משתני ספירת צעדים פיזיים
     let currentWalkSteps = 0;
     let lastAccelMagnitude = 0;
     let lastStepTime = 0;
@@ -1585,7 +1586,6 @@
 
     function updateDashboardDisplay() {
       const effectiveSteps = isWalkActive ? currentWalkSteps : 0;
-      // חישוב קלוריות: כ-0.04 קלוריות לכל צעד פיזי
       const currentCal = Math.floor(effectiveSteps * 0.04);
 
       const stepsEl = document.getElementById('stepsDisplay');
@@ -1652,6 +1652,21 @@
       }
     }
 
+    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c;
+    }
+
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -1668,24 +1683,13 @@
       }
     }
 
-    // מנוע זיהוי צעדים לפי חיישן תנועה (Device Motion Accelerometer)
-    function handleDeviceMotion(event) {
+    function handleMotionSignal(magnitude) {
       if (!isWalkActive) return;
 
-      const acc = event.accelerationIncludingGravity;
-      if (!acc) return;
-
-      const x = acc.x || 0;
-      const y = acc.y || 0;
-      const z = acc.z || 0;
-
-      // חישוב עוצמת התנועה (Vector Magnitude)
-      const magnitude = Math.sqrt(x * x + y * y + z * z);
       const delta = Math.abs(magnitude - lastAccelMagnitude);
       const now = Date.now();
 
-      // סף זיהוי פסיעה אנושית: זעזוע מעל 2.2 מ'/שנ² והפרש של 300 מילי-שניות לפחות בין צעד לצעד
-      if (delta > 2.2 && (now - lastStepTime > 300)) {
+      if (delta > 1.8 && (now - lastStepTime > 280)) {
         currentWalkSteps++;
         window.totalStepsAccumulated++;
         localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
@@ -1697,9 +1701,24 @@
       lastAccelMagnitude = magnitude;
     }
 
+    function handleDeviceMotion(event) {
+      if (!isWalkActive) return;
+
+      const acc = event.accelerationIncludingGravity || event.acceleration;
+      if (!acc) return;
+
+      const x = acc.x || 0;
+      const y = acc.y || 0;
+      const z = acc.z || 0;
+      const mag = Math.sqrt(x * x + y * y + z * z);
+
+      handleMotionSignal(mag);
+    }
+
     function startWalkTracking() {
       isWalkActive = true;
       currentWalkSteps = 0;
+      lastPosition = null;
 
       requestWakeLock();
 
@@ -1713,15 +1732,43 @@
 
       updateDashboardDisplay();
 
-      // בקשת הרשאה לחיישן תנועה (במיוחד ב-iOS / Safari) והפעלתו
+      // הפעלת מעקב חיישן תנועה
       if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(response => {
-          if (permissionState === 'granted') {
+        DeviceMotionEvent.requestPermission().then(state => {
+          if (state === 'granted') {
             window.addEventListener('devicemotion', handleDeviceMotion, true);
           }
         }).catch(console.error);
       } else {
         window.addEventListener('devicemotion', handleDeviceMotion, true);
+      }
+
+      // גיבוי GPS היברידי - המרת התקדמות במרחב לצעדים במידה והחיישן מוקפא ברקע
+      if (navigator.geolocation) {
+        geoWatchId = navigator.geolocation.watchPosition((pos) => {
+          if (!isWalkActive) return;
+
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const now = pos.timestamp || Date.now();
+
+          if (lastPosition) {
+            const dist = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
+            
+            // התקדמות אמיתית מעל 3 מטרים
+            if (dist >= 3) {
+              const gpsSteps = Math.round(dist * 1.3);
+              currentWalkSteps += gpsSteps;
+              window.totalStepsAccumulated += gpsSteps;
+              localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
+              
+              updateDashboardDisplay();
+              lastPosition = { lat, lng, now };
+            }
+          } else {
+            lastPosition = { lat, lng, now };
+          }
+        }, (err) => console.log(err), { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
       }
     }
 
@@ -1730,6 +1777,11 @@
       releaseWakeLock();
 
       window.removeEventListener('devicemotion', handleDeviceMotion, true);
+
+      if (geoWatchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+      }
 
       const btn = document.getElementById('startWalkCircleBtn');
       const mainTxt = document.getElementById('walkBtnTextMain');
@@ -1814,21 +1866,6 @@
         avatar.onclick = () => openChatWithUser(u);
         bar.appendChild(avatar);
       });
-    }
-
-    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
-      const φ1 = lat1 * Math.PI / 180;
-      const φ2 = lat2 * Math.PI / 180;
-      const Δφ = (lat2 - lat1) * Math.PI / 180;
-      const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-      return R * c;
     }
 
     function applyPartnersFilter() {
