@@ -258,7 +258,7 @@
       <div style="background: #0b1329; padding: 12px; border-radius: 12px; margin: 12px 0; text-align: right; font-size: 11px; border: 1px solid #1e293b;">
         <p style="margin:0; color:#cbd5e1;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
         • הגנת פרטיות: מיקומים מוצגים ברדיוס כללי בלבד לשמירת בטיחות המשתמשים.<br>
-        • דירוגים חיוביים בלבד – אפס סובלנות לבריונות ולמצבי הטרדה.<br>
+        • הגבלת גיל מחייבת (18+) ומניעת חיבור מרובה מאותו מכשיר.<br>
         • כפתור מצוקה SOS דיסקרטי ואפשרויות חסימה מידיות.</p>
       </div>
 
@@ -283,7 +283,7 @@
 
           <div style="display:flex; gap:8px; margin-top:4px;">
             <div style="flex:1;">
-              <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px;">גיל:</label>
+              <label style="display:block; text-align:right; font-weight:bold; margin-bottom:2px; color:#ef4444;">* גיל (18+):</label>
               <input type="number" id="userAgeInput" placeholder="גיל" min="18" max="99" value="30">
             </div>
             <div style="flex:1;">
@@ -298,7 +298,7 @@
           <div style="background:#0b1329; border:1px solid #1e293b; padding:8px; border-radius:8px; margin:8px 0; font-size:11px;">
             <input type="checkbox" id="termsCheckbox" style="width:auto; vertical-align:middle;" onchange="toggleAuthButtons()">
             <label for="termsCheckbox" style="vertical-align:middle; color:#cbd5e1;">
-              אני מסכים/ה ל<a href="javascript:void(0)" onclick="openTermsModal()" style="color:#38bdf8; font-weight:bold;">תקנון, הצהרת בריאות ותנאי השימוש (18+)</a>.
+              אני מצהיר/ה כי <b>אני מעל גיל 18</b> ומסכים/ה ל<a href="javascript:void(0)" onclick="openTermsModal()" style="color:#38bdf8; font-weight:bold;">תקנון והצהרת הבריאות</a>.
             </label>
           </div>
 
@@ -665,12 +665,12 @@
       <div class="modal-content">
         <h3 style="margin-top:0; color:#22c55e;">📜 תקנון, הצהרת בריאות ותנאי שימוש</h3>
         <div style="font-size:11px; color:#cbd5e1; line-height:1.4; max-height:220px; overflow-y:auto; background:#0b1329; padding:10px; border-radius:8px; border:1px solid #1e293b; margin-bottom:10px;">
-          <b>1. כללי וגיל המשתתפים:</b> האפליקציה מיועדת למשתמשים מגיל 18 ומעלה בלבד. השימוש באפליקציה מהווה אישור לכל התנאים.<br><br>
-          <b>2. הצהרת בריאות וכשירות גופנית:</b> המשתמש מצהיר בזאת כי הוא בריא וכשיר מבחינה גופנית ורפואית לבצע פעילות ספורטיבית והליכות. השימוש באפליקציה וההשתתפות במפגשים הם באחריותו הבלעדית של המשתמש.<br><br>
-          <b>3. הסרת אחריות משפטית (Disclaimer):</b> האפליקציה והנהלתה משמשות כפלטפורמה טכנולוגית בלבד לחיבור בין צועדים. האפליקציה אינה אחראית לכל נזק גוף, פציעה, תאונה, אובדן רכוש או אירוע בטיחותי מכל סוג שהוא שיתרחש במהלך צעידה או מפגש.<br><br>
-          <b>4. פרטיות ובטיחות:</b> המיקומים מוצגים ברדיוס מקורב (Location Fuzzying) להגנת הפרטיות. חל איסור מוחלט על הטרדה, בריונות או שימוש לרעה במערכת.
+          <b>1. הגבלת גיל מחייבת (18+):</b> האפליקציה מיועדת למשתמשים מגיל 18 ומעלה בלבד. כניסת קטינים חסומה בהחלט.<br><br>
+          <b>2. הגבלת חיבור למכשיר יחיד:</b> חל איסור מוחלט על התחברות ממספר מכשירים בו-זמנית מאותו חשבון נייד. כניסה ממכשיר חדש תחסום גישה פעילה ממכשירים אחרים.<br><br>
+          <b>3. הצהרת בריאות וכשירות גופנית:</b> המשתמש מצהיר בזאת כי הוא בריא וכשיר מבחינה גופנית ורפואית לבצע פעילות ספורטיבית והליכות.<br><br>
+          <b>4. הסרת אחריות משפטית (Disclaimer):</b> האפליקציה משמשת כפלטפורמה טכנולוגית בלבד. המערכת אינה אחראית לכל נזק גוף, פציעה או אירוע בטיחותי.
         </div>
-        <button onclick="acceptTermsFromModal()" style="margin-top:5px; background:#22c55e; color:#0b1329; font-weight:bold;">אני מאשר/ת ומצהיר/ה על כשירות רפואית</button>
+        <button onclick="acceptTermsFromModal()" style="margin-top:5px; background:#22c55e; color:#0b1329; font-weight:bold;">אני מאשר/ת ומצהיר/ה על כשירות רפואית (18+)</button>
       </div>
     </div>
 
@@ -737,6 +737,13 @@
     let heartbeatInterval = null;
     let blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
 
+    // מזהה ייחודי למכשיר הנוכחי למניעת התחברות מרובה
+    let myDeviceSessionId = localStorage.getItem('deviceSessionId');
+    if (!myDeviceSessionId) {
+      myDeviceSessionId = 'device_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('deviceSessionId', myDeviceSessionId);
+    }
+
     const pageLoadTime = Date.now();
 
     window.openSettingsModal = function() {
@@ -788,6 +795,15 @@
     async function handleUserLogin(user, isGoogle) {
       let inputName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
       let inputPhone = document.getElementById('guestPhoneInput') ? document.getElementById('guestPhoneInput').value.trim() : '';
+      let inputAge = document.getElementById('userAgeInput') ? parseInt(document.getElementById('userAgeInput').value, 10) : 30;
+
+      // בדיקת הגבלת גיל
+      if (inputAge < 18) {
+        alert("⛔ הגישה לאפליקציה מיועדת למשתתפים מגיל 18 ומעלה בלבד.");
+        signOut(auth);
+        resetAppState();
+        return;
+      }
       
       let savedName = localStorage.getItem('customGuestName') || inputName;
       let savedPhone = localStorage.getItem('customGuestPhone') || inputPhone;
@@ -797,6 +813,28 @@
       
       let finalName = isGoogle ? (googleName || savedName || 'צועד מאומת') : (savedName || inputName || 'צועד אורח');
       let finalContact = isGoogle ? (googleEmail || 'Google Account') : (savedPhone || inputPhone || 'לא הוזן טלפון');
+
+      currentUserDoc = doc(db, "users", user.uid);
+
+      // בדיקת התחברות כפולה מאותו נייד/חשבון במכשיר אחר
+      try {
+        const userSnap = await getDoc(currentUserDoc);
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          if (userData.activeDeviceId && userData.activeDeviceId !== myDeviceSessionId && userData.isOnline) {
+            alert("⛔ חשבון זה מחובר כעת ממכשיר אחר (טלפון/מחשב נוסף).\nלא ניתן להתחבר מאותו מספר/חשבון בשני מכשירים במקביל.");
+            signOut(auth);
+            resetAppState();
+            return;
+          }
+          if (userData.totalSteps) {
+            window.totalStepsAccumulated = parseInt(userData.totalSteps, 10);
+            localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
+          }
+        }
+      } catch (e) {
+        console.log("Check device session:", e);
+      }
 
       localStorage.setItem('customGuestName', finalName);
       if (savedPhone) localStorage.setItem('customGuestPhone', savedPhone);
@@ -810,23 +848,6 @@
         document.getElementById('profileAvatarChar').innerText = finalName.charAt(0).toUpperCase();
       }
 
-      currentUserDoc = doc(db, "users", user.uid);
-
-      if (isGoogle) {
-        try {
-          const userSnap = await getDoc(currentUserDoc);
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            if (userData.totalSteps) {
-              window.totalStepsAccumulated = parseInt(userData.totalSteps, 10);
-              localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
-            }
-          }
-        } catch (e) {
-          console.log("Cloud sync error:", e);
-        }
-      }
-      
       const baseLat = window.userPos ? window.userPos.lat : 32.835;
       const baseLng = window.userPos ? window.userPos.lng : 35.076;
 
@@ -837,10 +858,12 @@
         uid: user.uid,
         name: finalName,
         contactInfo: finalContact,
+        age: inputAge,
         isGuest: !isGoogle,
         lat: fuzzedLat,
         lng: fuzzedLng,
         isOnline: true,
+        activeDeviceId: myDeviceSessionId,
         lastSeen: Date.now(),
         pace: "בינוני",
         dog: "לא",
@@ -877,6 +900,7 @@
           setDoc(currentUserDoc, { 
             lastSeen: Date.now(), 
             isOnline: true,
+            activeDeviceId: myDeviceSessionId,
             totalSteps: window.totalStepsAccumulated || 0 
           }, { merge: true });
         }
@@ -885,11 +909,17 @@
 
     window.startAppAsGuest = async function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון והצהרת הבריאות!");
+        alert("⚠️ חובה לאשר את הצהרת הגיל (18+) והתקנון!");
         return;
       }
       const nameVal = document.getElementById('guestNameInput').value.trim();
       const phoneVal = document.getElementById('guestPhoneInput').value.trim();
+      const ageVal = parseInt(document.getElementById('userAgeInput').value, 10);
+
+      if (ageVal < 18) {
+        alert("⛔ הכניסה מיועדת למשתתפים מגיל 18 ומעלה בלבד.");
+        return;
+      }
 
       if (!nameVal) {
         alert("⚠️ חובה לרשום שם פרטי!");
@@ -908,17 +938,16 @@
         const querySnapshot = await getDocs(q);
         
         if (!querySnapshot.empty) {
-          let isNameMatch = false;
+          let isOnlineElsewhere = false;
           querySnapshot.forEach(docSnap => {
             const data = docSnap.data();
-            if (data.name && data.name.trim() === nameVal) {
-              isNameMatch = true;
+            if (data.isOnline && data.activeDeviceId && data.activeDeviceId !== myDeviceSessionId) {
+              isOnlineElsewhere = true;
             }
           });
 
-          if (!isNameMatch) {
-            const existingName = querySnapshot.docs[0].data().name || 'משתמש אחר';
-            alert(`⛔ מספר הטלפון ${cleanPhone} כבר רשום במערכת תחת השם "${existingName}".\nנא להתחבר בשמך המקורי או להשתמש במספר הנייד האישי שלך.`);
+          if (isOnlineElsewhere) {
+            alert(`⛔ מספר הטלפון ${cleanPhone} כבר מחובר כעת ממכשיר אחר במקביל.\nלא ניתן להתחבר מאותו מספר טלפון ביותר ממכשיר אחד בו-זמנית.`);
             return;
           }
         }
@@ -935,7 +964,7 @@
 
     window.loginWithGoogle = function() {
       if (!document.getElementById('termsCheckbox').checked) {
-        alert("⚠️ חובה לאשר את התקנון והצהרת הבריאות!");
+        alert("⚠️ חובה לאשר את הצהרת הגיל (18+) והתקנון!");
         return;
       }
       const provider = new GoogleAuthProvider();
@@ -1331,7 +1360,7 @@
       } else {
         alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצועדים אחרים).");
         closeBroadcastModal();
-        window.startWalkTracking();
+          window.startWalkTracking();
       }
     };
 
