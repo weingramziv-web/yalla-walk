@@ -817,9 +817,9 @@
           const userSnap = await getDoc(currentUserDoc);
           if (userSnap.exists()) {
             const userData = userSnap.data();
-            if (userData.totalMeters) {
-              window.totalDistanceMeters = parseFloat(userData.totalMeters);
-              localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
+            if (userData.totalSteps) {
+              window.totalStepsAccumulated = parseInt(userData.totalSteps, 10);
+              localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
             }
           }
         } catch (e) {
@@ -844,7 +844,7 @@
         lastSeen: Date.now(),
         pace: "בינוני",
         dog: "לא",
-        totalMeters: window.totalDistanceMeters || 0
+        totalSteps: window.totalStepsAccumulated || 0
       }, { merge: true }).then(() => {
         startHeartbeat();
         listenToLiveUsers();
@@ -877,7 +877,7 @@
           setDoc(currentUserDoc, { 
             lastSeen: Date.now(), 
             isOnline: true,
-            totalMeters: window.totalDistanceMeters || 0 
+            totalSteps: window.totalStepsAccumulated || 0 
           }, { merge: true });
         }
       }, 5000);
@@ -1502,16 +1502,15 @@
     let weeklyChartInstance = null;
 
     let isWalkActive = false;
-    let geoWatchId = null;
-    let lastPosition = null;
     let wakeLock = null;
-    let keepAliveInterval = null;
 
-    // מרחק בהליכה הנוכחית בלבד
-    let currentWalkDistanceMeters = 0;
-    // סך הכל מרחק מצטבר שנשמר בזיכרון עבור הגרף
-    let totalDistanceMeters = parseFloat(localStorage.getItem('userTotalMeters') || '0');
-    window.totalDistanceMeters = totalDistanceMeters;
+    // משתני ספירת צעדים פיזיים
+    let currentWalkSteps = 0;
+    let lastAccelMagnitude = 0;
+    let lastStepTime = 0;
+
+    let totalStepsAccumulated = parseInt(localStorage.getItem('userTotalSteps') || '0', 10);
+    window.totalStepsAccumulated = totalStepsAccumulated;
 
     function toggleAuthButtons() {
       const isChecked = document.getElementById('termsCheckbox').checked;
@@ -1585,16 +1584,14 @@
     }
 
     function updateDashboardDisplay() {
-      // חסימה: אם הליכה אינה פעילה, הצעדים והקלוריות בהליכה הנוכחית יישרו על 0
-      const effectiveMeters = isWalkActive ? currentWalkDistanceMeters : 0;
-      
-      const currentSteps = Math.round((effectiveMeters / 1000) * 1350);
-      const currentCal = Math.floor((effectiveMeters / 1000) * 60);
+      const effectiveSteps = isWalkActive ? currentWalkSteps : 0;
+      // חישוב קלוריות: כ-0.04 קלוריות לכל צעד פיזי
+      const currentCal = Math.floor(effectiveSteps * 0.04);
 
       const stepsEl = document.getElementById('stepsDisplay');
       const calEl = document.getElementById('calDisplay');
       
-      if (stepsEl) stepsEl.innerText = currentSteps.toLocaleString();
+      if (stepsEl) stepsEl.innerText = effectiveSteps.toLocaleString();
       if (calEl) calEl.innerText = currentCal.toLocaleString();
 
       initWeeklyChart();
@@ -1610,15 +1607,13 @@
         weeklyChartInstance.destroy();
       }
 
-      const totalStepsAccumulated = Math.round((window.totalDistanceMeters / 1000) * 1350);
-
       weeklyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ש\''],
           datasets: [{
             label: 'צעדים',
-            data: [2800, 4500, 2300, 5200, 3800, 1200, totalStepsAccumulated],
+            data: [2800, 4500, 2300, 5200, 3800, 1200, window.totalStepsAccumulated || 0],
             backgroundColor: '#38bdf8',
             borderRadius: 6
           }]
@@ -1657,21 +1652,6 @@
       }
     }
 
-    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3;
-      const φ1 = lat1 * Math.PI / 180;
-      const φ2 = lat2 * Math.PI / 180;
-      const Δφ = (lat2 - lat1) * Math.PI / 180;
-      const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-      return R * c;
-    }
-
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -1688,19 +1668,40 @@
       }
     }
 
+    // מנוע זיהוי צעדים לפי חיישן תנועה (Device Motion Accelerometer)
+    function handleDeviceMotion(event) {
+      if (!isWalkActive) return;
+
+      const acc = event.accelerationIncludingGravity;
+      if (!acc) return;
+
+      const x = acc.x || 0;
+      const y = acc.y || 0;
+      const z = acc.z || 0;
+
+      // חישוב עוצמת התנועה (Vector Magnitude)
+      const magnitude = Math.sqrt(x * x + y * y + z * z);
+      const delta = Math.abs(magnitude - lastAccelMagnitude);
+      const now = Date.now();
+
+      // סף זיהוי פסיעה אנושית: זעזוע מעל 2.2 מ'/שנ² והפרש של 300 מילי-שניות לפחות בין צעד לצעד
+      if (delta > 2.2 && (now - lastStepTime > 300)) {
+        currentWalkSteps++;
+        window.totalStepsAccumulated++;
+        localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
+        
+        lastStepTime = now;
+        updateDashboardDisplay();
+      }
+
+      lastAccelMagnitude = magnitude;
+    }
+
     function startWalkTracking() {
       isWalkActive = true;
-      lastPosition = null;
-      currentWalkDistanceMeters = 0;
+      currentWalkSteps = 0;
 
       requestWakeLock();
-
-      if (keepAliveInterval) clearInterval(keepAliveInterval);
-      keepAliveInterval = setInterval(() => {
-        if (isWalkActive && navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(()=>{}, ()=>{}, { enableHighAccuracy: true, maximumAge: 0 });
-        }
-      }, 10000);
 
       const btn = document.getElementById('startWalkCircleBtn');
       const mainTxt = document.getElementById('walkBtnTextMain');
@@ -1712,49 +1713,23 @@
 
       updateDashboardDisplay();
 
-      if (navigator.geolocation) {
-        geoWatchId = navigator.geolocation.watchPosition((pos) => {
-          // חסימה מוחלטת - ספור צעדים אך ורק כשההליכה מופעלת מפורשות!
-          if (!isWalkActive) return;
-
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          const timestamp = pos.timestamp || Date.now();
-
-          if (lastPosition) {
-            const distMeters = calculateDistanceMeters(lastPosition.lat, lastPosition.lng, lat, lng);
-            const timeDiffSec = (timestamp - lastPosition.timestamp) / 1000;
-            const speedKmh = timeDiffSec > 0 ? (distMeters / timeDiffSec) * 3.6 : 0;
-
-            if (distMeters >= 2.5 && speedKmh <= 15) {
-              currentWalkDistanceMeters += distMeters;
-              window.totalDistanceMeters += distMeters;
-              localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
-              
-              updateDashboardDisplay();
-              lastPosition = { lat, lng, timestamp };
-            }
-          } else {
-            lastPosition = { lat, lng, timestamp };
+      // בקשת הרשאה לחיישן תנועה (במיוחד ב-iOS / Safari) והפעלתו
+      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(response => {
+          if (permissionState === 'granted') {
+            window.addEventListener('devicemotion', handleDeviceMotion, true);
           }
-        }, (err) => console.log(err), { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+        }).catch(console.error);
+      } else {
+        window.addEventListener('devicemotion', handleDeviceMotion, true);
       }
     }
 
     function stopWalkTracking() {
       isWalkActive = false;
-      lastPosition = null;
       releaseWakeLock();
 
-      if (keepAliveInterval) {
-        clearInterval(keepAliveInterval);
-        keepAliveInterval = null;
-      }
-
-      if (geoWatchId !== null && navigator.geolocation) {
-        navigator.geolocation.clearWatch(geoWatchId);
-        geoWatchId = null;
-      }
+      window.removeEventListener('devicemotion', handleDeviceMotion, true);
 
       const btn = document.getElementById('startWalkCircleBtn');
       const mainTxt = document.getElementById('walkBtnTextMain');
@@ -1764,12 +1739,11 @@
       if (mainTxt) mainTxt.innerText = 'START';
       if (subTxt) subTxt.innerText = 'WALK';
 
-      const lastSteps = Math.round((currentWalkDistanceMeters / 1000) * 1350);
-      const lastCal = Math.floor((currentWalkDistanceMeters / 1000) * 60);
+      const lastCal = Math.floor(currentWalkSteps * 0.04);
 
-      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת בהליכה זו: ${lastSteps.toLocaleString()} צעדים\nשרפת: ${lastCal.toLocaleString()} קלוריות🔥`);
+      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת בהליכה זו: ${currentWalkSteps.toLocaleString()} צעדים\nשרפת: ${lastCal.toLocaleString()} קלוריות🔥`);
 
-      currentWalkDistanceMeters = 0;
+      currentWalkSteps = 0;
       updateDashboardDisplay();
     }
 
@@ -1840,6 +1814,21 @@
         avatar.onclick = () => openChatWithUser(u);
         bar.appendChild(avatar);
       });
+    }
+
+    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c;
     }
 
     function applyPartnersFilter() {
