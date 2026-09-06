@@ -1585,8 +1585,11 @@
     }
 
     function updateDashboardDisplay() {
-      const currentSteps = Math.round((currentWalkDistanceMeters / 1000) * 1350);
-      const currentCal = Math.floor((currentWalkDistanceMeters / 1000) * 60);
+      // חסימה: אם הליכה אינה פעילה, הצעדים והקלוריות בהליכה הנוכחית יישרו על 0
+      const effectiveMeters = isWalkActive ? currentWalkDistanceMeters : 0;
+      
+      const currentSteps = Math.round((effectiveMeters / 1000) * 1350);
+      const currentCal = Math.floor((effectiveMeters / 1000) * 60);
 
       const stepsEl = document.getElementById('stepsDisplay');
       const calEl = document.getElementById('calDisplay');
@@ -1669,7 +1672,6 @@
       return R * c;
     }
 
-    // מנגנון שמירת מסך ורכיבים פתוחים ברקע (Keep Alive)
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
@@ -1693,7 +1695,6 @@
 
       requestWakeLock();
 
-      // הפעלת פעימת רקע כל 10 שניות למניעת הקפאת ה-GPS ע"י מערכת ההפעלה
       if (keepAliveInterval) clearInterval(keepAliveInterval);
       keepAliveInterval = setInterval(() => {
         if (isWalkActive && navigator.geolocation) {
@@ -1713,6 +1714,9 @@
 
       if (navigator.geolocation) {
         geoWatchId = navigator.geolocation.watchPosition((pos) => {
+          // חסימה מוחלטת - ספור צעדים אך ורק כשההליכה מופעלת מפורשות!
+          if (!isWalkActive) return;
+
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const timestamp = pos.timestamp || Date.now();
@@ -1722,7 +1726,7 @@
             const timeDiffSec = (timestamp - lastPosition.timestamp) / 1000;
             const speedKmh = timeDiffSec > 0 ? (distMeters / timeDiffSec) * 3.6 : 0;
 
-            if (distMeters >= 2 && speedKmh <= 15) {
+            if (distMeters >= 2.5 && speedKmh <= 15) {
               currentWalkDistanceMeters += distMeters;
               window.totalDistanceMeters += distMeters;
               localStorage.setItem('userTotalMeters', window.totalDistanceMeters.toString());
@@ -1739,6 +1743,7 @@
 
     function stopWalkTracking() {
       isWalkActive = false;
+      lastPosition = null;
       releaseWakeLock();
 
       if (keepAliveInterval) {
