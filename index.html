@@ -737,7 +737,6 @@
     let heartbeatInterval = null;
     let blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
 
-    // מזהה ייחודי למכשיר הנוכחי למניעת התחברות מרובה
     let myDeviceSessionId = localStorage.getItem('deviceSessionId');
     if (!myDeviceSessionId) {
       myDeviceSessionId = 'device_' + Math.random().toString(36).substring(2, 15);
@@ -797,7 +796,6 @@
       let inputPhone = document.getElementById('guestPhoneInput') ? document.getElementById('guestPhoneInput').value.trim() : '';
       let inputAge = document.getElementById('userAgeInput') ? parseInt(document.getElementById('userAgeInput').value, 10) : 30;
 
-      // בדיקת הגבלת גיל
       if (inputAge < 18) {
         alert("⛔ הגישה לאפליקציה מיועדת למשתתפים מגיל 18 ומעלה בלבד.");
         signOut(auth);
@@ -816,7 +814,6 @@
 
       currentUserDoc = doc(db, "users", user.uid);
 
-      // בדיקת התחברות כפולה מאותו נייד/חשבון במכשיר אחר
       try {
         const userSnap = await getDoc(currentUserDoc);
         if (userSnap.exists()) {
@@ -1534,12 +1531,20 @@
     let geoWatchId = null;
     let wakeLock = null;
 
-    let currentWalkSteps = 0;
+    let currentWalkSteps = parseInt(localStorage.getItem('currentActiveSteps') || '0', 10);
     let lastAccelMagnitude = 0;
     let lastStepTime = 0;
 
     let totalStepsAccumulated = parseInt(localStorage.getItem('userTotalSteps') || '0', 10);
     window.totalStepsAccumulated = totalStepsAccumulated;
+
+    // מנגנון חידוש זהיר של WakeLock והחיישן ברענון / חזרה מחיסכון בסוללה
+    document.addEventListener("visibilitychange", async () => {
+      if (document.visibilityState === "visible" && isWalkActive) {
+        await requestWakeLock();
+        attachMotionListener();
+      }
+    });
 
     function toggleAuthButtons() {
       const isChecked = document.getElementById('termsCheckbox').checked;
@@ -1711,7 +1716,6 @@
       }
     }
 
-    // מנוע ספירה פיזי בלבד - סינון רעשים קשוח (Noise Gate)
     function handleDeviceMotion(event) {
       if (!isWalkActive) return;
 
@@ -1726,10 +1730,12 @@
       const delta = Math.abs(magnitude - lastAccelMagnitude);
       const now = Date.now();
 
-      // סף קשוח: רק זעזוע מעל 3.8 מ'/שנ² (צעד פיזי אמיתי) ורווח של 320 מילי-שניות מונעים ספירה בעמידה!
+      // סף זיהוי פסיעה פיזית קשוח (3.8m/s²)
       if (delta > 3.8 && (now - lastStepTime > 320)) {
         currentWalkSteps++;
         window.totalStepsAccumulated++;
+        
+        localStorage.setItem('currentActiveSteps', currentWalkSteps.toString());
         localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
         
         lastStepTime = now;
@@ -1739,9 +1745,23 @@
       lastAccelMagnitude = magnitude;
     }
 
+    function attachMotionListener() {
+      window.removeEventListener('devicemotion', handleDeviceMotion, true);
+      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission().then(state => {
+          if (state === 'granted') {
+            window.addEventListener('devicemotion', handleDeviceMotion, true);
+          }
+        }).catch(console.error);
+      } else {
+        window.addEventListener('devicemotion', handleDeviceMotion, true);
+      }
+    }
+
     function startWalkTracking() {
       isWalkActive = true;
       currentWalkSteps = 0;
+      localStorage.setItem('currentActiveSteps', '0');
       lastAccelMagnitude = 0;
 
       requestWakeLock();
@@ -1755,19 +1775,8 @@
       if (subTxt) subTxt.innerText = 'WALK';
 
       updateDashboardDisplay();
+      attachMotionListener();
 
-      // הפעלת החיישן הפיזי בלבד!
-      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission().then(state => {
-          if (state === 'granted') {
-            window.addEventListener('devicemotion', handleDeviceMotion, true);
-          }
-        }).catch(console.error);
-      } else {
-        window.addEventListener('devicemotion', handleDeviceMotion, true);
-      }
-
-      // ה-GPS מופעל אך ורק לצורך המפה והצועדים בסביבה (בלי לגעת בצעדים!)
       if (navigator.geolocation) {
         geoWatchId = navigator.geolocation.watchPosition((pos) => {
           if (!isWalkActive) return;
@@ -1801,6 +1810,7 @@
       alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת בהליכה זו: ${currentWalkSteps.toLocaleString()} צעדים\nשרפת: ${lastCal.toLocaleString()} קלוריות🔥`);
 
       currentWalkSteps = 0;
+      localStorage.setItem('currentActiveSteps', '0');
       updateDashboardDisplay();
     }
 
