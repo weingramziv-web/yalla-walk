@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>OK, Let's Go!</title>
 
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1329">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -74,6 +80,19 @@
     .btn-group { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; font-weight: bold; }
     .btn-logout { background: #dc2626; color: #fff; margin-top: 15px; font-weight: bold; }
     .hidden { display: none !important; }
+
+    .pwa-install-banner {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #38bdf8;
+    }
 
     .google-benefits-card {
       background: linear-gradient(135deg, #1e293b, #0b1329);
@@ -253,6 +272,11 @@
       <div style="text-align: center; margin-top: 15px;">
         <h1 style="font-size: 28px; color: #22c55e;"><i class="fa-solid fa-person-walking"></i> OK, Let's Go!</h1>
         <p style="font-size: 13px; font-weight: bold; color: #94a3b8; text-align: center;">הקהילה הבטוחה והבריאה של הצעידה בסביבה</p>
+      </div>
+
+      <div class="pwa-install-banner hidden" id="pwaInstallBanner">
+        <span>📲 להתקנת האפליקציה על המסך למעקב רציף:</span>
+        <button style="width:auto; padding:4px 8px; font-size:11px; background:#fff; color:#0284c7; margin:0;" onclick="installPWA()">התקן עכשיו</button>
       </div>
 
       <div style="background: #0b1329; padding: 12px; border-radius: 12px; margin: 12px 0; text-align: right; font-size: 11px; border: 1px solid #1e293b;">
@@ -666,7 +690,7 @@
         <h3 style="margin-top:0; color:#22c55e;">📜 תקנון, הצהרת בריאות ותנאי שימוש</h3>
         <div style="font-size:11px; color:#cbd5e1; line-height:1.4; max-height:220px; overflow-y:auto; background:#0b1329; padding:10px; border-radius:8px; border:1px solid #1e293b; margin-bottom:10px;">
           <b>1. הגבלת גיל מחייבת (18+):</b> האפליקציה מיועדת למשתמשים מגיל 18 ומעלה בלבד. כניסת קטינים חסומה בהחלט.<br><br>
-          <b>2. הגבלת חיבור למכשיר יחיד:</b> חל איסור מוחלט על התחברות ממספר מכשירים בו-זמנית מאותו חשבון נייד. כניסה ממכשיר חדש תחסום גישה פעילה ממכשירים אחרים.<br><br>
+          <b>2. הגבלת חיבור למכשיר יחיד:</b> חל איסור מוחלט על התחברות ממספר מכשירים בו-זמנית מאותו חשבון נייד.<br><br>
           <b>3. הצהרת בריאות וכשירות גופנית:</b> המשתמש מצהיר בזאת כי הוא בריא וכשיר מבחינה גופנית ורפואית לבצע פעילות ספורטיבית והליכות.<br><br>
           <b>4. הסרת אחריות משפטית (Disclaimer):</b> האפליקציה משמשת כפלטפורמה טכנולוגית בלבד. המערכת אינה אחראית לכל נזק גוף, פציעה או אירוע בטיחותי.
         </div>
@@ -744,6 +768,11 @@
     }
 
     const pageLoadTime = Date.now();
+
+    // רישום Service Worker להתקנת PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Registration error:', err));
+    }
 
     window.openSettingsModal = function() {
       document.getElementById('emergencyContact1').value = localStorage.getItem('emergency1') || '';
@@ -1357,7 +1386,7 @@
       } else {
         alert("🚶‍♂️ צעידה אישית התחילה! תהנה מההליכה (לא נשלחה התראה לצועדים אחרים).");
         closeBroadcastModal();
-          window.startWalkTracking();
+        window.startWalkTracking();
       }
     };
 
@@ -1538,7 +1567,26 @@
     let totalStepsAccumulated = parseInt(localStorage.getItem('userTotalSteps') || '0', 10);
     window.totalStepsAccumulated = totalStepsAccumulated;
 
-    // מנגנון חידוש זהיר של WakeLock והחיישן ברענון / חזרה מחיסכון בסוללה
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const banner = document.getElementById('pwaInstallBanner');
+      if (banner) banner.classList.remove('hidden');
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('pwaInstallBanner').classList.add('hidden');
+          }
+          deferredPrompt = null;
+        });
+      }
+    }
+
     document.addEventListener("visibilitychange", async () => {
       if (document.visibilityState === "visible" && isWalkActive) {
         await requestWakeLock();
@@ -1730,8 +1778,8 @@
       const delta = Math.abs(magnitude - lastAccelMagnitude);
       const now = Date.now();
 
-      // סף זיהוי פסיעה פיזית קשוח (3.8m/s²)
-      if (delta > 3.8 && (now - lastStepTime > 320)) {
+      // סף זיהוי פסיעה פיזית (2.4m/s²)
+      if (delta > 2.4 && (now - lastStepTime > 300)) {
         currentWalkSteps++;
         window.totalStepsAccumulated++;
         
@@ -2026,6 +2074,7 @@
     window.declineChatRequest = declineChatRequest;
     window.requestNotificationPermission = requestNotificationPermission;
     window.updateDashboardDisplay = updateDashboardDisplay;
+    window.installPWA = installPWA;
   </script>
 </body>
 </html>
