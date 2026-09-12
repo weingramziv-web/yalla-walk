@@ -769,7 +769,6 @@
 
     const pageLoadTime = Date.now();
 
-    // רישום Service Worker להתקנת PWA
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Registration error:', err));
     }
@@ -1556,7 +1555,8 @@
     let usageTimerInterval = null;
     let weeklyChartInstance = null;
 
-    let isWalkActive = false;
+    // שחזור מצב הליכה פעיל מ-LocalStorage (מונע איפוס וקריסה ברקע)
+    let isWalkActive = localStorage.getItem('isWalkActiveState') === 'true';
     let geoWatchId = null;
     let wakeLock = null;
 
@@ -1675,6 +1675,22 @@
       if (stepsEl) stepsEl.innerText = effectiveSteps.toLocaleString();
       if (calEl) calEl.innerText = currentCal.toLocaleString();
 
+      const btn = document.getElementById('startWalkCircleBtn');
+      const mainTxt = document.getElementById('walkBtnTextMain');
+      const subTxt = document.getElementById('walkBtnTextSub');
+
+      if (btn && mainTxt && subTxt) {
+        if (isWalkActive) {
+          btn.classList.add('active-walk');
+          mainTxt.innerText = 'STOP';
+          subTxt.innerText = 'WALK';
+        } else {
+          btn.classList.remove('active-walk');
+          mainTxt.innerText = 'START';
+          subTxt.innerText = 'WALK';
+        }
+      }
+
       initWeeklyChart();
     }
 
@@ -1778,7 +1794,6 @@
       const delta = Math.abs(magnitude - lastAccelMagnitude);
       const now = Date.now();
 
-      // סף זיהוי פסיעה פיזית (2.4m/s²)
       if (delta > 2.4 && (now - lastStepTime > 300)) {
         currentWalkSteps++;
         window.totalStepsAccumulated++;
@@ -1808,20 +1823,9 @@
 
     function startWalkTracking() {
       isWalkActive = true;
-      currentWalkSteps = 0;
-      localStorage.setItem('currentActiveSteps', '0');
-      lastAccelMagnitude = 0;
-
+      localStorage.setItem('isWalkActiveState', 'true');
+      
       requestWakeLock();
-
-      const btn = document.getElementById('startWalkCircleBtn');
-      const mainTxt = document.getElementById('walkBtnTextMain');
-      const subTxt = document.getElementById('walkBtnTextSub');
-
-      if (btn) btn.classList.add('active-walk');
-      if (mainTxt) mainTxt.innerText = 'STOP';
-      if (subTxt) subTxt.innerText = 'WALK';
-
       updateDashboardDisplay();
       attachMotionListener();
 
@@ -1836,6 +1840,7 @@
 
     function stopWalkTracking() {
       isWalkActive = false;
+      localStorage.setItem('isWalkActiveState', 'false');
       releaseWakeLock();
 
       window.removeEventListener('devicemotion', handleDeviceMotion, true);
@@ -1844,14 +1849,6 @@
         navigator.geolocation.clearWatch(geoWatchId);
         geoWatchId = null;
       }
-
-      const btn = document.getElementById('startWalkCircleBtn');
-      const mainTxt = document.getElementById('walkBtnTextMain');
-      const subTxt = document.getElementById('walkBtnTextSub');
-
-      if (btn) btn.classList.remove('active-walk');
-      if (mainTxt) mainTxt.innerText = 'START';
-      if (subTxt) subTxt.innerText = 'WALK';
 
       const lastCal = Math.floor(currentWalkSteps * 0.04);
 
@@ -1868,6 +1865,13 @@
       switchTab(targetScreen || 'mainScreen');
       
       startUsageTimer();
+      
+      // אם הייתה הליכה פעילה בעת רענון/הפסקה ברקע - חבר מחדש את החיישנים
+      if (isWalkActive) {
+        attachMotionListener();
+        requestWakeLock();
+      }
+      
       updateDashboardDisplay();
 
       setTimeout(() => { 
