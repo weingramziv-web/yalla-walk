@@ -1822,7 +1822,8 @@
             dailySteps = data.bucket[0].dataset[0].point[0].value[0].intVal || 0;
           }
 
-          if (dailySteps >= 0) {
+          // אם גוגל פיט מחזיר ערך תקין וגדול מ-0, נעדכן. אם מחזיר 0, נשמור על הצעדים הקיימים בזיכרון.
+          if (dailySteps > 0) {
             currentWalkSteps = dailySteps;
             window.totalStepsAccumulated = dailySteps;
             localStorage.setItem('currentActiveSteps', currentWalkSteps.toString());
@@ -1879,7 +1880,6 @@
       
       startUsageTimer();
       
-      // שליפה מידית של צעדי היום בטעינת האפליקציה
       fetchGoogleFitDailySteps();
 
       if (fitSyncInterval) clearInterval(fitSyncInterval);
