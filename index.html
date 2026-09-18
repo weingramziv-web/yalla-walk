@@ -281,7 +281,7 @@
 
       <div style="background: #0b1329; padding: 12px; border-radius: 12px; margin: 12px 0; text-align: right; font-size: 11px; border: 1px solid #1e293b;">
         <p style="margin:0; color:#cbd5e1;">🛡️ <b>אזור מוגן ומפוקח:</b><br>
-        • מסונכרן אוטומטית מול <b>Google Fit</b> לדיוק מירבי.<br>
+        • מסונכרן אוטומטית מול <b>Google Fit</b> לסנכרון צעדים יומי.<br>
         • הגבלת גיל מחייבת (18+) ומניעת חיבור מרובה מאותו מכשיר.<br>
         • כפתור מצוקה SOS דיסקרטי ואפשרויות חסימה מידיות.</p>
       </div>
@@ -290,7 +290,7 @@
         <div class="google-benefits-card">
           <b><i class="fa-solid fa-lightbulb"></i> למה כדאי להתחבר דרך Google?</b>
           <div style="margin-top:4px; line-height:1.4;">
-            ✓ <b>סנכרון מלא מול Google Fit:</b> דיוק מוחלט בצעדים ובקלוריות.<br>
+            ✓ <b>סנכרון מלא מול Google Fit:</b> מציג את סך הצעדים והקלוריות של היום.<br>
             ✓ <b>תג צועד מאומת (VIP):</b> בונה אמון וביטחון מול צועדים אחרים.<br>
             ✓ <b>סנכרון מועדפים:</b> שמירת החברים והקבוצות שלך מכל מכשיר.
           </div>
@@ -359,7 +359,7 @@
         <div class="sport-grid">
           <div class="sport-stat-card">
             <div class="sport-stat-val" id="stepsDisplay">0</div>
-            <div class="sport-stat-lbl">מספר צעדים בהליכה זו</div>
+            <div class="sport-stat-lbl" id="stepsStatLabel">צעדים היום (Google Fit)</div>
           </div>
           <div class="sport-stat-card">
             <div class="sport-stat-val" id="calDisplay">0</div>
@@ -993,7 +993,6 @@
         return;
       }
       const provider = new GoogleAuthProvider();
-      // הוספת Scope של Google Fit לקריאת צעדים ופעילות
       provider.addScope('https://www.googleapis.com/auth/fitness.activity.read');
 
       localStorage.setItem('appLoggedIn', 'true');
@@ -1566,7 +1565,6 @@
     let weeklyChartInstance = null;
 
     let isWalkActive = localStorage.getItem('isWalkActiveState') === 'true';
-    let walkStartTimestamp = parseInt(localStorage.getItem('walkStartTimestamp') || '0', 10);
     let geoWatchId = null;
     let wakeLock = null;
 
@@ -1597,9 +1595,8 @@
     }
 
     document.addEventListener("visibilitychange", async () => {
-      if (document.visibilityState === "visible" && isWalkActive) {
-        await requestWakeLock();
-        fetchGoogleFitSteps();
+      if (document.visibilityState === "visible") {
+        fetchGoogleFitDailySteps();
       }
     });
 
@@ -1675,7 +1672,7 @@
     }
 
     function updateDashboardDisplay() {
-      const effectiveSteps = isWalkActive ? currentWalkSteps : 0;
+      const effectiveSteps = currentWalkSteps;
       const currentCal = Math.floor(effectiveSteps * 0.04);
 
       const stepsEl = document.getElementById('stepsDisplay');
@@ -1719,7 +1716,7 @@
           labels: ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'ש\''],
           datasets: [{
             label: 'צעדים',
-            data: [2800, 4500, 2300, 5200, 3800, 1200, window.totalStepsAccumulated || 0],
+            data: [2800, 4500, 2300, 5200, 3800, currentWalkSteps || 0, 0],
             backgroundColor: '#38bdf8',
             borderRadius: 6
           }]
@@ -1789,15 +1786,14 @@
       }
     }
 
-    // קריאת צעדים בלייב ישירות מ-Google Fit REST API
-    async function fetchGoogleFitSteps() {
-      if (!isWalkActive) return;
-
+    // שליפת סך הצעדים היומי המלא מ-Google Fit (מחצות ועד לרגע זה)
+    async function fetchGoogleFitDailySteps() {
       const accessToken = localStorage.getItem('googleFitAccessToken');
       if (!accessToken) return;
 
-      const startTimeNanos = (walkStartTimestamp || Date.now()) * 1000000;
-      const endTimeNanos = Date.now() * 1000000;
+      const now = new Date();
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const endOfDay = now.getTime();
 
       const requestBody = {
         "aggregateBy": [{
@@ -1805,8 +1801,8 @@
           "dataSourceId": "derived:com.google.step_count.delta:com.google.android.gms:estimated_steps"
         }],
         "bucketByTime": { "durationMillis": 86400000 },
-        "startTimeMillis": walkStartTimestamp || Date.now(),
-        "endTimeMillis": Date.now()
+        "startTimeMillis": startOfDay,
+        "endTimeMillis": endOfDay
       };
 
       try {
@@ -1821,14 +1817,16 @@
 
         if (response.ok) {
           const data = await response.json();
-          let fitSteps = 0;
+          let dailySteps = 0;
           if (data.bucket && data.bucket[0] && data.bucket[0].dataset[0].point[0]) {
-            fitSteps = data.bucket[0].dataset[0].point[0].value[0].intVal || 0;
+            dailySteps = data.bucket[0].dataset[0].point[0].value[0].intVal || 0;
           }
 
-          if (fitSteps > 0) {
-            currentWalkSteps = fitSteps;
+          if (dailySteps >= 0) {
+            currentWalkSteps = dailySteps;
+            window.totalStepsAccumulated = dailySteps;
             localStorage.setItem('currentActiveSteps', currentWalkSteps.toString());
+            localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
             updateDashboardDisplay();
           }
         }
@@ -1839,20 +1837,14 @@
 
     function startWalkTracking() {
       isWalkActive = true;
-      walkStartTimestamp = Date.now();
-      currentWalkSteps = 0;
-
       localStorage.setItem('isWalkActiveState', 'true');
-      localStorage.setItem('walkStartTimestamp', walkStartTimestamp.toString());
-      localStorage.setItem('currentActiveSteps', '0');
 
       requestWakeLock();
       updateDashboardDisplay();
 
-      // סנכרון תקופתי כל 10 שניות מול Google Fit
-      fetchGoogleFitSteps();
+      fetchGoogleFitDailySteps();
       if (fitSyncInterval) clearInterval(fitSyncInterval);
-      fitSyncInterval = setInterval(fetchGoogleFitSteps, 10000);
+      fitSyncInterval = setInterval(fetchGoogleFitDailySteps, 10000);
 
       if (navigator.geolocation) {
         geoWatchId = navigator.geolocation.watchPosition((pos) => {
@@ -1868,11 +1860,6 @@
       localStorage.setItem('isWalkActiveState', 'false');
       releaseWakeLock();
 
-      if (fitSyncInterval) {
-        clearInterval(fitSyncInterval);
-        fitSyncInterval = null;
-      }
-
       if (geoWatchId !== null && navigator.geolocation) {
         navigator.geolocation.clearWatch(geoWatchId);
         geoWatchId = null;
@@ -1880,13 +1867,8 @@
 
       const lastCal = Math.floor(currentWalkSteps * 0.04);
 
-      alert(`🛑 הצעידה הסתיימה בהצלחה!\nצעדת בהליכה זו (לפי Google Fit): ${currentWalkSteps.toLocaleString()} צעדים\nשרפת: ${lastCal.toLocaleString()} קלוריות🔥`);
+      alert(`🛑 הצעידה הסתיימה בהצלחה!\nסך הצעדים שלך היום לפי Google Fit: ${currentWalkSteps.toLocaleString()} צעדים\nשרפת: ${lastCal.toLocaleString()} קלוריות🔥`);
 
-      window.totalStepsAccumulated += currentWalkSteps;
-      localStorage.setItem('userTotalSteps', window.totalStepsAccumulated.toString());
-
-      currentWalkSteps = 0;
-      localStorage.setItem('currentActiveSteps', '0');
       updateDashboardDisplay();
     }
 
@@ -1897,12 +1879,11 @@
       
       startUsageTimer();
       
-      if (isWalkActive) {
-        requestWakeLock();
-        fetchGoogleFitSteps();
-        if (fitSyncInterval) clearInterval(fitSyncInterval);
-        fitSyncInterval = setInterval(fetchGoogleFitSteps, 10000);
-      }
+      // שליפה מידית של צעדי היום בטעינת האפליקציה
+      fetchGoogleFitDailySteps();
+
+      if (fitSyncInterval) clearInterval(fitSyncInterval);
+      fitSyncInterval = setInterval(fetchGoogleFitDailySteps, 10000);
       
       updateDashboardDisplay();
 
